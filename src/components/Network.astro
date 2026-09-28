@@ -1,0 +1,61 @@
+---
+import { home, type Lang } from '../i18n/content';
+// A layered network you travel down while scrolling. Each layer is one stage of how I work,
+// and its nodes are the tools I use at that stage. Positions are computed here, at build time.
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const t = home[lang].network;
+const layers = t.layers;
+
+const W = 800, TOP = 90, GAP = 250;
+const H = TOP * 2 + GAP * (layers.length - 1);
+const pos = layers.map((l, i) => l.nodes.map((label, j) => {
+  const n = l.nodes.length;
+  const span = Math.min(620, 150 * (n - 1));
+  return { label, x: W / 2 - span / 2 + (n > 1 ? (span * j) / (n - 1) : 0), y: TOP + i * GAP };
+}));
+const edges = pos.slice(0, -1).map((layer, i) => layer.flatMap((a) => pos[i + 1].map((b) => {
+  const my = (a.y + b.y) / 2;
+  return `M${a.x} ${a.y} C${a.x} ${my} ${b.x} ${my} ${b.x} ${b.y}`;
+})));
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<section class="network" id="toolkit" aria-labelledby="net-title">
+  <div class="net-pin">
+    <div class="net-copy">
+      <div class="section-label mono"><span>(05)</span><span id="net-title">{t.label}</span><span class="net-count"><b>01</b> / {pad(layers.length)}</span></div>
+      <h2 class="net-heading">{t.title} <em>{t.titleEm}</em></h2>
+      <ol class="net-layers">
+        {layers.map((l, i) => (
+          <li class="net-layer" data-layer={i}>
+            <p class="mono">{t.layerWord} {pad(i + 1)} · {l.name}</p>
+            <h3>{l.title}</h3>
+            <p class="net-body">{l.body}</p>
+            <ul class="tags">{l.nodes.map((n) => <li>{n}</li>)}</ul>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="net-view" aria-hidden="true">
+      <svg class="net-svg" viewBox={`0 0 ${W} ${H}`} data-top={TOP} data-gap={GAP} data-w={W}>
+        {edges.map((group, i) => (
+          <g class="net-edges" data-gap={i}>
+            {group.map((d) => <path class="edge-base" d={d} />)}
+            {group.map((d) => <path class="edge-lit" d={d} pathLength="1" />)}
+          </g>
+        ))}
+        {pos.map((layer, i) => (
+          <g class="net-nodes" data-layer={i}>
+            <text class="layer-name" x="14" y={layer[0].y - 34}>{pad(i + 1)} {layers[i].name.toUpperCase()}</text>
+            {layer.map((p) => (
+              <g class="node" transform={`translate(${p.x} ${p.y})`}>
+                <circle class="node-ring" r="22" />
+                <circle class="node-core" r="9" />
+                <text y="46">{p.label}</text>
+              </g>
+            ))}
+          </g>
+        ))}
+      </svg>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,37 @@
+---
+import '@fontsource-variable/manrope';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/instrument-serif/400-italic.css';
+import '../styles/site.css';
+import { localePath, type Lang } from '../i18n/content';
+interface Props { title: string; description: string; path?: string; bodyClass?: string; lang?: Lang }
+const { title, description, path = '/', bodyClass, lang = 'en' } = Astro.props;
+const url = (l: Lang) => `https://rohitsuryaa.com${localePath(l, path)}`;
+---
+<!doctype html>
+<html lang={lang} class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#0d0d0c" />
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="canonical" href={url(lang)} />
+  <link rel="alternate" hreflang="en" href={url('en')} />
+  <link rel="alternate" hreflang="de" href={url('de')} />
+  <link rel="alternate" hreflang="x-default" href={url('en')} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={url(lang)} />
+  <meta property="og:locale" content={lang === 'de' ? 'de_DE' : 'en_GB'} />
+  <script is:inline>document.documentElement.classList.replace('no-js','js');</script>
+</head>
+<body class={bodyClass}>
+  <a class="skip" href="#main">{lang === 'de' ? 'Zum Inhalt springen' : 'Skip to content'}</a>
+  <div class="cursor is-hidden" aria-hidden="true"><span class="cursor-label"></span></div>
+  <slot />
+</body>
+</html>

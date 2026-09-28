@@ -1,0 +1,234 @@
+---
+import Layout from './Layout.astro';
+import Exhibit from './Exhibit.astro';
+import Network from './Network.astro';
+import { projects, localize } from '../data/projects';
+import { home, site, localePath, type Lang } from '../i18n/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = home[lang];
+const other: Lang = lang === 'en' ? 'de' : 'en';
+const list = projects.map((p) => localize(p, lang));
+const pad = (n: number) => String(n).padStart(2, '0');
+const work = (slug: string) => localePath(lang, `/work/${slug}/`);
+const dois = ['10.1109/ICEMCE57940.2023.10433983', '10.1109/ICSCSS60660.2024.10625462'];
+const glyphs = [0, 1, 2];
+---
+<Layout lang={lang} title={t.htmlTitle} description={t.description} path="/">
+
+<div class="loader" aria-hidden="true">
+  <div class="loader-top mono"><span>rs©</span><span>{t.role}</span></div>
+  <div class="loader-words">{t.loaderWords.map((w) => <span>{w}</span>)}</div>
+  <div class="loader-count"><span class="loader-num">0</span><sup>%</sup></div>
+  <div class="loader-bar"><i></i></div>
+</div>
+
+<div class="scroll-progress" aria-hidden="true"><i></i></div>
+
+<header class="site-header">
+  <a class="logo" href="#top" data-magnetic aria-label={t.nav.home}><span class="logo-rs">rs</span><sup>©</sup></a>
+  <span></span>
+  <nav aria-label="Primary">
+    <a href="#work" class="hide-sm">{t.nav.work}</a>
+    <a href="#about" class="hide-sm">{t.nav.about}</a>
+    <a href="#experience" class="hide-sm">{t.nav.experience}</a>
+    <a href="#contact" class="nav-cta">{t.nav.contact}</a>
+    <a class="lang-switch mono" href={localePath(other, '/')} hreflang={other} lang={other} aria-label={t.nav.switchLabel}>{t.nav.switchText}</a>
+  </nav>
+</header>
+
+<main id="main">
+  <!-- 01 HERO -->
+  <section class="hero" id="top" aria-label={t.hero.sub}>
+    <canvas class="hero-field" aria-hidden="true"></canvas>
+    <div class="hero-main">
+      <h1 class="hero-title">
+        <span class="sr-only">{t.hero.sr}</span>
+        <span aria-hidden="true">{t.hero.before}<br/> {t.hero.mid} <span class="rotator">{t.hero.words.map((w) => <span class="rot-word">{w}</span>)}</span><br/> {t.hero.after}</span>
+      </h1>
+      <div class="hero-sub">
+        <p class="mono">{t.hero.sub} · <span class="open"><i class="pulse"></i>{t.hero.open}</span></p>
+        <div class="hero-ctas">
+          <a class="pill-link accent" href="#work" data-magnetic>{t.hero.ctaWork} <span>↓</span></a>
+          <a class="pill-link ghost-d" href="#contact" data-magnetic>{t.hero.ctaContact} <span>↗</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-bottom">
+      <p class="hero-legend mono" aria-hidden="true"><b class="legend-noise">{t.hero.scroll}</b><b class="legend-signal">{t.hero.found}</b></p>
+      <p class="hero-name" aria-hidden="true">Rohit Suryaa</p>
+    </div>
+  </section>
+
+  <!-- 02 ABOUT -->
+  <section class="manifesto light" id="about" aria-labelledby="about-title">
+    <div class="section-label mono"><span>(01)</span><span id="about-title">{t.about.label}</span><span>{t.about.aside}</span></div>
+    <p class="manifesto-text" data-fill>{t.about.manifesto}</p>
+    <div class="about-grid">
+      <figure class="about-portrait" data-cursor={t.about.cursor}>
+        <div class="about-portrait-inner"><img src="/images/rohit.jpg" alt="" width="853" height="1280" loading="lazy" /></div>
+        <figcaption class="mono">{t.about.caption}</figcaption>
+      </figure>
+      <div class="about-copy">
+        <p class="lead" data-reveal>{t.about.lead}</p>
+        {t.about.body.map((para) => <p data-reveal>{para}</p>)}
+        <dl class="facts" data-reveal>
+          {t.about.facts.map(([k, v]) => <div><dt class="mono">{k}</dt><dd>{v}</dd></div>)}
+        </dl>
+        <div class="cv-links" data-reveal>
+          {t.about.cv.map((c, i) => <a class:list={['pill-link', i && 'ghost']} href={c.href} target="_blank" rel="noopener" lang={c.lang} data-magnetic>{c.label} <span>↗</span></a>)}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 NUMBERS -->
+  <section class="numbers" aria-label={t.stats.map((s) => s.label).join(', ')}>
+    <ul>
+      {t.stats.map((s) => (
+        <li data-reveal>
+          <span class="num" data-count={s.value} data-suffix={s.suffix} data-locale={t.numberLocale} data-pad={s.pad ? '2' : undefined}>{s.pad ? pad(s.value) : s.value.toLocaleString(t.numberLocale)}{s.suffix}</span>
+          <span class="num-label">{s.label}</span>
+          <span class="num-note mono">{s.note}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- 04 WORK (pinned showcase on desktop, stacked list elsewhere) -->
+  <section class="work" id="work" aria-labelledby="work-title">
+    <div class="work-pin">
+      <div class="work-side">
+        <div class="work-intro">
+          <div class="section-label mono"><span>(02)</span><span>{t.work.label}</span><span class="work-count-wrap"><b class="work-count">01</b> / {pad(list.length)}</span></div>
+          <h2 id="work-title">{t.work.title} <em>{t.work.titleEm}</em></h2>
+          <p>{t.work.intro}</p>
+        </div>
+        <ol class="work-list" aria-label={t.work.index}>
+          {list.map((p, i) => (
+            <li style={`--c:${p.color}`}><a href={work(p.slug)} data-index={i}><span class="mono">{pad(i + 1)}</span><b>{p.short}</b><small class="mono">{p.category}</small></a></li>
+          ))}
+        </ol>
+        <div class="work-rail" aria-hidden="true"><i></i></div>
+      </div>
+      <div class="work-stage">
+        {list.map((p, i) => (
+          <article class="panel" style={`--c:${p.color}`} data-index={i}>
+            <a class="panel-media" href={work(p.slug)} data-cursor={t.work.cursor} aria-label={`${p.short}, ${t.work.caseStudy}`}>
+              <div class="panel-art"><Exhibit kind={p.art} /></div>
+              <span class="panel-index mono">{pad(i + 1)} / {pad(list.length)}</span>
+              <span class="panel-cat mono">{p.category}</span>
+              <span class="panel-metric"><b>{p.metric}</b><small class="mono">{p.metricLabel}</small></span>
+            </a>
+            <div class="panel-info">
+              <p class="panel-year mono">{p.year}</p>
+              <h3><a href={work(p.slug)}>{p.short}</a></h3>
+              <p class="panel-desc">{p.description}</p>
+              <ul class="tags">{p.tags.map((tag) => <li>{tag}</li>)}</ul>
+              <div class="panel-links">
+                <a href={work(p.slug)}>{t.work.caseStudy} <span>↗</span></a>
+                <a href={`${site.github}/${p.repo}`} target="_blank" rel="noopener">{t.work.source} <span>↗</span></a>
+                {p.doi && <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">IEEE <span>↗</span></a>}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+    <a class="work-outro" href={site.github} target="_blank" rel="noopener" data-cursor="GitHub">
+      <span class="mono">{t.work.more}</span>
+      <b>@srohitsuryaa21 <span>↗</span></b>
+    </a>
+  </section>
+
+  <!-- 05 PRINCIPLES (stacking cards) -->
+  <section class="principles light" aria-labelledby="principles-title">
+    <div class="section-label mono"><span>(03)</span><span id="principles-title">{t.principles.label}</span><span>{t.principles.aside}</span></div>
+    <div class="stack">
+      {t.principles.items.map((p, i) => (
+        <article class={`card card-${i}`}>
+          <span class="card-n">{pad(i + 1)}</span>
+          <div>
+            <h3>{p.title}</h3>
+            <p>{p.body}</p>
+          </div>
+          <svg class="card-glyph" viewBox="0 0 200 200" aria-hidden="true">
+            {glyphs[i] === 0 && Array.from({ length: 9 }, (_, k) => <rect x={20 + k * 18} y={180 - (k + 1) * 17} width="12" height={(k + 1) * 17} fill="currentColor" opacity={0.25 + k * 0.08} />)}
+            {glyphs[i] === 1 && Array.from({ length: 6 }, (_, k) => <rect x={30 + k * 6} y={30 + k * 22} width={140 - k * 12} height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2" />)}
+            {glyphs[i] === 2 && Array.from({ length: 14 }, (_, k) => <circle cx="100" cy="100" r={8 + k * 6.4} fill="none" stroke="currentColor" stroke-width="1.4" opacity={1 - k * 0.06} />)}
+          </svg>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 06 EXPERIENCE -->
+  <section class="experience" id="experience" aria-labelledby="exp-title">
+    <div class="exp-grid">
+      <div class="exp-head">
+        <div class="section-label mono"><span>(04)</span><span>{t.experience.label}</span></div>
+        <h2 id="exp-title" data-split>{t.experience.title} <em>{t.experience.titleEm}</em></h2>
+      </div>
+      <ol class="timeline">
+        <span class="timeline-line" aria-hidden="true"><i></i></span>
+        {t.experience.timeline.map((e) => (
+          <li data-reveal>
+            <span class="t-when mono">{e.when}</span>
+            <h3>{e.what}</h3>
+            <p class="t-where">{e.where}</p>
+            <p class="t-body">{e.body}</p>
+            {e.tags.length > 0 && <ul class="tags">{e.tags.map((tag) => <li>{tag}</li>)}</ul>}
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="creds">
+      <div data-reveal>
+        <h3 class="mono">{t.experience.papersLabel}</h3>
+        <ul>{t.experience.papers.map((title, i) => <li><a href={`https://doi.org/${dois[i]}`} target="_blank" rel="noopener"><span class="mono">{i ? '2024' : '2023'}</span><b>{title}</b><span>↗</span></a></li>)}</ul>
+      </div>
+      <div data-reveal>
+        <h3 class="mono">{t.experience.certsLabel}</h3>
+        <ul>{t.experience.certs.map((c) => <li><div><span class="mono">✓</span><b>{c.name}</b><span class="mono by">{c.by}</span></div></li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 TOOLKIT (a network you travel down) -->
+  <Network lang={lang} />
+</main>
+
+<!-- 08 CONTACT (curtain reveal) -->
+<footer class="contact" id="contact" aria-labelledby="contact-title">
+  <div class="contact-inner">
+    <div class="section-label mono"><span>(06)</span><span>{t.contact.label}</span><span><i class="pulse"></i> {t.contact.aside}</span></div>
+    <p class="contact-kicker">{t.contact.kicker}</p>
+    <h2 id="contact-title" class="contact-title">{t.contact.title}<br/><em>{t.contact.titleEm}</em></h2>
+    <div class="contact-actions">
+      <div class="big-buttons">
+        <a class="big-button" href={`mailto:${site.email}`} data-magnetic data-cursor={t.contact.writeCursor}><span>{t.contact.write[0]}<br/>{t.contact.write[1]}</span></a>
+        <a class="big-button ghost" href={site.linkedin} target="_blank" rel="noopener" data-magnetic data-cursor={t.contact.linkedinCursor}><span>LinkedIn<br/>↗</span></a>
+      </div>
+      <div class="contact-links">
+        <div class="email-row">
+          <a href={`mailto:${site.email}`} class="email">{site.email}</a>
+          <button type="button" id="copy-email" data-email={site.email} data-copied={t.contact.copied} data-fail={t.contact.copyFail}>{t.contact.copy}</button>
+          <span id="copy-status" role="status" class="mono"></span>
+        </div>
+        <ul>
+          <li><a href={site.github} target="_blank" rel="noopener">GitHub ↗</a></li>
+          <li><a href={site.linkedin} target="_blank" rel="noopener">LinkedIn ↗</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="contact-bar mono">
+      <span>© {new Date().getFullYear()} {t.contact.rights}</span>
+      <span>{t.contact.time} <time id="local-time">…</time></span>
+      <a href="#top">{t.contact.top}</a>
+    </div>
+  </div>
+</footer>
+
+<script>import '../scripts/site';</script>
+</Layout>

@@ -1,0 +1,62 @@
+---
+import Layout from './Layout.astro';
+import Exhibit from './Exhibit.astro';
+import { projects, localize } from '../data/projects';
+import { caseCopy, home, site, localePath, type Lang } from '../i18n/content';
+
+interface Props { slug: string; lang: Lang }
+const { slug, lang } = Astro.props;
+const index = projects.findIndex((p) => p.slug === slug);
+const project = localize(projects[index], lang);
+const next = localize(projects[(index + 1) % projects.length], lang);
+const t = caseCopy[lang];
+const other: Lang = lang === 'en' ? 'de' : 'en';
+const pad = (n: number) => String(n).padStart(2, '0');
+const [first, ...rest] = project.name.split(' ');
+const story = [[t.problem, project.challenge], [t.built, project.approach], [t.outcome, project.result]];
+const path = `/work/${project.slug}/`;
+---
+<Layout lang={lang} title={`${project.short} | Rohit Suryaa`} description={project.description} path={path} bodyClass="case-page">
+<header class="site-header">
+  <a class="logo" href={localePath(lang, '/')} aria-label={home[lang].nav.home}><span class="logo-rs">rs</span><sup>©</sup></a>
+  <p class="header-role">{t.studies} {pad(index + 1)} / {pad(projects.length)}</p>
+  <nav aria-label="Primary">
+    <a href={`${localePath(lang, '/')}#work`}>{t.all}</a>
+    <a href={`${localePath(lang, '/')}#contact`} class="nav-cta">{t.contact}</a>
+    <a class="lang-switch mono" href={localePath(other, path)} hreflang={other} lang={other} aria-label={home[lang].nav.switchLabel}>{home[lang].nav.switchText}</a>
+  </nav>
+</header>
+<main id="main" style={`--c:${project.color}`}>
+  <section class="case-hero">
+    <a class="case-back mono" href={`${localePath(lang, '/')}#work`}>{t.back}</a>
+    <p class="case-meta mono"><span>{pad(index + 1)} · {project.category}</span><span>{project.year}</span></p>
+    <h1>{first} <em>{rest.join(' ')}</em></h1>
+    <div class="case-sum">
+      <p>{project.description}</p>
+      <ul class="tags">{project.tags.map((tag) => <li>{tag}</li>)}</ul>
+    </div>
+  </section>
+  <div class="case-art">
+    <Exhibit kind={project.art} />
+    <span class="panel-metric"><b>{project.metric}</b><small class="mono">{project.metricLabel}</small></span>
+  </div>
+  <section class="case-body light" aria-label={project.short}>
+    {story.map(([label, copy]) => (
+      <article>
+        <h2 class="mono">{label}</h2>
+        <p>{copy}</p>
+      </article>
+    ))}
+    <div class="case-links">
+      <a class="pill-link" href={`${site.github}/${project.repo}`} target="_blank" rel="noopener">{t.code} <span>↗</span></a>
+      {project.doi && <a class="pill-link ghost" href={`https://doi.org/${project.doi}`} target="_blank" rel="noopener">{t.paper} <span>↗</span></a>}
+    </div>
+  </section>
+  <a class="next-case" href={localePath(lang, `/work/${next.slug}/`)} style={`--c:${next.color}`}>
+    <span class="mono">{t.next}</span>
+    <b>{next.short}<span>↗</span></b>
+  </a>
+</main>
+<footer class="case-foot mono"><span>© {new Date().getFullYear()} Rohit Suryaa Saravanan</span><span class="case-foot-links"><a href={`mailto:${site.email}`}>{site.email}</a><a href={site.linkedin} target="_blank" rel="noopener">LinkedIn ↗</a><a href={site.github} target="_blank" rel="noopener">GitHub ↗</a></span></footer>
+<script>import '../scripts/site';</script>
+</Layout>

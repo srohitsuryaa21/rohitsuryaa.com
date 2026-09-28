@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Résumé</title>
+<!-- One template for both résumés. ?lang=de renders the German one. Printed to A4 PDF with Chrome.
+     Content follows the website (src/data/projects.ts, src/i18n/content.ts). No dashes in the text. -->
+<style>
+  @font-face { font-family: 'Manrope'; src: url('../../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2') format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'Manrope'; src: url('../../node_modules/@fontsource-variable/manrope/files/manrope-latin-ext-wght-normal.woff2') format('woff2'); font-weight: 200 800; unicode-range: U+0100-024F; }
+  @page { size: A4; margin: 13mm 14mm 12mm; }
+  :root { --ink: #151513; --dim: #5d5a54; --line: #d9d4ca; --accent: #e8431a; }
+  * { box-sizing: border-box; }
+  html { font: 400 8.9pt/1.42 'Manrope', sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+  header { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 12px; padding-bottom: 9px; border-bottom: 2px solid var(--ink); }
+  h1 { margin: 0; font-size: 22pt; line-height: 1; font-weight: 800; letter-spacing: -.035em; }
+  .role { margin: 4px 0 0; font-size: 10.5pt; font-weight: 600; color: var(--accent); }
+  .mark { font-size: 20pt; font-weight: 800; letter-spacing: -.06em; line-height: 1; }
+  .mark sup { font-size: 8pt; color: var(--accent); letter-spacing: 0; }
+  .contact { margin: 7px 0 0; color: var(--dim); font-size: 8.3pt; line-height: 1.55; }
+  .contact b { color: var(--ink); font-weight: 600; }
+  section { margin-top: 11px; }
+  h2 { margin: 0 0 5px; font-size: 8pt; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  p { margin: 0; }
+  .item { margin-top: 6px; break-inside: avoid; }
+  .item-head { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: baseline; }
+  .item-head b { font-weight: 700; font-size: 9.4pt; }
+  .item-head i { font-style: normal; color: var(--dim); }
+  .when { color: var(--dim); font-size: 8.2pt; white-space: nowrap; }
+  ul { margin: 3px 0 0; padding-left: 13px; }
+  li { margin: 1px 0; }
+  li::marker { color: var(--accent); }
+  .stack { margin-top: 2px; color: var(--dim); font-size: 8.1pt; }
+  .stack a { color: var(--ink); }
+  .skills { display: grid; grid-template-columns: 118px 1fr; gap: 2px 10px; }
+  .skills dt { font-weight: 700; }
+  .skills dd { margin: 0; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+</style>
+</head>
+<body>
+<div id="cv"></div>
+<script>
+const C = {
+  en: {
+    role: 'Software Developer and Data Scientist',
+    place: 'Fulda, Hessen, Germany',
+    h: { summary: 'Summary', exp: 'Experience', projects: 'Selected projects', edu: 'Education', skills: 'Technical skills', pubs: 'Publications', certs: 'Certifications', langs: 'Languages', stack: 'Stack' },
+    summary: 'Software developer and data scientist, currently doing an MSc in Data Science at Hochschule Fulda. One year of professional experience building enterprise software for a US cybersecurity startup, two IEEE papers in applied machine learning, and practical work on AI agents built with LangGraph and RAG. I care about the model, and just as much about the API around it, the pipeline that ships it, and whether the result actually helps.',
+    jobs: [{
+      title: 'Associate Software Developer', org: 'EigenSecure, remote (USA)', when: 'Mar 2024 to Apr 2025',
+      points: [
+        'Turned business and security requirements into backend features, REST APIs and proof of concept components in an Agile Scrum team.',
+        'Built features around access control, evidence workflows and compliance data, working across MySQL, PostgreSQL and MongoDB.',
+        'Improved SQL queries, data workflows and CI/CD pipelines for reliable deployments and traceable audit trails.',
+        'Kept engineering and product stakeholders informed about progress and the choices involved, balancing security needs with delivery speed.',
+      ],
+    }],
+    projects: [
+      { t: 'Windmill Pitch Prediction', s: 'IEEE ICEMCE 2023', when: 'Feb to Jun 2024', p: ['Built 26 time based features from six months of turbine data, trained an XGBoost model and added a second layer that corrects its remaining errors.', 'Reached 96% prediction accuracy, cut error from 8.6% to 2.3% and raised modelled power output by 21%.'], st: 'Python, XGBoost, time series, simulation, statistical evaluation', l: 'DOI 10.1109/ICEMCE57940.2023.10433983' },
+      { t: 'Supply Chain Intelligence', s: 'Forecasting and analytics pipeline', when: '2025', p: ['Built an analytics pipeline over 110,123 online orders: SARIMA and XGBoost forecasting with error under 20% (MAPE 18.5%), EOQ reorder quantities, delivery analysis at 92.1% on time and risk scores for 881 sellers.', 'Brought the results together in one interactive Plotly Dash dashboard for operational decisions.'], st: 'Python, Pandas, NumPy, SARIMA, XGBoost, SQL, Plotly Dash', l: 'github.com/srohitsuryaa21/supply-chain-forecasting' },
+      { t: 'Luxury Concierge Agent', s: 'AI agent for vehicle configuration', when: '2026', p: ['Built a five step LangGraph agent over a SQLite catalogue that turns usage, region, cabin style, budget and timeline into a priced specification ready for sales.', 'Every answer is checked against the catalogue with Pydantic, budgets are enforced in Python so the model can never set a price, conversations are saved, and FastAPI serves a hand written front end. Twenty offline test scenarios run without a single API call.'], st: 'Python, LangGraph, RAG, FastAPI, Pydantic, SQLite, pytest', l: 'github.com/srohitsuryaa21/luxury-concierge-agent' },
+      { t: 'FinGuard PayOps', s: 'Payment operations platform', when: '', p: ['Built a SEPA style payment lifecycle with rule based fraud scoring, compliance alerts, an approve or reject flow for analysts, audit logging and a React dashboard, designed with DORA style resilience in mind.'], st: 'Java, Spring Boot, PostgreSQL, React', l: 'github.com/srohitsuryaa21/FinGuard-PayOps' },
+      { t: 'DeFi Farmer Platform', s: 'IEEE ICSCSS 2024', when: '2024', p: ['Wrote Ethereum smart contracts for loans, payments, insurance and supply chain tracking for small farmers, with a Web3.py backend tested on a local Ganache network. Modelled adoption of digital records rose from under 50% to about 80%.'], st: 'Solidity, Ethereum, Web3.py, Ganache', l: 'DOI 10.1109/ICSCSS60660.2024.10625462' },
+      { t: 'Aviation Delay Ontology', s: 'Data pipeline and Power BI', when: '', p: ['Modelled 63,000 US flights as connected flights and airports in the style of Palantir Foundry: cleaning, delay features, stable flight IDs and an airport table in pandas and PySpark, reported in Power BI (Chicago O’Hare averaged 21.1 minutes of delay against 13.6 at Atlanta).'], st: 'Python, pandas, PySpark, Power BI', l: 'github.com/srohitsuryaa21/aviation-delay-ontology' },
+      { t: 'SOC Silverstone', s: 'Formula 1 telemetry analysis', when: '2026', p: ['Estimated battery deployment from speed and throttle in public FastF1 data for the 2026 British Grand Prix and measured tyre wear per stint; the two turned out to be unrelated (r = −0.04).'], st: 'Python, FastF1, statistics', l: 'github.com/srohitsuryaa21/SOC-Silverstone-2026' },
+      { t: 'Employee Attrition Prediction', s: 'Explainable machine learning', when: 'Dec 2022 to Feb 2023', p: ['Classification pipeline on a public HR dataset with exploratory analysis, feature engineering, model comparison and driver analysis that explains which factors matter most.'], st: 'Python, Scikit-learn, Pandas', l: 'github.com/srohitsuryaa21/employee-attrition-prediction' },
+      { t: 'Personal portfolio', s: 'rohitsuryaa.com', when: '2025 to now', p: ['Bilingual website in English and German with scroll driven storytelling, a canvas data visualisation and full fallbacks for reduced motion and screen readers.'], st: 'Astro, TypeScript, GSAP, CSS', l: 'rohitsuryaa.com' },
+    ],
+    edu: [
+      { t: 'MSc Data Science', o: 'Hochschule Fulda, Germany', when: 'Apr 2025 to now', f: 'Machine learning, big data and distributed systems, data mining and predictive analytics, process mining, visualisation and BI, research methods, data ethics and GDPR.' },
+      { t: 'BTech Big Data Computer Science', o: 'SRM University, Chennai, India', when: 'Aug 2020 to Nov 2024', f: 'Big data systems, distributed systems, data structures and algorithms, databases, software engineering.' },
+    ],
+    skills: [
+      ['Data and ML', 'Python, Pandas, NumPy, Scikit-learn, XGBoost, PyTorch, TensorFlow, SARIMA, time series, classification, explainability, statistics'],
+      ['AI agents', 'LangGraph, RAG, FastAPI, Pydantic, ChromaDB, Ollama, pytest, offline evaluation'],
+      ['Software', 'C#, .NET, ASP.NET Core, Blazor, Java, Spring Boot, REST APIs, JavaScript, TypeScript, React'],
+      ['Data and BI', 'SQL, PostgreSQL, MySQL, MongoDB, SQLite, PySpark, ETL, Power BI, Plotly Dash, Tableau'],
+      ['Cloud and delivery', 'Azure, Docker, GitHub Actions, Jenkins, CI/CD, Git, Linux'],
+    ],
+    pubs: [
+      'Windmill pitch prediction with XGBoost and residual correction. IEEE ICEMCE, 2023. DOI 10.1109/ICEMCE57940.2023.10433983',
+      'A DeFi platform for transparent agricultural finance. IEEE ICSCSS, 2024. DOI 10.1109/ICSCSS60660.2024.10625462',
+    ],
+    certs: 'IBM Data Science Professional (Coursera)',
+    langs: 'English: fluent (C1+) · German: A2, improving · Tamil: native',
+  },
+  de: {
+    role: 'Softwareentwickler und Data Scientist',
+    place: 'Fulda, Hessen, Deutschland',
+    h: { summary: 'Profil', exp: 'Berufserfahrung', projects: 'Ausgewählte Projekte', edu: 'Ausbildung', skills: 'Technische Kenntnisse', pubs: 'Veröffentlichungen', certs: 'Zertifikate', langs: 'Sprachen', stack: 'Stack' },
+    summary: 'Softwareentwickler und Data Scientist, derzeit im Master Data Science an der Hochschule Fulda. Ein Jahr Berufserfahrung in der Entwicklung von Unternehmenssoftware für ein Startup aus den USA im Bereich Cybersecurity, zwei Veröffentlichungen bei IEEE zu angewandtem Machine Learning und praktische Erfahrung mit Agentensystemen auf Basis von LangGraph und RAG. Mir ist das Modell wichtig, aber genauso die API drumherum, die Pipeline, die es ausliefert, und ob das Ergebnis wirklich hilft.',
+    jobs: [{
+      title: 'Associate Software Developer', org: 'EigenSecure, remote (USA)', when: 'März 2024 bis April 2025',
+      points: [
+        'Anforderungen aus Geschäft und Sicherheit in Funktionen für das Backend, REST APIs und Prototypen umgesetzt, in einem agilen Team mit Scrum.',
+        'Funktionen rund um Zugriffskontrolle, Nachweisprozesse und Daten für Compliance entwickelt, mit MySQL, PostgreSQL und MongoDB.',
+        'Abfragen in SQL, Datenabläufe und Pipelines für CI/CD verbessert, für zuverlässige Deployments und nachvollziehbare Prüfpfade.',
+        'Entwicklung und Produktmanagement regelmäßig über Fortschritt und Abwägungen informiert und dabei Sicherheit und Liefertempo in Einklang gebracht.',
+      ],
+    }],
+    projects: [
+      { t: 'Windmill Pitch Prediction', s: 'IEEE ICEMCE 2023', when: 'Feb. bis Juni 2024', p: ['Aus sechs Monaten Turbinendaten 26 zeitbasierte Merkmale gebaut, ein Modell mit XGBoost trainiert und eine zweite Schicht ergänzt, die dessen verbleibende Fehler korrigiert.', '96 % Vorhersagegenauigkeit erreicht, den Fehler von 8,6 % auf 2,3 % gesenkt und die modellierte Leistung um 21 % gesteigert.'], st: 'Python, XGBoost, Zeitreihen, Simulation, statistische Auswertung', l: 'DOI 10.1109/ICEMCE57940.2023.10433983' },
+      { t: 'Supply Chain Intelligence', s: 'Prognose und Analysepipeline', when: '2025', p: ['Analysepipeline über 110.123 Onlinebestellungen gebaut: Prognosen mit SARIMA und XGBoost bei unter 20 % Fehler (MAPE 18,5 %), Bestellmengen nach EOQ, Lieferanalyse mit 92,1 % Pünktlichkeit und Risikowerte für 881 Verkäufer.', 'Die Ergebnisse in einem interaktiven Dashboard mit Plotly Dash für operative Entscheidungen zusammengeführt.'], st: 'Python, Pandas, NumPy, SARIMA, XGBoost, SQL, Plotly Dash', l: 'github.com/srohitsuryaa21/supply-chain-forecasting' },
+      { t: 'Luxury Concierge Agent', s: 'Agentensystem für Fahrzeugkonfiguration', when: '2026', p: ['In LangGraph einen Agenten mit fünf Schritten auf einem Katalog in SQLite gebaut, der Nutzung, Region, Innenraum, Budget und Zeitplan in eine bepreiste Spezifikation für den Vertrieb übersetzt.', 'Jede Antwort wird mit Pydantic gegen den Katalog geprüft, Budgets werden in Python durchgesetzt, sodass das Modell nie einen Preis setzen kann, Gespräche werden gespeichert, und FastAPI liefert eine selbst geschriebene Oberfläche aus. Zwanzig Testszenarien laufen ohne einen einzigen Aufruf der API.'], st: 'Python, LangGraph, RAG, FastAPI, Pydantic, SQLite, pytest', l: 'github.com/srohitsuryaa21/luxury-concierge-agent' },
+      { t: 'FinGuard PayOps', s: 'Plattform für Zahlungsabläufe', when: '', p: ['Zahlungsablauf nach dem Vorbild von SEPA gebaut, mit regelbasierter Betrugsbewertung, Warnungen zur Compliance, Freigabe oder Ablehnung durch Analysten, Protokollierung für Audits und einem Dashboard in React, mit Blick auf Resilienz im Sinne von DORA.'], st: 'Java, Spring Boot, PostgreSQL, React', l: 'github.com/srohitsuryaa21/FinGuard-PayOps' },
+      { t: 'DeFi Farmer Platform', s: 'IEEE ICSCSS 2024', when: '2024', p: ['Smart Contracts für Ethereum geschrieben, die Kredite, Zahlungen, Versicherungen und die Nachverfolgung in der Lieferkette für Kleinbauern abwickeln, mit Backend in Web3.py und Tests in einem lokalen Netzwerk mit Ganache. Die modellierte Nutzung digitaler Nachweise stieg von unter 50 % auf etwa 80 %.'], st: 'Solidity, Ethereum, Web3.py, Ganache', l: 'DOI 10.1109/ICSCSS60660.2024.10625462' },
+      { t: 'Aviation Delay Ontology', s: 'Datenpipeline und Power BI', when: '', p: ['63.000 Flüge in den USA als verbundene Flüge und Flughäfen nach dem Vorbild von Palantir Foundry modelliert: Bereinigung, Merkmale zu Verspätungen, stabile IDs und eine Tabelle für Flughäfen in pandas und PySpark, ausgewertet in Power BI (Chicago O’Hare im Schnitt 21,1 Minuten Verspätung, Atlanta 13,6).'], st: 'Python, pandas, PySpark, Power BI', l: 'github.com/srohitsuryaa21/aviation-delay-ontology' },
+      { t: 'SOC Silverstone', s: 'Analyse von Telemetrie aus der Formel 1', when: '2026', p: ['Den Batterieeinsatz beim Großen Preis von Großbritannien 2026 aus Geschwindigkeit und Gaspedal in öffentlichen Daten aus FastF1 geschätzt und den Reifenverschleiß je Stint gemessen; beides hängt praktisch nicht zusammen (r = −0,04).'], st: 'Python, FastF1, Statistik', l: 'github.com/srohitsuryaa21/SOC-Silverstone-2026' },
+      { t: 'Employee Attrition Prediction', s: 'Erklärbares Machine Learning', when: 'Dez. 2022 bis Feb. 2023', p: ['Klassifikationspipeline auf einem öffentlichen Datensatz aus dem Personalbereich, mit explorativer Analyse, Merkmalsentwicklung, Modellvergleich und einer Treiberanalyse, die zeigt, welche Faktoren am wichtigsten sind.'], st: 'Python, Scikit-learn, Pandas', l: 'github.com/srohitsuryaa21/employee-attrition-prediction' },
+      { t: 'Persönliches Portfolio', s: 'rohitsuryaa.com', when: '2025 bis heute', p: ['Zweisprachige Website auf Englisch und Deutsch mit Storytelling beim Scrollen, einer Datenvisualisierung auf Canvas und vollständigen Alternativen für reduzierte Bewegung und Screenreader.'], st: 'Astro, TypeScript, GSAP, CSS', l: 'rohitsuryaa.com' },
+    ],
+    edu: [
+      { t: 'M.Sc. Data Science', o: 'Hochschule Fulda, Deutschland', when: 'April 2025 bis heute', f: 'Machine Learning, Big Data und verteilte Systeme, Data Mining und Predictive Analytics, Process Mining, Visualisierung und BI, Forschungsmethoden, Datenethik und DSGVO.' },
+      { t: 'B.Tech. Big Data Computer Science', o: 'SRM University, Chennai, Indien', when: 'Aug. 2020 bis Nov. 2024', f: 'Systeme für Big Data, verteilte Systeme, Datenstrukturen und Algorithmen, Datenbanken, Softwareentwicklung.' },
+    ],
+    skills: [
+      ['Data und ML', 'Python, Pandas, NumPy, Scikit-learn, XGBoost, PyTorch, TensorFlow, SARIMA, Zeitreihen, Klassifikation, Erklärbarkeit, Statistik'],
+      ['Agentensysteme', 'LangGraph, RAG, FastAPI, Pydantic, ChromaDB, Ollama, pytest, Evaluation ohne API'],
+      ['Software', 'C#, .NET, ASP.NET Core, Blazor, Java, Spring Boot, REST APIs, JavaScript, TypeScript, React'],
+      ['Daten und BI', 'SQL, PostgreSQL, MySQL, MongoDB, SQLite, PySpark, ETL, Power BI, Plotly Dash, Tableau'],
+      ['Cloud und Auslieferung', 'Azure, Docker, GitHub Actions, Jenkins, CI/CD, Git, Linux'],
+    ],
+    pubs: [
+      'Windmill pitch prediction with XGBoost and residual correction. IEEE ICEMCE, 2023. DOI 10.1109/ICEMCE57940.2023.10433983',
+      'A DeFi platform for transparent agricultural finance. IEEE ICSCSS, 2024. DOI 10.1109/ICSCSS60660.2024.10625462',
+    ],
+    certs: 'IBM Data Science Professional (Coursera)',
+    langs: 'Englisch: verhandlungssicher (C1+) · Deutsch: A2, im Aufbau · Tamil: Muttersprache',
+  },
+};
+
+const lang = new URLSearchParams(location.search).get('lang') === 'de' ? 'de' : 'en';
+document.documentElement.lang = lang;
+const c = C[lang];
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const link = (l) => l.startsWith('DOI') ? `<a href="https://doi.org/${l.slice(4)}">${l}</a>` : `<a href="https://${l}">${l}</a>`;
+const item = (title, sub, when, body) => `<div class="item"><div class="item-head"><span><b>${esc(title)}</b>${sub ? ` <i>· ${esc(sub)}</i>` : ''}</span><span class="when">${esc(when || '')}</span></div>${body}</div>`;
+document.getElementById('cv').innerHTML = `
+<header>
+  <div>
+    <h1>Rohit Suryaa Saravanan</h1>
+    <p class="role">${c.role}</p>
+    <p class="contact">${c.place} · +49 160 96597803 · <b><a href="mailto:Rohitsuryaas21@gmail.com">Rohitsuryaas21@gmail.com</a></b><br/>
+      <a href="https://www.linkedin.com/in/rohitsuryaa/">linkedin.com/in/rohitsuryaa</a> · <b><a href="https://rohitsuryaa.com">rohitsuryaa.com</a></b> · <a href="https://github.com/srohitsuryaa21">github.com/srohitsuryaa21</a></p>
+  </div>
+  <div class="mark">rs<sup>©</sup></div>
+</header>
+<section><h2>${c.h.summary}</h2><p>${esc(c.summary)}</p></section>
+<section><h2>${c.h.exp}</h2>${c.jobs.map((j) => item(j.title, j.org, j.when, `<ul>${j.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>`)).join('')}</section>
+<section><h2>${c.h.projects}</h2>${c.projects.map((p) => item(p.t, p.s, p.when, `<ul>${p.p.map((x) => `<li>${esc(x)}</li>`).join('')}</ul><p class="stack">${c.h.stack}: ${esc(p.st)} · ${link(p.l)}</p>`)).join('')}</section>
+<section><h2>${c.h.edu}</h2>${c.edu.map((e) => item(e.t, e.o, e.when, `<p class="stack">${esc(e.f)}</p>`)).join('')}</section>
+<section><h2>${c.h.skills}</h2><dl class="skills">${c.skills.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl></section>
+<section><h2>${c.h.pubs}</h2><ul>${c.pubs.map((p) => `<li>${esc(p)}</li>`).join('')}</ul></section>
+<div class="two">
+  <section><h2>${c.h.certs}</h2><p>${esc(c.certs)}</p></section>
+  <section><h2>${c.h.langs}</h2><p>${esc(c.langs)}</p></section>
+</div>`;
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>

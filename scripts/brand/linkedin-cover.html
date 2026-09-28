@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LinkedIn cover</title>
+<!-- Rendered to PNG in Chrome at 1584×396 (LinkedIn's size) and at 2× for sharp screens.
+     LinkedIn puts the profile photo over the lower left, so that corner stays empty. -->
+<style>
+  @font-face { font-family: 'Manrope'; src: url('../../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2') format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'Instrument Serif'; font-style: italic; src: url('../../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2') format('woff2'); }
+  @font-face { font-family: 'JetBrains Mono'; src: url('../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2') format('woff2'); font-weight: 100 800; }
+  html, body { margin: 0; }
+  :root { --bg: #0d0d0c; --fg: #ece8df; --dim: #8d8a82; --accent: #ff4d1f; }
+  .blue { --bg: #06101f; --fg: #eef3ff; --dim: #7f90ad; --accent: #5b9bff; }
+  .cover { position: relative; width: 1584px; height: 396px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: 'Manrope', sans-serif; }
+  .blue .cover { background: radial-gradient(ellipse 70% 120% at 80% 30%, #0d2144 0%, #06101f 70%); }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mark { position: absolute; left: 48px; top: 40px; width: 64px; }
+  .meta { position: absolute; top: 44px; right: 56px; font: 500 13px/1 'JetBrains Mono', monospace; letter-spacing: .04em; text-transform: uppercase; color: var(--dim); display: flex; gap: 26px; }
+  .meta b { color: var(--fg); font-weight: 500; }
+  .meta i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #43d17a; margin-right: 8px; vertical-align: 1px; }
+  .text { position: absolute; right: 56px; bottom: 58px; text-align: right; }
+  h1 { margin: 0; font-weight: 700; font-size: 64px; line-height: .98; letter-spacing: -.055em; }
+  h1 em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--accent); font-size: 1.1em; letter-spacing: -.02em; }
+  .sub { margin-top: 18px; font: 500 14px/1 'JetBrains Mono', monospace; letter-spacing: .04em; text-transform: uppercase; color: var(--dim); }
+  .sub b { color: var(--accent); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <canvas id="field"></canvas>
+  <img class="mark" src="../../brand/rs-mark-light.svg" alt="" />
+  <div class="meta"><span><i></i><b>Open to opportunities</b></span><span>Fulda, Germany</span></div>
+  <div class="text">
+    <h1 id="tagline">I turn raw data into<br/><em>decisions</em> people trust.</h1>
+    <p class="sub">Software developer &amp; data scientist · <b>rohitsuryaa.com</b></p>
+  </div>
+</div>
+<script>
+  // ?theme=blue gives the blue version with its own tagline
+  const blue = new URLSearchParams(location.search).get('theme') === 'blue';
+  if (blue) {
+    document.documentElement.classList.add('blue');
+    document.querySelector('.mark').src = '../../brand/rs-mark-blue.svg';
+    document.getElementById('tagline').innerHTML = 'Where software engineering<br/>meets <em>data science.</em>';
+  }
+  const rgb = blue ? '91,155,255' : '255,77,31', bgRgb = blue ? '6,16,31' : '13,13,12', dotRgb = blue ? '238,243,255' : '236,232,223';
+  // Same idea as the site's hero: a dot grid where a data series settles into a fitted curve.
+  const c = document.getElementById('field');
+  const dpr = window.devicePixelRatio || 1;
+  const w = 1584, h = 396, gap = 22;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const cols = Math.ceil(w / gap) + 1, rows = Math.ceil(h / gap) + 1;
+  const progress = 0.82; // mostly clean, with a little of the raw noise left in
+  const jitter = Array.from({ length: cols }, (_, i) => ((Math.sin(i * 12.9898) * 43758.5453) % 1));
+  const series = (i) => {
+    const nx = i / cols, n = 1 - progress;
+    const clean = h * 0.8 - h * 0.5 * Math.pow(nx, 1.4) + h * 0.05 * Math.sin(nx * 7);
+    const noise = h * 0.12 * (Math.sin(nx * 37) * 0.5 + Math.sin(nx * 71) * 0.3 + Math.sin(nx * 13) * 0.4);
+    return clean + (noise + jitter[i] * h * 0.15) * n * n;
+  };
+  const sigma = gap * (0.55 + 1.1 * (1 - progress));
+  for (let i = 0; i < cols; i++) {
+    const sy = series(i);
+    for (let j = 0; j < rows; j++) {
+      const x = i * gap, y = j * gap, d = y - sy;
+      const k = Math.exp(-(d * d) / (2 * sigma * sigma));
+      if (k < 0.06) { ctx.fillStyle = `rgba(${dotRgb},0.06)`; ctx.fillRect(x - 0.7, y - 0.7, 1.4, 1.4); continue; }
+      ctx.fillStyle = `rgba(${rgb},${Math.min(0.9, k * 0.85)})`;
+      ctx.beginPath(); ctx.arc(x, y, 0.8 + k * 1.9, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  ctx.strokeStyle = `rgba(${rgb},0.55)`; ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  for (let i = 0; i < cols; i++) i ? ctx.lineTo(i * gap, series(i)) : ctx.moveTo(0, series(0));
+  ctx.stroke();
+  // keep the text readable: darken behind the headline
+  const g = ctx.createLinearGradient(w * 0.45, 0, w, 0);
+  g.addColorStop(0, `rgba(${bgRgb},0)`); g.addColorStop(0.55, `rgba(${bgRgb},0.7)`); g.addColorStop(1, `rgba(${bgRgb},0.8)`);
+  ctx.fillStyle = g; ctx.fillRect(w * 0.45, 0, w * 0.55, h);
+  document.body.dataset.ready = '1';
+</script>
+</body>
+</html>
