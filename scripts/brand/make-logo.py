@@ -43,12 +43,17 @@ cs = 0.42                                  # © scale
 x_height = font['OS/2'].sxHeight
 parts.append((copy_d, x + 0.02 * upm, x_height - 0.05 * upm, cs))  # baseline of © raised near x-height
 
-# bounds of the whole mark (font units, y up)
-xmin = 0.0
-xmax = x + 0.02 * upm + copy_adv * cs
-ymin = font['OS/2'].sxHeight * -0.0 - 0.02 * upm   # letters sit on the baseline
-ymax = x_height - 0.05 * upm + (font['OS/2'].sCapHeight * cs) + 0.02 * upm
-ymax = max(ymax, x_height + 0.02 * upm)
+# bounds of the whole mark from the real glyph outlines (font units, y up), plus a small safety margin
+def part_bounds(ch, dx, dy, sc):
+    _, _, (x0, y0, x1, y1) = glyph(ch)
+    return dx + x0 * sc, dy + y0 * sc, dx + x1 * sc, dy + y1 * sc
+
+boxes = [part_bounds(ch, dx, dy, sc) for ch, (_, dx, dy, sc) in zip('rs©', parts)]
+margin = 0.02 * upm
+xmin = min(bx[0] for bx in boxes) - margin
+ymin = min(bx[1] for bx in boxes) - margin
+xmax = max(bx[2] for bx in boxes) + margin
+ymax = max(bx[3] for bx in boxes) + margin
 
 
 def mark_group(fill_letters, fill_copy, fill_s=None):
