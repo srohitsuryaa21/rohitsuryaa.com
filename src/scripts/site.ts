@@ -62,6 +62,7 @@ function initLite() {
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
   if (finePointer) { buildCursor(); buildMagnetic(); }
+  buildHeaderHide();
   gsap.from('.case-hero > *', { y: 50, opacity: 0, duration: 1.1, ease: 'expo.out', stagger: 0.08 });
   gsap.from('.case-art', { clipPath: 'inset(12% 8% 0% 8% round 22px)', duration: 1.4, ease: 'expo.out', delay: 0.2 });
   gsap.fromTo('.case-art .exhibit-art', { yPercent: -6 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: '.case-art', start: 'top bottom', end: 'bottom top', scrub: true } });
@@ -111,6 +112,7 @@ function initMotion() {
       ['cards', buildCards],
       ['timeline', buildTimeline],
       ['header', buildHeaderTheme],
+      ['headerHide', buildHeaderHide],
       ['network', buildNetwork],
     ];
     if (finePointer) steps.push(['cursor', buildCursor], ['magnetic', buildMagnetic]);
@@ -413,6 +415,20 @@ function buildCards() {
   cards.forEach((card) => {
     const glyph = $('.card-glyph', card);
     if (glyph) gsap.from(glyph.children, { opacity: 0, scale: 0.6, transformOrigin: '50% 50%', stagger: 0.05, duration: 0.8, ease: 'back.out(2)', scrollTrigger: { trigger: card, start: 'top 70%', once: true } });
+  });
+}
+
+// Phones: the solid header slides away while scrolling down and returns on the way up.
+function buildHeaderHide() {
+  const header = $('.site-header');
+  if (!header) return;
+  const mm = gsap.matchMedia();
+  mm.add('(max-width: 899px)', () => {
+    const st = ScrollTrigger.create({
+      start: 0, end: 'max',
+      onUpdate: (self) => header.classList.toggle('is-hidden', self.direction === 1 && self.scroll() > 140),
+    });
+    return () => { st.kill(); header.classList.remove('is-hidden'); };
   });
 }
 

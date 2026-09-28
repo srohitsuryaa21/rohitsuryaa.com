@@ -390,7 +390,12 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
   .motion-net .net-body{font-size:14px}
 
   .hide-sm{display:none!important}
-  .site-header{grid-template-columns:1fr auto;padding-block:18px}
+  /* phones: one solid row, hidden while scrolling down, back on scroll up */
+  .site-header{display:flex;justify-content:space-between;align-items:center;padding-block:12px;mix-blend-mode:normal;color:var(--paper);background:#0d0d0cd9;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid #ffffff14;transition:transform .45s var(--ease)}
+  .site-header>span:empty{display:none}
+  .site-header nav{align-items:center;gap:18px}
+  .on-accent .site-header{color:var(--paper)}
+  .site-header.is-hidden{transform:translateY(-100%)}
   .header-role{display:none}
   .numbers ul{grid-template-columns:1fr 1fr}
   .numbers li:nth-child(2){border-right:0}
@@ -398,7 +403,8 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
   .numbers li:nth-child(-n+2){border-bottom:1px solid var(--line-d)}
   .about-grid,.exp-grid,.creds,.case-sum{grid-template-columns:1fr}
   .about-portrait,.exp-head{position:relative;top:0}
-  .about-portrait{max-width:260px}
+  .about-portrait{max-width:280px;margin-inline:auto;width:100%}
+  .about-portrait figcaption{text-align:center}
   .card{grid-template-columns:1fr;min-height:0}
   .card-glyph{position:absolute;right:24px;top:24px;width:80px}
   .contact-actions{flex-direction:column;align-items:flex-start}
