@@ -209,6 +209,7 @@ const glyphs = [0, 1, 2];
       <div class="big-buttons">
         <a class="big-button" href={`mailto:${site.email}`} data-magnetic data-cursor={t.contact.writeCursor}><span>{t.contact.write[0]}<br/>{t.contact.write[1]}</span></a>
         <a class="big-button ghost" href={site.linkedin} target="_blank" rel="noopener" data-magnetic data-cursor={t.contact.linkedinCursor}><span>LinkedIn<br/>↗</span></a>
+        <a class="big-button ghost" href={site.github} target="_blank" rel="noopener" data-magnetic data-cursor="@srohitsuryaa21"><span>GitHub<br/>↗</span></a>
       </div>
       <div class="contact-links">
         <div class="email-row">
@@ -216,10 +217,6 @@ const glyphs = [0, 1, 2];
           <button type="button" id="copy-email" data-email={site.email} data-copied={t.contact.copied} data-fail={t.contact.copyFail}>{t.contact.copy}</button>
           <span id="copy-status" role="status" class="mono"></span>
         </div>
-        <ul>
-          <li><a href={site.github} target="_blank" rel="noopener">GitHub ↗</a></li>
-          <li><a href={site.linkedin} target="_blank" rel="noopener">LinkedIn ↗</a></li>
-        </ul>
       </div>
     </div>
     <div class="contact-bar mono">
