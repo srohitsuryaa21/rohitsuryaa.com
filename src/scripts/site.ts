@@ -40,8 +40,75 @@ function setupClock() {
   setInterval(tick, 30_000);
 }
 
+/* Work row: counter, progress rail, rolodex of project names and arrow buttons, shared by both modes */
+let workIdx = 0;
+let workJump: ((idx: number) => void) | null = null;
+// where each card sits along the row (0..1); the last few can't reach the left edge, so they share the final stretch
+function cardStops(panels: HTMLElement[], distance: number) {
+  const n = panels.length;
+  const raw = panels.map((p) => (p.offsetLeft - panels[0].offsetLeft) / (distance || 1));
+  const f = Math.max(1, raw.findIndex((v) => v >= 1));
+  if (raw[f] === undefined || raw[f] < 1) return raw;
+  return raw.map((v, k) => (k < f ? v : raw[f - 1] + ((1 - raw[f - 1]) * (k - f + 1)) / (n - f)));
+}
+// progress along the row as a fractional card position, so the rolodex turns smoothly between cards
+function fracIndex(p: number, stops: number[]) {
+  if (p <= stops[0]) return 0;
+  for (let k = 0; k < stops.length - 1; k++) {
+    if (p <= stops[k + 1]) return k + (p - stops[k]) / (stops[k + 1] - stops[k] || 1);
+  }
+  return stops.length - 1;
+}
+function workState(pos: number, n: number, progress: number) {
+  const idx = Math.round(pos);
+  workIdx = idx;
+  const count = $('.work-count');
+  if (count) count.textContent = String(idx + 1).padStart(2, '0');
+  const rail = $('.work-rail i');
+  if (rail) rail.style.transform = `scaleX(${Math.max(1 / n, progress)})`;
+  $$<HTMLButtonElement>('.work-btn').forEach((b) => { b.disabled = Number(b.dataset.dir) < 0 ? idx === 0 : idx === n - 1; });
+  const items = $$('.work-list.is-wheel li');
+  const row = items[0]?.offsetHeight ?? 0;
+  items.forEach((li, i) => {
+    const d = i - pos;
+    li.style.transform = `translateY(${d * row}px) scale(${1 - Math.min(2.6, Math.abs(d)) * 0.07})`;
+    li.style.opacity = String(Math.max(0, 1 - Math.abs(d) * 0.3));
+    li.style.visibility = Math.abs(d) > 2.6 ? 'hidden' : 'visible';
+    li.classList.toggle('is-active', i === idx);
+  });
+}
+function setupWorkRow() {
+  const view = $('.work-viewport');
+  const panels = $$('.work-track .panel');
+  if (!view || !panels.length) return;
+  const n = panels.length;
+  $('.work-list')?.classList.add('is-wheel');
+  const update = () => {
+    if (root.classList.contains('motion-h')) return;
+    const max = view.scrollWidth - view.clientWidth;
+    const p = max > 0 ? view.scrollLeft / max : 1;
+    workState(fracIndex(p, cardStops(panels, max)), n, p);
+  };
+  // desktop scrolls the page (workJump), everywhere else the row itself scrolls
+  const go = (idx: number) => {
+    idx = gsap.utils.clamp(0, n - 1, idx);
+    if (root.classList.contains('motion-h') && workJump) return workJump(idx);
+    const max = view.scrollWidth - view.clientWidth;
+    view.scrollTo({ left: cardStops(panels, max)[idx] * max, behavior: reduced ? 'auto' : 'smooth' });
+  };
+  view.addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', update);
+  $$<HTMLButtonElement>('.work-btn').forEach((b) => b.addEventListener('click', () => go(workIdx + Number(b.dataset.dir))));
+  $$<HTMLAnchorElement>('.work-list a').forEach((a) => a.addEventListener('click', (e) => {
+    e.preventDefault();
+    go(Number(a.dataset.index));
+  }));
+  update();
+}
+
 setupCopy();
 setupClock();
+setupWorkRow();
 const heroName = $('.hero-name');
 if (heroName) fitName(heroName);
 
@@ -333,71 +400,65 @@ function buildWork(lenis: Lenis) {
   const mm = gsap.matchMedia();
   mm.add('(min-width: 900px) and (min-height: 600px)', () => {
     root.classList.add('motion-h');
-    const panels = $$('.work-stage .panel');
-    const items = $$('.work-list li');
-    const links = $$<HTMLAnchorElement>('.work-list a');
-    const count = $('.work-count')!;
-    const rail = $('.work-rail i')!;
+    const track = $('.work-track')!;
+    const panels = $$('.work-track .panel');
     const n = panels.length;
-    const R = 'inset(0% 0% 0% 0% round 18px)';
+    // how far the track travels, and where each card sits along it (0..1), so every card can land flush left
+    const distance = () => Math.max(0, track.scrollWidth - innerWidth);
+    const stops = () => cardStops(panels, distance());
+    const nearest = (v: number) => stops().reduce((best, s, k, all) => (Math.abs(s - v) < Math.abs(all[best] - v) ? k : best), 0);
 
-    const setActive = (idx: number) => {
-      items.forEach((li, k) => li.classList.toggle('is-active', k === idx));
-      panels.forEach((p, k) => { p.inert = k !== idx; });
-      count.textContent = String(idx + 1).padStart(2, '0');
-    };
-    setActive(0);
-
-    const tl = gsap.timeline({
-      defaults: { ease: 'none' },
+    // declared before the tween: its onUpdate can fire while it is being created
+    const lean = { v: 0 };
+    const setSkew = gsap.quickSetter(panels, 'skewX', 'deg');
+    const slide = gsap.to(track, {
+      x: () => -distance(), ease: 'none',
       scrollTrigger: {
-        trigger: '.work-pin', start: 'top top', end: () => `+=${(n - 1) * innerHeight * 0.85}`,
-        pin: true, scrub: 0.8, invalidateOnRefresh: true,
-        snap: { snapTo: 1 / (n - 1), duration: { min: 0.25, max: 0.7 }, delay: 0.08, ease: 'power2.inOut' },
+        trigger: '.work-pin', start: 'top top', end: () => `+=${distance()}`,
+        pin: true, scrub: 0.7, invalidateOnRefresh: true,
+        snap: { snapTo: (v) => stops()[nearest(v)], duration: { min: 0.25, max: 0.7 }, delay: 0.1, ease: 'power2.inOut' },
         onUpdate: (self) => {
-          gsap.set(rail, { scaleX: self.progress });
-          setActive(Math.round(self.progress * (n - 1)));
+          workState(fracIndex(self.progress, stops()), n, self.progress);
+          // cards lean into fast scrolling, then settle
+          const skew = gsap.utils.clamp(-7, 7, self.getVelocity() / -350);
+          if (Math.abs(skew) > Math.abs(lean.v)) {
+            lean.v = skew;
+            gsap.to(lean, { v: 0, duration: 0.8, ease: 'power3', overwrite: true, onUpdate: () => setSkew(lean.v) });
+          }
         },
       },
     });
 
-    gsap.set(panels.slice(1).map((p) => $('.panel-media', p)), { visibility: 'hidden' });
-    panels.forEach((panel, i) => {
-      if (i === 0) return;
-      const prev = panels[i - 1];
-      const at = i - 1;
-      tl.set($('.panel-media', panel), { visibility: 'visible' }, at);
-      // previous project sinks back while the next one wipes up over it
-      tl.to($('.panel-media', prev), { scale: 0.9, opacity: 0.25, duration: 1 }, at)
-        .to($('.panel-info', prev), { y: -30, opacity: 0, duration: 0.35 }, at)
-        .fromTo($('.panel-media', panel), { clipPath: 'inset(100% 0% 0% 0% round 18px)' }, { clipPath: R, duration: 1, ease: 'power2.inOut' }, at)
-        .fromTo($('.panel-art', panel), { scale: 1.3, yPercent: 12 }, { scale: 1, yPercent: 0, duration: 1 }, at)
-        .fromTo($('.panel-metric', panel), { yPercent: 60, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5 }, at + 0.45)
-        .fromTo($('.panel-info', panel), { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45 }, at + 0.55);
+    panels.forEach((panel) => {
+      // the artwork drifts against the card as it crosses the screen
+      gsap.fromTo($('.panel-art', panel), { xPercent: 7 }, {
+        xPercent: -7, ease: 'none',
+        scrollTrigger: { trigger: panel, containerAnimation: slide, start: 'left right', end: 'right left', scrub: true },
+      });
+      // cards arriving from the right grow into place
+      gsap.fromTo($('.panel-media', panel), { scale: 0.86, opacity: 0.4 }, {
+        scale: 1, opacity: 1, ease: 'none', transformOrigin: '0% 60%',
+        scrollTrigger: { trigger: panel, containerAnimation: slide, start: 'left right', end: 'left 55%', scrub: true },
+      });
     });
 
-    // index links jump straight to their project
-    const onClick = (e: MouseEvent) => {
-      const a = (e.currentTarget as HTMLElement);
-      const st = tl.scrollTrigger;
-      if (!st) return;
-      e.preventDefault();
-      const idx = Number(a.dataset.index);
-      lenis.scrollTo(st.start + (st.end - st.start) * (idx / (n - 1)), { duration: 1.2 });
+    // the arrows and the rolodex move between cards by scrolling the page
+    workJump = (idx) => {
+      const st = slide.scrollTrigger;
+      if (st) lenis.scrollTo(st.start + (st.end - st.start) * stops()[idx], { duration: 1.1 });
     };
-    links.forEach((l) => l.addEventListener('click', onClick));
 
     return () => {
       root.classList.remove('motion-h');
-      links.forEach((l) => l.removeEventListener('click', onClick));
-      panels.forEach((p) => { p.inert = false; });
+      workJump = null;
+      gsap.set(panels, { clearProps: 'transform' });
     };
   });
 
   mm.add('(max-width: 899px), (max-height: 599px)', () => {
-    $$('.panel').forEach((panel) => {
-      gsap.from($('.panel-media', panel), { clipPath: 'inset(30% 8% 0% 8% round 18px)', duration: 1.3, ease: 'expo.out', scrollTrigger: { trigger: panel, start: 'top 90%', once: true } });
-      gsap.from($('.panel-info', panel), { y: 40, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: panel, start: 'top 75%', once: true } });
+    gsap.from('.work-track .panel', {
+      x: 80, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: 0.08,
+      scrollTrigger: { trigger: '.work-viewport', start: 'top 85%', once: true },
     });
   });
 }
@@ -509,12 +570,21 @@ function buildCursor() {
   if (!cursor || !label) return;
   const xTo = gsap.quickTo(cursor, 'x', { duration: 0.45, ease: 'power3' });
   const yTo = gsap.quickTo(cursor, 'y', { duration: 0.45, ease: 'power3' });
-  addEventListener('pointermove', (e) => { xTo(e.clientX); yTo(e.clientY); cursor.classList.remove('is-hidden'); });
+  addEventListener('pointermove', (e) => {
+    xTo(e.clientX); yTo(e.clientY);
+    cursor.classList.remove('is-hidden');
+    // a note opens to the lower right of the pointer, or to the left near the right edge
+    cursor.classList.toggle('flip', e.clientX > innerWidth - 340);
+  });
   document.addEventListener('pointerleave', () => cursor.classList.add('is-hidden'));
   document.addEventListener('pointerover', (e) => {
-    const t = (e.target as Element).closest<HTMLElement>('[data-cursor]');
-    if (t) { label.textContent = t.dataset.cursor ?? ''; cursor.classList.add('has-label'); }
-    else cursor.classList.remove('has-label');
+    const el = e.target as Element;
+    // a short note (the story behind a number) turns the dot into a small card
+    const note = el.closest<HTMLElement>('[data-cursor-note]');
+    const t = el.closest<HTMLElement>('[data-cursor]');
+    if (note) { label.textContent = note.dataset.cursorNote ?? ''; cursor.classList.remove('has-label'); cursor.classList.add('has-note'); }
+    else if (t) { label.textContent = t.dataset.cursor ?? ''; cursor.classList.remove('has-note'); cursor.classList.add('has-label'); }
+    else cursor.classList.remove('has-label', 'has-note');
   });
 }
 

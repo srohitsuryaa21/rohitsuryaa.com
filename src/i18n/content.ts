@@ -42,15 +42,16 @@ export const home = {
       cv: [{ label: 'Résumé (English)', href: site.cvEn, lang: 'en' }, { label: 'Lebenslauf (Deutsch)', href: site.cvDe, lang: 'de' }],
     },
     stats: [
-      { value: 96, suffix: '%', label: 'Prediction accuracy', note: 'Windmill pitch model, IEEE 2023' },
-      { value: 110123, suffix: '', label: 'Orders analysed', note: 'Supply chain pipeline' },
-      { value: 63, suffix: 'K', label: 'Flights modelled', note: 'Aviation delay model' },
-      { value: 2, suffix: '', label: 'IEEE papers', note: 'Machine learning and blockchain finance', pad: true },
+      { value: 96, suffix: '%', label: 'Prediction accuracy', note: 'Windmill pitch model, IEEE 2023', why: 'My blade pitch model was right 96% of the time. The error fell from 8.6% to 2.3%, and the turbine made 21% more power.' },
+      { value: 110123, suffix: '', label: 'Orders analysed', note: 'Supply chain pipeline', why: 'Every order in a real online store dataset, cleaned and joined into one dashboard: 92.1% delivered on time, 881 sellers scored for risk.' },
+      { value: 63, suffix: 'K', label: 'Flights modelled', note: 'Aviation delay model', why: 'US flights turned into a model of connected flights and airports. Chicago O’Hare averaged 21.1 minutes of delay, Atlanta 13.6.' },
+      { value: 2, suffix: '', label: 'IEEE papers', note: 'Machine learning and blockchain finance', pad: true, why: 'Two peer reviewed IEEE papers: the windmill pitch model in 2023 and a blockchain platform for small farmers in 2024.' },
     ],
     work: {
       label: 'Selected work', title: 'Eight projects,', titleEm: 'all open source.',
       intro: 'Research, data engineering, AI agents and fintech. Each one started with a real question, and the code for every one of them is on GitHub.',
       index: 'Project index', cursor: 'View case', caseStudy: 'Case study', source: 'Source', more: 'More on GitHub',
+      prev: 'Previous project', next: 'Next project',
     },
     principles: {
       label: 'How I work', aside: 'Three habits',
@@ -120,15 +121,16 @@ export const home = {
       cv: [{ label: 'Lebenslauf (Deutsch)', href: site.cvDe, lang: 'de' }, { label: 'Résumé (English)', href: site.cvEn, lang: 'en' }],
     },
     stats: [
-      { value: 96, suffix: ' %', label: 'Vorhersagegenauigkeit', note: 'Pitchmodell für Windkraftanlagen, IEEE 2023' },
-      { value: 110123, suffix: '', label: 'Analysierte Bestellungen', note: 'Pipeline für Lieferketten' },
-      { value: 63, suffix: 'K', label: 'Modellierte Flüge', note: 'Modell für Flugverspätungen' },
-      { value: 2, suffix: '', label: 'Veröffentlichungen', note: 'IEEE, Machine Learning und Blockchain', pad: true },
+      { value: 96, suffix: ' %', label: 'Vorhersagegenauigkeit', note: 'Pitchmodell für Windkraftanlagen, IEEE 2023', why: 'Mein Modell für den Blattwinkel lag in 96 % der Fälle richtig. Der Fehler sank von 8,6 % auf 2,3 %, und die Turbine erzeugte 21 % mehr Strom.' },
+      { value: 110123, suffix: '', label: 'Analysierte Bestellungen', note: 'Pipeline für Lieferketten', why: 'Jede Bestellung aus einem echten Onlineshop, bereinigt und in einem Dashboard vereint: 92,1 % pünktlich geliefert, 881 Verkäufer nach Risiko bewertet.' },
+      { value: 63, suffix: 'K', label: 'Modellierte Flüge', note: 'Modell für Flugverspätungen', why: 'Flüge in den USA als Modell aus verbundenen Flügen und Flughäfen. Chicago O’Hare kam im Schnitt auf 21,1 Minuten Verspätung, Atlanta auf 13,6.' },
+      { value: 2, suffix: '', label: 'Veröffentlichungen', note: 'IEEE, Machine Learning und Blockchain', pad: true, why: 'Zwei begutachtete Paper bei der IEEE: das Pitchmodell für Windräder 2023 und eine Plattform auf der Blockchain für Kleinbauern 2024.' },
     ],
     work: {
       label: 'Ausgewählte Projekte', title: 'Acht Projekte,', titleEm: 'alle Open Source.',
       intro: 'Forschung, Data Engineering, Agentensysteme und Fintech. Jedes Projekt begann mit einer echten Frage, und der Code zu allen liegt auf GitHub.',
       index: 'Projektübersicht', cursor: 'Ansehen', caseStudy: 'Fallstudie', source: 'Code', more: 'Mehr auf GitHub',
+      prev: 'Vorheriges Projekt', next: 'Nächstes Projekt',
     },
     principles: {
       label: 'Wie ich arbeite', aside: 'Drei Gewohnheiten',

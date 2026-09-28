@@ -87,7 +87,7 @@ const glyphs = [0, 1, 2];
   <section class="numbers" aria-label={t.stats.map((s) => s.label).join(', ')}>
     <ul>
       {t.stats.map((s) => (
-        <li data-reveal>
+        <li data-reveal data-cursor-note={s.why}>
           <span class="num" data-count={s.value} data-suffix={s.suffix} data-locale={t.numberLocale} data-pad={s.pad ? '2' : undefined}>{s.pad ? pad(s.value) : s.value.toLocaleString(t.numberLocale)}{s.suffix}</span>
           <span class="num-label">{s.label}</span>
           <span class="num-note mono">{s.note}</span>
@@ -96,44 +96,52 @@ const glyphs = [0, 1, 2];
     </ul>
   </section>
 
-  <!-- 04 WORK (pinned showcase on desktop, stacked list elsewhere) -->
+  <!-- 04 WORK (scroll moves the cards sideways on desktop, swipe row elsewhere) -->
   <section class="work" id="work" aria-labelledby="work-title">
     <div class="work-pin">
-      <div class="work-side">
+      <div class="work-head">
+        <div class="section-label mono"><span>(02)</span><span>{t.work.label}</span></div>
         <div class="work-intro">
-          <div class="section-label mono"><span>(02)</span><span>{t.work.label}</span><span class="work-count-wrap"><b class="work-count">01</b> / {pad(list.length)}</span></div>
           <h2 id="work-title">{t.work.title} <em>{t.work.titleEm}</em></h2>
           <p>{t.work.intro}</p>
         </div>
-        <ol class="work-list" aria-label={t.work.index}>
-          {list.map((p, i) => (
-            <li style={`--c:${p.color}`}><a href={work(p.slug)} data-index={i}><span class="mono">{pad(i + 1)}</span><b>{p.short}</b><small class="mono">{p.category}</small></a></li>
-          ))}
-        </ol>
-        <div class="work-rail" aria-hidden="true"><i></i></div>
+        <div class="work-meta">
+          <ol class="work-list" aria-label={t.work.index}>
+            {list.map((p, i) => (
+              <li style={`--c:${p.color}`}><a href={work(p.slug)} data-index={i}><span class="mono">{pad(i + 1)}</span><b>{p.short}</b><small class="mono">{p.category}</small></a></li>
+            ))}
+          </ol>
+          <div class="work-nav">
+            <span class="work-count-wrap mono"><b class="work-count">01</b> / {pad(list.length)}</span>
+            <div class="work-rail" aria-hidden="true"><i></i></div>
+            <button class="work-btn" type="button" data-dir="-1" aria-label={t.work.prev}>←</button>
+            <button class="work-btn" type="button" data-dir="1" aria-label={t.work.next}>→</button>
+          </div>
+        </div>
       </div>
-      <div class="work-stage">
-        {list.map((p, i) => (
-          <article class="panel" style={`--c:${p.color}`} data-index={i}>
-            <a class="panel-media" href={work(p.slug)} data-cursor={t.work.cursor} aria-label={`${p.short}, ${t.work.caseStudy}`}>
-              <div class="panel-art"><Exhibit kind={p.art} /></div>
-              <span class="panel-index mono">{pad(i + 1)} / {pad(list.length)}</span>
-              <span class="panel-cat mono">{p.category}</span>
-              <span class="panel-metric"><b>{p.metric}</b><small class="mono">{p.metricLabel}</small></span>
-            </a>
-            <div class="panel-info">
-              <p class="panel-year mono">{p.year}</p>
-              <h3><a href={work(p.slug)}>{p.short}</a></h3>
-              <p class="panel-desc">{p.description}</p>
-              <ul class="tags">{p.tags.map((tag) => <li>{tag}</li>)}</ul>
-              <div class="panel-links">
-                <a href={work(p.slug)}>{t.work.caseStudy} <span>↗</span></a>
-                <a href={`${site.github}/${p.repo}`} target="_blank" rel="noopener">{t.work.source} <span>↗</span></a>
-                {p.doi && <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">IEEE <span>↗</span></a>}
+      <div class="work-viewport" role="region" aria-label={t.work.index} tabindex="0">
+        <div class="work-track">
+          {list.map((p, i) => (
+            <article class="panel" style={`--c:${p.color}`} data-index={i}>
+              <a class="panel-media" href={work(p.slug)} data-cursor={t.work.cursor} aria-label={`${p.short}, ${t.work.caseStudy}`}>
+                <div class="panel-art"><Exhibit kind={p.art} /></div>
+                <span class="panel-index mono">{pad(i + 1)} / {pad(list.length)}</span>
+                <span class="panel-cat mono">{p.category}</span>
+                <span class="panel-metric"><b>{p.metric}</b><small class="mono">{p.metricLabel}</small></span>
+              </a>
+              <div class="panel-info">
+                <p class="panel-year mono">{p.year}</p>
+                <h3><a href={work(p.slug)}>{p.short}</a></h3>
+                <p class="panel-desc">{p.description}</p>
+                <div class="panel-links">
+                  <a href={work(p.slug)}>{t.work.caseStudy} <span>↗</span></a>
+                  <a href={`${site.github}/${p.repo}`} target="_blank" rel="noopener">{t.work.source} <span>↗</span></a>
+                  {p.doi && <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">IEEE <span>↗</span></a>}
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
+        </div>
       </div>
     </div>
     <a class="work-outro" href={site.github} target="_blank" rel="noopener" data-cursor="GitHub">
