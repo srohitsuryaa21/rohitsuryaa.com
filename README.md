@@ -58,7 +58,7 @@ The user asked that visible text contain no dashes (em, en or hyphen used as pun
 ## Scope
 
 - No blog, CMS or API (excluded by the user).
-- Nothing has been deployed or pushed.
+- Code lives at https://github.com/srohitsuryaa21/rohitsuryaa.com. Every push is built by `.github/workflows/deploy.yml`. Publishing is manual (Actions tab, "Run workflow") until rohitsuryaa.com moves over from the old `rohit_portfolio_website` repo, which still serves the live site.
 
 ## Brand files (`brand/`)
 
