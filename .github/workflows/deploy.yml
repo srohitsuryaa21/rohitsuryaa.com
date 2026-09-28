@@ -1,7 +1,5 @@
-# Every push to main is type-checked and built (the build also checks internal links).
-# Publishing to GitHub Pages is a manual step for now ("Run workflow" in the Actions tab),
-# because rohitsuryaa.com still points at the old site in srohitsuryaa21/rohit_portfolio_website.
-# Once the domain has moved to this repo, add `push` to the deploy job's condition below.
+# Every push to main is type-checked, built (the build also checks internal links) and published
+# to GitHub Pages at rohitsuryaa.com. Pull requests are built but not published.
 name: Build and deploy
 
 on:
@@ -37,7 +35,7 @@ jobs:
           path: dist
 
   deploy:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
