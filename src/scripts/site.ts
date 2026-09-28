@@ -106,8 +106,107 @@ function setupWorkRow() {
   update();
 }
 
+/* Experience: on wide screens the entries alternate sides of one flowing S shaped line.
+   A faint copy of the line runs through every dot; the orange line and a glowing point travel along it as you scroll. */
+const zig = { total: 0, cum: [] as number[], lit: null as SVGPathElement | null, base: null as SVGPathElement | null, head: null as SVGPathElement | null };
+function zigAt(len: number) {
+  if (!zig.base || !zig.lit || !zig.head || !zig.total) return;
+  zig.lit.style.strokeDashoffset = String(zig.total - len);
+  // the arrow sits at the tip of the drawn line and turns to follow the curve
+  const pt = zig.base.getPointAtLength(len);
+  const a = zig.base.getPointAtLength(Math.max(0, len - 2)), b = zig.base.getPointAtLength(Math.min(zig.total, Math.max(len, 2)));
+  const angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+  zig.head.setAttribute('transform', `translate(${pt.x} ${pt.y}) rotate(${angle})`);
+}
+function setupZigzag() {
+  const tl = $('.timeline');
+  const items = $$('.timeline > li');
+  if (!tl || items.length < 2) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('class', 'timeline-zig');
+  svg.setAttribute('aria-hidden', 'true');
+  zig.base = document.createElementNS(ns, 'path');
+  zig.base.setAttribute('class', 'zig-base');
+  zig.lit = document.createElementNS(ns, 'path');
+  zig.lit.setAttribute('class', 'zig-lit');
+  zig.head = document.createElementNS(ns, 'path');
+  zig.head.setAttribute('class', 'zig-head');
+  zig.head.setAttribute('d', 'M-8 -8 L9 0 L-8 8 L-4 0 Z');
+  svg.append(zig.base, zig.lit, zig.head);
+  tl.prepend(svg);
+  // the line runs on past the last entry: the story isn't finished
+  const more = document.createElement('span');
+  more.className = 'zig-more mono';
+  more.textContent = tl.dataset.more ?? '';
+  more.setAttribute('aria-hidden', 'true');
+  tl.append(more);
+  tl.classList.add('zig-ready');
+  const draw = () => {
+    if (!matchMedia('(min-width: 900px)').matches) return;
+    svg.setAttribute('viewBox', `0 0 ${tl.clientWidth} ${tl.clientHeight}`);
+    // each entry's dot: on the left edge of entries 1 and 3, on the right edge of entry 2 (its text sits on the other side)
+    const pts = items.map((li, i) => [i % 2 ? li.offsetLeft + li.offsetWidth - 6.5 : li.offsetLeft + 6.5, li.offsetTop + 12.5]);
+    // where each entry's content ends (the space below it is the gap to the next one)
+    const ends = items.map((li) => li.offsetTop + li.offsetHeight - parseFloat(getComputedStyle(li).paddingBottom));
+    // run straight down beside the text, swing across the gap in an S bend, then drop onto the next dot
+    const step = (i: number) => {
+      const [x0] = pts[i], [x1, y1] = pts[i + 1];
+      const ya = ends[i] + 10, yb = y1 - 14, ym = (ya + yb) / 2;
+      return `L${x0} ${ya} C${x0} ${ym} ${x1} ${ym} ${x1} ${yb} L${x1} ${y1}`;
+    };
+    const last = pts[pts.length - 1], tailY = tl.clientHeight - 36;
+    const tail = `L${last[0]} ${tailY}`;
+    more.style.left = `${last[0] + 22}px`;
+    more.style.top = `${tailY - 6}px`;
+    const d = `M${pts[0].join(' ')} ` + pts.slice(1).map((_, i) => step(i)).join(' ') + ' ' + tail;
+    zig.base!.setAttribute('d', d);
+    zig.lit!.setAttribute('d', d);
+    // path length at each dot, so the scroll can move the point from one entry to the next
+    const probe = document.createElementNS(ns, 'path');
+    zig.cum = [0];
+    for (let i = 0; i < items.length - 1; i++) {
+      probe.setAttribute('d', `M${pts[0].join(' ')} ` + pts.slice(1, i + 2).map((_, k) => step(k)).join(' '));
+      zig.cum.push(probe.getTotalLength());
+    }
+    zig.total = zig.base!.getTotalLength();
+    zig.cum.push(zig.total);
+    zig.lit!.style.strokeDasharray = String(zig.total);
+    // without scroll motion the whole line is drawn and the point rests on the last entry
+    zigAt(reduced ? zig.total : zigPos());
+  };
+  draw();
+  addEventListener('resize', draw);
+  document.fonts.ready.then(draw);
+}
+// scroll position along the line, set by buildTimeline (segment index + fraction)
+let zigT = 0;
+function zigPos() {
+  const k = Math.min(Math.floor(zigT), zig.cum.length - 2);
+  if (k < 0) return 0;
+  return zig.cum[k] + (zig.cum[k + 1] - zig.cum[k]) * (zigT - k);
+}
+
+/* Numbers: on touch screens (no cursor to carry the note) a tap opens the story behind a number */
+function setupNumberNotes() {
+  $$('.numbers li').forEach((li) => {
+    const btn = $<HTMLButtonElement>('.num-toggle', li);
+    if (!btn) return;
+    const toggle = () => {
+      const open = !li.classList.contains('is-open');
+      li.classList.toggle('is-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    };
+    btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+    // the whole tile is a tap target, not just the small button
+    li.addEventListener('click', () => { if (!matchMedia('(pointer: fine)').matches) toggle(); });
+  });
+}
+
 setupCopy();
 setupClock();
+setupNumberNotes();
+setupZigzag();
 setupWorkRow();
 const heroName = $('.hero-name');
 if (heroName) fitName(heroName);
@@ -501,6 +600,18 @@ function buildHeaderTheme() {
 }
 
 function buildTimeline() {
+  // S line: the point glides from one entry's dot to the next between the moments they light up.
+  // A heavy scrub makes it trail the scroll a little, so it moves slowly and smoothly.
+  const items = $$('.timeline > li');
+  // one part per bend, plus the tail after the last entry
+  const parts = items.map(() => ({ f: 0 }));
+  parts.forEach((part, i) => {
+    gsap.to(part, {
+      f: 1, ease: 'none',
+      scrollTrigger: { trigger: items[i], start: 'top 66%', endTrigger: items[i + 1] ?? '.timeline', end: items[i + 1] ? 'top 66%' : 'bottom 70%', scrub: 1.6 },
+      onUpdate: () => { zigT = parts.reduce((sum, q) => sum + q.f, 0); zigAt(zigPos()); },
+    });
+  });
   gsap.to('.timeline-line i', {
     scaleY: 1, ease: 'none',
     scrollTrigger: { trigger: '.timeline', start: 'top 65%', end: 'bottom 65%', scrub: true },

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Desktop wallpaper</title>
+<!-- Rendered to PNG in Chrome at 1920×1080 with 2× pixel density, which gives 3840×2160 (4K UHD).
+     Company style: one brand graphic, the mark small and centred, the corners kept quiet for desktop
+     icons and the taskbar, and a fine grain so the gradients don't band on large screens.
+     ?v=signal (default) | mark | paper | blue -->
+<style>
+  @font-face { font-family: 'JetBrains Mono'; src: url('../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2') format('woff2'); font-weight: 100 800; }
+  html, body { margin: 0; }
+  :root { --bg: #0d0d0c; --fg: #ece8df; --dim: #6f6c66; }
+  .paper { --bg: #ece8df; --fg: #0d0d0c; --dim: #8d8a82; }
+  .blue { --bg: #06101f; --fg: #eef3ff; --dim: #5a6a86; }
+  .wall { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+  .blue .wall { background: radial-gradient(ellipse 80% 90% at 70% 35%, #0d2144 0%, #06101f 70%); }
+  .v-mark .wall { background: radial-gradient(ellipse 55% 60% at 50% 48%, #1a1714 0%, #0d0d0c 70%); }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mark { position: absolute; left: 50%; top: 42%; width: 150px; transform: translate(-50%, -50%); }
+  .v-mark .mark { top: 50%; width: 420px; filter: drop-shadow(0 0 120px rgba(255, 77, 31, .16)); }
+  .caption { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); font: 500 13px/1 'JetBrains Mono', monospace; letter-spacing: .32em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wall">
+  <canvas id="field"></canvas>
+  <img class="mark" src="../../brand/rs-mark-light.svg" alt="" />
+  <p class="caption">rohitsuryaa.com</p>
+</div>
+<script>
+  const v = new URLSearchParams(location.search).get('v') || 'signal';
+  const root = document.documentElement;
+  root.classList.add('v-' + v);
+  if (v === 'paper' || v === 'blue') root.classList.add(v);
+  const mark = document.querySelector('.mark');
+  if (v === 'paper') mark.src = '../../brand/rs-mark-dark.svg';
+  if (v === 'blue') mark.src = '../../brand/rs-mark-blue.svg';
+
+  const theme = {
+    signal: { line: '255,77,31', dot: '236,232,223', bg: '13,13,12' },
+    mark: { line: '255,77,31', dot: '236,232,223', bg: '13,13,12' },
+    paper: { line: '255,77,31', dot: '13,13,12', bg: '236,232,223' },
+    blue: { line: '91,155,255', dot: '238,243,255', bg: '6,16,31' },
+  }[v];
+
+  const c = document.getElementById('field');
+  const dpr = window.devicePixelRatio || 1;
+  const w = 1920, h = 1080;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // The site's hero motif: a dot grid where a noisy data series settles into one fitted curve.
+  // It sweeps up from lower left to the right, under the mark, leaving the top corners empty.
+  if (v !== 'mark') {
+    const gap = 24, cols = Math.ceil(w / gap) + 1, rows = Math.ceil(h / gap) + 1;
+    const progress = 0.8;
+    const jitter = Array.from({ length: cols }, (_, i) => ((Math.sin(i * 12.9898) * 43758.5453) % 1));
+    const series = (i) => {
+      const nx = i / cols, n = 1 - progress;
+      const clean = h * 0.86 - h * 0.34 * Math.pow(nx, 1.5) + h * 0.035 * Math.sin(nx * 6.5);
+      const noise = h * 0.08 * (Math.sin(nx * 37) * 0.5 + Math.sin(nx * 71) * 0.3 + Math.sin(nx * 13) * 0.4);
+      return clean + (noise + jitter[i] * h * 0.1) * n * n;
+    };
+    const sigma = gap * (0.6 + 1.2 * (1 - progress));
+    const faint = v === 'paper' ? 0.1 : 0.07;
+    for (let i = 0; i < cols; i++) {
+      const sy = series(i);
+      for (let j = 0; j < rows; j++) {
+        const x = i * gap, y = j * gap, d = y - sy;
+        const k = Math.exp(-(d * d) / (2 * sigma * sigma));
+        if (k < 0.06) { ctx.fillStyle = `rgba(${theme.dot},${faint})`; ctx.fillRect(x - 0.7, y - 0.7, 1.4, 1.4); continue; }
+        ctx.fillStyle = `rgba(${theme.line},${Math.min(0.9, k * 0.85)})`;
+        ctx.beginPath(); ctx.arc(x, y, 0.9 + k * 2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.strokeStyle = `rgba(${theme.line},0.5)`; ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    for (let i = 0; i < cols; i++) i ? ctx.lineTo(i * gap, series(i)) : ctx.moveTo(0, series(0));
+    ctx.stroke();
+    // fade the grid out towards the top so the mark sits in calm space
+    const g = ctx.createLinearGradient(0, 0, 0, h * 0.55);
+    g.addColorStop(0, `rgba(${theme.bg},0.85)`); g.addColorStop(1, `rgba(${theme.bg},0)`);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h * 0.55);
+  }
+
+  // fine grain at full resolution: stops banding in the gradients on big monitors
+  const W = c.width, H = c.height;
+  const img = ctx.getImageData(0, 0, W, H), px = img.data;
+  const amp = v === 'paper' ? 5 : 4;
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  // the canvas is transparent where nothing was drawn, so paint the background in first
+  const bg = document.createElement('canvas'); bg.width = W; bg.height = H;
+  const b = bg.getContext('2d');
+  const style = getComputedStyle(document.querySelector('.wall'));
+  b.fillStyle = style.backgroundColor; b.fillRect(0, 0, W, H);
+  if (style.backgroundImage !== 'none') {
+    // radial backgrounds: draw the same gradient into the canvas
+    const cx = v === 'blue' ? 0.7 : 0.5, cy = v === 'blue' ? 0.35 : 0.48;
+    const inner = v === 'blue' ? '#0d2144' : '#1a1714', outer = v === 'blue' ? '#06101f' : '#0d0d0c';
+    b.save(); b.translate(W * cx, H * cy); b.scale(v === 'blue' ? 0.8 * W : 0.55 * W, v === 'blue' ? 0.9 * H : 0.6 * H);
+    const rg = b.createRadialGradient(0, 0, 0, 0, 0, 1);
+    rg.addColorStop(0, inner); rg.addColorStop(0.7, outer); rg.addColorStop(1, outer);
+    b.fillStyle = rg; b.fillRect(-2, -2, 4, 4); b.restore();
+  }
+  b.drawImage(c, 0, 0);
+  const all = b.getImageData(0, 0, W, H), q = all.data;
+  for (let i = 0; i < q.length; i += 4) {
+    const n = (rnd() - 0.5) * 2 * amp;
+    q[i] += n; q[i + 1] += n; q[i + 2] += n; q[i + 3] = 255;
+  }
+  ctx.putImageData(all, 0, 0);
+  document.body.dataset.ready = '1';
+</script>
+</body>
+</html>

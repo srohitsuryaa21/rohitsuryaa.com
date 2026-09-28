@@ -41,6 +41,7 @@ export const home = {
       facts: [['Based', 'Fulda, Germany'], ['From', 'Chennai, India'], ['Languages', 'English · Deutsch'], ['Looking for', 'Software, backend, data and ML roles']],
       cv: [{ label: 'Résumé (English)', href: site.cvEn, lang: 'en' }, { label: 'Lebenslauf (Deutsch)', href: site.cvDe, lang: 'de' }],
     },
+    statsMore: 'The story',
     stats: [
       { value: 96, suffix: '%', label: 'Prediction accuracy', note: 'Windmill pitch model, IEEE 2023', why: 'My blade pitch model was right 96% of the time. The error fell from 8.6% to 2.3%, and the turbine made 21% more power.' },
       { value: 110123, suffix: '', label: 'Orders analysed', note: 'Supply chain pipeline', why: 'Every order in a real online store dataset, cleaned and joined into one dashboard: 92.1% delivered on time, 881 sellers scored for risk.' },
@@ -64,12 +65,13 @@ export const home = {
     experience: {
       label: 'Experience and education', title: 'Built across', titleEm: 'the stack.',
       timeline: [
-        { when: '2025 to now', what: 'MSc Data Science', where: 'Hochschule Fulda · Germany', body: 'Statistics, machine learning and data engineering. Most of the projects on this page were built alongside the course.', tags: [] as string[] },
-        { when: '2024 to 2025', what: 'Associate Software Developer', where: 'EigenSecure · USA, remote', body: 'Built enterprise software for a cybersecurity startup: backend APIs, access control and evidence workflows, compliance data, responsive interfaces and delivery automation, as part of an Agile team.', tags: ['C# / .NET', 'REST APIs', 'SQL', 'Agile'] },
         { when: '2020 to 2024', what: 'BTech, Big Data Computer Science', where: 'SRM University · Chennai, India', body: 'Distributed data, algorithms and software engineering. Both IEEE papers came out of these years.', tags: [] as string[] },
+        { when: '2024 to 2025', what: 'Associate Software Developer', where: 'EigenSecure · USA, remote', body: 'Built enterprise software for a cybersecurity startup: backend APIs, access control and evidence workflows, compliance data, responsive interfaces and delivery automation, as part of an Agile team.', tags: ['C# / .NET', 'REST APIs', 'SQL', 'Agile'] },
+        { when: '2025 to now', what: 'MSc Data Science', where: 'Hochschule Fulda · Germany', body: 'Statistics, machine learning and data engineering. Most of the projects on this page were built alongside the course.', tags: [] as string[] },
       ],
       papersLabel: 'IEEE publications',
       papers: ['Windmill pitch prediction with XGBoost and residual correction', 'A DeFi platform for transparent agricultural finance'],
+      more: 'More coming',
       certsLabel: 'Certifications',
       certs: [{ name: 'IBM Data Science Professional', by: 'IBM, Coursera' }],
     },
@@ -120,6 +122,7 @@ export const home = {
       facts: [['Wohnort', 'Fulda, Deutschland'], ['Herkunft', 'Chennai, Indien'], ['Sprachen', 'Englisch · Deutsch'], ['Gesucht', 'Stellen in Software, Backend, Data und ML']],
       cv: [{ label: 'Lebenslauf (Deutsch)', href: site.cvDe, lang: 'de' }, { label: 'Résumé (English)', href: site.cvEn, lang: 'en' }],
     },
+    statsMore: 'Hintergrund',
     stats: [
       { value: 96, suffix: ' %', label: 'Vorhersagegenauigkeit', note: 'Pitchmodell für Windkraftanlagen, IEEE 2023', why: 'Mein Modell für den Blattwinkel lag in 96 % der Fälle richtig. Der Fehler sank von 8,6 % auf 2,3 %, und die Turbine erzeugte 21 % mehr Strom.' },
       { value: 110123, suffix: '', label: 'Analysierte Bestellungen', note: 'Pipeline für Lieferketten', why: 'Jede Bestellung aus einem echten Onlineshop, bereinigt und in einem Dashboard vereint: 92,1 % pünktlich geliefert, 881 Verkäufer nach Risiko bewertet.' },
@@ -143,12 +146,13 @@ export const home = {
     experience: {
       label: 'Erfahrung und Ausbildung', title: 'Vom Backend', titleEm: 'bis zum Modell.',
       timeline: [
-        { when: '2025 bis heute', what: 'M.Sc. Data Science', where: 'Hochschule Fulda · Deutschland', body: 'Statistik, Machine Learning und Data Engineering. Die meisten Projekte auf dieser Seite sind neben dem Studium entstanden.', tags: [] as string[] },
-        { when: '2024 bis 2025', what: 'Associate Software Developer', where: 'EigenSecure · USA, remote', body: 'Unternehmenssoftware für ein Startup im Bereich Cybersecurity: APIs im Backend, Zugriffskontrolle und Nachweisprozesse, Daten für Compliance, responsive Oberflächen und automatisierte Auslieferung, als Teil eines agilen Teams.', tags: ['C# / .NET', 'REST APIs', 'SQL', 'Agile'] },
         { when: '2020 bis 2024', what: 'B.Tech. Big Data Computer Science', where: 'SRM University · Chennai, Indien', body: 'Verteilte Daten, Algorithmen und Softwareentwicklung. Beide Veröffentlichungen bei IEEE sind in dieser Zeit entstanden.', tags: [] as string[] },
+        { when: '2024 bis 2025', what: 'Associate Software Developer', where: 'EigenSecure · USA, remote', body: 'Unternehmenssoftware für ein Startup im Bereich Cybersecurity: APIs im Backend, Zugriffskontrolle und Nachweisprozesse, Daten für Compliance, responsive Oberflächen und automatisierte Auslieferung, als Teil eines agilen Teams.', tags: ['C# / .NET', 'REST APIs', 'SQL', 'Agile'] },
+        { when: '2025 bis heute', what: 'M.Sc. Data Science', where: 'Hochschule Fulda · Deutschland', body: 'Statistik, Machine Learning und Data Engineering. Die meisten Projekte auf dieser Seite sind neben dem Studium entstanden.', tags: [] as string[] },
       ],
       papersLabel: 'Veröffentlichungen bei IEEE',
       papers: ['Vorhersage des Blattwinkels von Windkraftanlagen mit XGBoost und Fehlerkorrektur', 'Transparente Agrarfinanzierung auf der Blockchain'],
+      more: 'Fortsetzung folgt',
       certsLabel: 'Zertifikate',
       certs: [{ name: 'IBM Data Science Professional', by: 'IBM, Coursera' }],
     },

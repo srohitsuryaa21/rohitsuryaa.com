@@ -86,11 +86,14 @@ const glyphs = [0, 1, 2];
   <!-- 03 NUMBERS -->
   <section class="numbers" aria-label={t.stats.map((s) => s.label).join(', ')}>
     <ul>
-      {t.stats.map((s) => (
+      {t.stats.map((s, i) => (
         <li data-reveal data-cursor-note={s.why}>
           <span class="num" data-count={s.value} data-suffix={s.suffix} data-locale={t.numberLocale} data-pad={s.pad ? '2' : undefined}>{s.pad ? pad(s.value) : s.value.toLocaleString(t.numberLocale)}{s.suffix}</span>
           <span class="num-label">{s.label}</span>
           <span class="num-note mono">{s.note}</span>
+          {/* mouse users read this in the cursor; touch screens tap to open it in place */}
+          <button class="num-toggle mono" type="button" aria-expanded="false" aria-controls={`why-${i}`}>{t.statsMore} <span aria-hidden="true">+</span></button>
+          <p class="num-why" id={`why-${i}`}><span>{s.why}</span></p>
         </li>
       ))}
     </ul>
@@ -178,7 +181,7 @@ const glyphs = [0, 1, 2];
         <div class="section-label mono"><span>(04)</span><span>{t.experience.label}</span></div>
         <h2 id="exp-title" data-split>{t.experience.title} <em>{t.experience.titleEm}</em></h2>
       </div>
-      <ol class="timeline">
+      <ol class="timeline" data-more={t.experience.more}>
         <span class="timeline-line" aria-hidden="true"><i></i></span>
         {t.experience.timeline.map((e) => (
           <li data-reveal>

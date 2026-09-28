@@ -152,6 +152,19 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .numbers li:nth-child(odd) .num{color:var(--accent)}
 .num-label{font-weight:600;font-size:17px;margin-top:16px;letter-spacing:-.01em}
 .num-note{color:var(--fg-dim)}
+/* the story behind each number: in the cursor for mouse users, a tap to open on touch screens */
+.num-toggle{align-self:flex-start;display:inline-flex;gap:8px;align-items:center;margin-top:14px;padding:8px 14px;border:1px solid var(--line-d);border-radius:99px;background:none;color:var(--paper);font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.num-toggle span{display:inline-block;color:var(--accent);font-size:15px;line-height:1;transition:transform .4s var(--ease)}
+.numbers li.is-open .num-toggle span{transform:rotate(45deg)}
+.num-why{display:grid;grid-template-rows:1fr;margin-top:12px;color:#d6d2c9;font-size:14px;line-height:1.55}
+.num-why>span{overflow:hidden;border-left:2px solid var(--accent);padding-left:12px}
+.js .num-toggle~.num-why{grid-template-rows:0fr;margin-top:0;opacity:0;transition:grid-template-rows .5s var(--ease),opacity .4s,margin .5s var(--ease)}
+.js .numbers li.is-open .num-why{grid-template-rows:1fr;margin-top:12px;opacity:1}
+.no-js .num-toggle{display:none}
+@media (pointer:fine){
+  .num-toggle{display:none}
+  .num-why{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;margin:0}
+}
 
 /* ───────── Work ───────── */
 /* Default (phones, reduced motion, no JS): a native swipe row that snaps card by card */
@@ -286,6 +299,29 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .motion .timeline>li{opacity:.35;transition:opacity .6s var(--ease)}
 .motion .timeline>li.is-active{opacity:1}
 .motion .timeline>li.is-active::before{background:var(--accent);box-shadow:0 0 0 6px #ff4d1f33}
+/* S line (wide screens, once scripts have drawn it): entries step left and right along one flowing curve */
+.timeline-zig,.zig-more{display:none}
+/* phones: the straight line ends in the same note */
+.timeline::after{content:attr(data-more);display:block;margin-top:-20px;color:var(--fg-dim);font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+@media (min-width:900px){
+  .zig-ready.timeline{padding-left:0}
+  .zig-ready .timeline-line,.zig-ready.timeline::after{display:none}
+  .zig-ready .timeline-zig{display:block;position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+  /* a snake down the middle: entries sit close on either side of it, so each bend only shifts a little */
+  .zig-ready.timeline>li{width:60%;margin-left:40%;padding-left:40px;padding-bottom:clamp(80px,7vw,120px)}
+  .zig-ready.timeline>li:last-of-type{padding-bottom:130px}
+  /* the middle entry sits on the other side of the line: text to the left, right aligned */
+  .zig-ready.timeline>li:nth-of-type(even){margin-left:0;padding-left:0;padding-right:40px;text-align:right}
+  .zig-ready.timeline>li:nth-of-type(even)::before{left:auto;right:0}
+  .zig-ready.timeline>li:nth-of-type(even) .t-body{margin-left:auto}
+  .zig-ready.timeline>li:nth-of-type(even) .tags{justify-content:flex-end}
+  .zig-ready.timeline>li::before{left:0;z-index:1}
+  .zig-base,.zig-lit{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .zig-base{stroke:var(--line-d)}
+  .zig-lit{stroke:var(--accent)}
+  .zig-head{fill:var(--accent);stroke:var(--accent);stroke-width:1.5;stroke-linejoin:round;filter:drop-shadow(0 0 8px #ff4d1fb3)}
+  .zig-more{display:block;position:absolute;color:var(--fg-dim);font-size:12px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+}
 .timeline h3{font:700 clamp(26px,2.8vw,44px)/1.02 var(--display);letter-spacing:-.045em;margin:12px 0 6px}
 .t-where{color:var(--fg-dim);font-weight:500}
 .t-body{margin-top:16px;color:#c3bfb6;max-width:56ch}
