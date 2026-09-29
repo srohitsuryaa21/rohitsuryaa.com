@@ -245,6 +245,8 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .motion-h .work-track{position:relative;width:100%;height:100%;padding:0;perspective:2200px;perspective-origin:50% 45%}
 .motion-h .panel{position:absolute;left:50%;top:0;--w:clamp(460px,min(47vw,92vh),860px);width:var(--w);margin-left:calc(var(--w) / -2);height:100%;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:clamp(10px,1.8vh,18px);background:var(--ink);backface-visibility:hidden;will-change:transform,opacity}
 .motion-h .panel.is-side{cursor:pointer}
+/* a live blur is expensive to redraw on moving 3D cards: use a solid pill instead */
+.motion-h .panel-cat{backdrop-filter:none;background:#0d0d0cd9}
 
 .motion-h .panel.is-side a{pointer-events:none}
 .motion-h .panel-media{aspect-ratio:auto;min-height:0;will-change:transform}

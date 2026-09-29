@@ -59,24 +59,37 @@ function fracIndex(p: number, stops: number[]) {
   }
   return stops.length - 1;
 }
+// elements and the wheel's row height are looked up once, not on every frame (reading a size
+// right after moving the cards would force the browser to lay the page out again each frame)
+const wk = { ready: false, count: null as HTMLElement | null, rail: null as HTMLElement | null, btns: [] as HTMLButtonElement[], items: [] as HTMLElement[], row: 0, idx: -1 };
+function workCache() {
+  wk.count = $('.work-count');
+  wk.rail = $('.work-rail i');
+  wk.btns = $$<HTMLButtonElement>('.work-btn');
+  wk.items = $$('.work-list.is-wheel li');
+  wk.row = wk.items[0]?.offsetHeight ?? 0;
+  wk.ready = true;
+}
 function workState(pos: number, n: number, progress: number) {
+  if (!wk.ready) workCache();
   const idx = Math.round(pos);
   workIdx = idx;
-  const count = $('.work-count');
-  if (count) count.textContent = String(idx + 1).padStart(2, '0');
-  const rail = $('.work-rail i');
-  if (rail) rail.style.transform = `scaleX(${Math.max(1 / n, progress)})`;
-  $$<HTMLButtonElement>('.work-btn').forEach((b) => { b.disabled = Number(b.dataset.dir) < 0 ? idx === 0 : idx === n - 1; });
-  const items = $$('.work-list.is-wheel li');
-  const row = items[0]?.offsetHeight ?? 0;
-  items.forEach((li, i) => {
-    const d = i - pos;
-    li.style.transform = `translateY(${d * row}px) scale(${1 - Math.min(2.6, Math.abs(d)) * 0.07})`;
-    li.style.opacity = String(Math.max(0, 1 - Math.abs(d) * 0.3));
-    li.style.visibility = Math.abs(d) > 2.6 ? 'hidden' : 'visible';
-    li.classList.toggle('is-active', i === idx);
+  if (idx !== wk.idx) {
+    wk.idx = idx;
+    if (wk.count) wk.count.textContent = String(idx + 1).padStart(2, '0');
+    wk.btns.forEach((b) => { b.disabled = Number(b.dataset.dir) < 0 ? idx === 0 : idx === n - 1; });
+    wk.items.forEach((li, i) => li.classList.toggle('is-active', i === idx));
+  }
+  if (wk.rail) wk.rail.style.transform = `scaleX(${Math.max(1 / n, progress)})`;
+  wk.items.forEach((li, i) => {
+    const d = i - pos, a = Math.abs(d);
+    if (a > 3.6) { if (li.style.visibility !== 'hidden') li.style.visibility = 'hidden'; return; }
+    li.style.transform = `translate3d(0,${(d * wk.row).toFixed(1)}px,0) scale(${(1 - Math.min(2.6, a) * 0.07).toFixed(3)})`;
+    li.style.opacity = String(Math.max(0, 1 - a * 0.3).toFixed(3));
+    li.style.visibility = a > 2.6 ? 'hidden' : 'visible';
   });
 }
+addEventListener('resize', () => { wk.ready = false; });
 function setupWorkRow() {
   const view = $('.work-viewport');
   const panels = $$('.work-track .panel');
@@ -511,16 +524,18 @@ function buildWork(lenis: Lenis) {
       const w = panels[0].offsetWidth;
       panels.forEach((panel, i) => {
         const d = i - pos, a = Math.abs(d), sgn = Math.sign(d), near = Math.min(a, 1), far = Math.max(a - 1, 0);
+        // cards well out of view are hidden once and then left alone
+        if (a > 3.6) { if (panel.style.visibility !== 'hidden') panel.style.visibility = 'hidden'; return; }
         const x = sgn * (near * w * 0.62 + far * w * 0.16);
         const o = a > 3.4 ? 0 : 1 - far * 0.25;
-        panel.style.transform = `translateX(${x}px) translateZ(${-near * 320 - far * 60}px) rotateY(${-sgn * near * 55}deg)`;
+        panel.style.transform = `translate3d(${x.toFixed(1)}px,0,${(-near * 320 - far * 60).toFixed(1)}px) rotateY(${(-sgn * near * 55).toFixed(2)}deg)`;
         panel.style.opacity = String(o);
         panel.style.zIndex = String(100 - Math.round(a * 10));
         panel.style.visibility = o <= 0.01 ? 'hidden' : 'visible';
         panel.classList.toggle('is-side', a > 0.5);
         // the artwork drifts inside its frame as the card turns
         const art = arts[i];
-        if (art) art.style.transform = `translateX(${clamp(-2, 2, -d) * 6}%)`;
+        if (art) art.style.transform = `translate3d(${(clamp(-2, 2, -d) * 6).toFixed(2)}%,0,0)`;
         // the cards overlap, so only the front one keeps its text
         const info = infos[i];
         if (info) info.style.opacity = String(clamp(0, 1, 1 - a * 1.6));
@@ -529,17 +544,27 @@ function buildWork(lenis: Lenis) {
     place(0);
 
     // declared before the trigger: it can call onRefresh while being created
-    const turn = { pos: 0 };
+    const turn = { pos: 0, target: 0 };
     const flow = ScrollTrigger.create({
       trigger: '.work-pin', start: 'top top', end: () => `+=${(n - 1) * innerHeight * 0.55}`,
       pin: true, invalidateOnRefresh: true,
       snap: { snapTo: 1 / (n - 1), directional: false, duration: { min: 0.25, max: 0.8 }, delay: 0.1, ease: 'power2.inOut' },
-      onRefresh: () => place(turn.pos),
-      onUpdate: (self) => {
-        // ease towards the scroll position, so the cards glide instead of ticking with the wheel
-        gsap.to(turn, { pos: self.progress * (n - 1), duration: 0.8, ease: 'power3.out', overwrite: true, onUpdate: () => { place(turn.pos); workState(turn.pos, n, turn.pos / (n - 1)); } });
-      },
+      onRefresh: (self) => { wk.ready = false; turn.target = self.progress * (n - 1); place(turn.pos); },
+      onUpdate: (self) => { turn.target = self.progress * (n - 1); },
     });
+    // one loop, in step with the screen: the cards ease a fixed share of the way to the scroll position each frame,
+    // so they glide without starting a new animation on every wheel event, and stop working once they arrive
+    const glide = (_t: number, dt: number) => {
+      const gap = turn.target - turn.pos;
+      if (Math.abs(gap) < 0.0005) {
+        if (gap !== 0) { turn.pos = turn.target; place(turn.pos); workState(turn.pos, n, turn.pos / (n - 1)); }
+        return;
+      }
+      turn.pos += gap * (1 - Math.pow(1 - 0.16, dt / 16.67));
+      place(turn.pos);
+      workState(turn.pos, n, turn.pos / (n - 1));
+    };
+    gsap.ticker.add(glide);
 
     // a card at the side comes to the front when clicked, instead of opening
     const onSide = (e: MouseEvent) => {
@@ -556,6 +581,7 @@ function buildWork(lenis: Lenis) {
     return () => {
       root.classList.remove('motion-h');
       workJump = null;
+      gsap.ticker.remove(glide);
       panels.forEach((p) => p.removeEventListener('click', onSide, true));
       gsap.set([...panels, ...arts, ...infos], { clearProps: 'transform,opacity,visibility,zIndex' });
       panels.forEach((p) => p.classList.remove('is-side'));
