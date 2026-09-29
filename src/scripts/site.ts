@@ -501,56 +501,65 @@ function buildWork(lenis: Lenis) {
     root.classList.add('motion-h');
     const track = $('.work-track')!;
     const panels = $$('.work-track .panel');
+    const arts = panels.map((p) => $('.panel-art', p));
+    const infos = panels.map((p) => $('.panel-info', p));
     const n = panels.length;
-    // how far the track travels, and where each card sits along it (0..1), so every card can land flush left
-    const distance = () => Math.max(0, track.scrollWidth - innerWidth);
-    const stops = () => cardStops(panels, distance());
-    const nearest = (v: number) => stops().reduce((best, s, k, all) => (Math.abs(s - v) < Math.abs(all[best] - v) ? k : best), 0);
+    // Coverflow: the current project faces you flat, the others turn and stack to either side like records on a shelf.
+    const clamp = gsap.utils.clamp;
+    // pos is the card facing you, as a fraction (2.5 = halfway between the third and fourth card)
+    const place = (pos: number) => {
+      const w = panels[0].offsetWidth;
+      panels.forEach((panel, i) => {
+        const d = i - pos, a = Math.abs(d), sgn = Math.sign(d), near = Math.min(a, 1), far = Math.max(a - 1, 0);
+        const x = sgn * (near * w * 0.62 + far * w * 0.16);
+        const o = a > 3.4 ? 0 : 1 - far * 0.25;
+        panel.style.transform = `translateX(${x}px) translateZ(${-near * 320 - far * 60}px) rotateY(${-sgn * near * 55}deg)`;
+        panel.style.opacity = String(o);
+        panel.style.zIndex = String(100 - Math.round(a * 10));
+        panel.style.visibility = o <= 0.01 ? 'hidden' : 'visible';
+        panel.classList.toggle('is-side', a > 0.5);
+        // the artwork drifts inside its frame as the card turns
+        const art = arts[i];
+        if (art) art.style.transform = `translateX(${clamp(-2, 2, -d) * 6}%)`;
+        // the cards overlap, so only the front one keeps its text
+        const info = infos[i];
+        if (info) info.style.opacity = String(clamp(0, 1, 1 - a * 1.6));
+      });
+    };
+    place(0);
 
-    // declared before the tween: its onUpdate can fire while it is being created
-    const lean = { v: 0 };
-    const setSkew = gsap.quickSetter(panels, 'skewX', 'deg');
-    const slide = gsap.to(track, {
-      x: () => -distance(), ease: 'none',
-      scrollTrigger: {
-        trigger: '.work-pin', start: 'top top', end: () => `+=${distance()}`,
-        pin: true, scrub: 0.7, invalidateOnRefresh: true,
-        snap: { snapTo: (v) => stops()[nearest(v)], duration: { min: 0.25, max: 0.7 }, delay: 0.1, ease: 'power2.inOut' },
-        onUpdate: (self) => {
-          workState(fracIndex(self.progress, stops()), n, self.progress);
-          // cards lean into fast scrolling, then settle
-          const skew = gsap.utils.clamp(-7, 7, self.getVelocity() / -350);
-          if (Math.abs(skew) > Math.abs(lean.v)) {
-            lean.v = skew;
-            gsap.to(lean, { v: 0, duration: 0.8, ease: 'power3', overwrite: true, onUpdate: () => setSkew(lean.v) });
-          }
-        },
+    // declared before the trigger: it can call onRefresh while being created
+    const turn = { pos: 0 };
+    const flow = ScrollTrigger.create({
+      trigger: '.work-pin', start: 'top top', end: () => `+=${(n - 1) * innerHeight * 0.55}`,
+      pin: true, invalidateOnRefresh: true,
+      snap: { snapTo: 1 / (n - 1), directional: false, duration: { min: 0.25, max: 0.8 }, delay: 0.1, ease: 'power2.inOut' },
+      onRefresh: () => place(turn.pos),
+      onUpdate: (self) => {
+        // ease towards the scroll position, so the cards glide instead of ticking with the wheel
+        gsap.to(turn, { pos: self.progress * (n - 1), duration: 0.8, ease: 'power3.out', overwrite: true, onUpdate: () => { place(turn.pos); workState(turn.pos, n, turn.pos / (n - 1)); } });
       },
     });
 
-    panels.forEach((panel) => {
-      // the artwork drifts against the card as it crosses the screen
-      gsap.fromTo($('.panel-art', panel), { xPercent: 7 }, {
-        xPercent: -7, ease: 'none',
-        scrollTrigger: { trigger: panel, containerAnimation: slide, start: 'left right', end: 'right left', scrub: true },
-      });
-      // cards arriving from the right grow into place
-      gsap.fromTo($('.panel-media', panel), { scale: 0.86, opacity: 0.4 }, {
-        scale: 1, opacity: 1, ease: 'none', transformOrigin: '0% 60%',
-        scrollTrigger: { trigger: panel, containerAnimation: slide, start: 'left right', end: 'left 55%', scrub: true },
-      });
-    });
-
-    // the arrows and the rolodex move between cards by scrolling the page
-    workJump = (idx) => {
-      const st = slide.scrollTrigger;
-      if (st) lenis.scrollTo(st.start + (st.end - st.start) * stops()[idx], { duration: 1.1 });
+    // a card at the side comes to the front when clicked, instead of opening
+    const onSide = (e: MouseEvent) => {
+      const panel = (e.currentTarget as HTMLElement);
+      if (!panel.classList.contains('is-side')) return;
+      e.preventDefault();
+      workJump?.(Number(panel.dataset.index));
     };
+    panels.forEach((p) => p.addEventListener('click', onSide, true));
+
+    // the arrows and the rolodex move through the cards by scrolling the page
+    workJump = (idx) => lenis.scrollTo(flow.start + (flow.end - flow.start) * (idx / (n - 1)), { duration: 1.2 });
 
     return () => {
       root.classList.remove('motion-h');
       workJump = null;
-      gsap.set(panels, { clearProps: 'transform' });
+      panels.forEach((p) => p.removeEventListener('click', onSide, true));
+      gsap.set([...panels, ...arts, ...infos], { clearProps: 'transform,opacity,visibility,zIndex' });
+      panels.forEach((p) => p.classList.remove('is-side'));
+      track.style.removeProperty('transform');
     };
   });
 
