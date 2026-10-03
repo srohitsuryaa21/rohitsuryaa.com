@@ -1,0 +1,101 @@
+---
+// Supply chain forecasting. Numbers: notebook outputs in github.com/srohitsuryaa21/supply-chain-forecasting
+// (Olist, 86 weeks, 8 week test) and the M5 competition paper (International Journal of Forecasting).
+import ScrollStory, { type Step } from '../ScrollStory.astro';
+import type { Lang } from '../../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const m5 = [{ label: de ? 'M5 Wettbewerb, International Journal of Forecasting' : 'M5 competition, International Journal of Forecasting', url: 'https://www.sciencedirect.com/science/article/pii/S0169207021001874' }];
+const steps: Step[] = de ? [
+  { k: 'q', h: 'Wie viele Bestellungen nächste Woche?', p: 'Im Schnitt 1.142 pro Woche. Mal 46, mal 2.979.' },
+  { k: 'first', h: 'Ich habe auf Machine Learning gesetzt.', p: 'XGBoost verlor, sogar gegen „wie letzte Woche“.' },
+  { k: 'insight', h: 'Einfache Struktur gewann.', p: 'Mit 86 Wochen Historie schlug klassisches SARIMA alle Modelle: 18,5 % Fehler.' },
+  { k: 'delivery', h: '23 Tage versprochen. In 12 geliefert.', p: 'Olist plante großzügig. 92,1 % kamen pünktlich.' },
+  { k: 'sellers', h: '881 Verkäufer. Ein echtes Problem.', p: 'Ein Verkäufer lieferte 32,1 % seiner Bestellungen zu spät.' },
+  { k: 'real', h: 'Mit mehr Daten gewinnt ML.', p: 'Im M5 Wettbewerb mit Walmart Daten nutzten alle 50 besten Teams LightGBM.', src: m5 },
+  { k: 'next', h: 'Als Nächstes: den Kipppunkt finden.', p: 'Mit wachsender Historie neu rechnen und sehen, wann ML übernimmt.' },
+] : [
+  { k: 'q', h: 'How many orders next week?', p: '1,142 a week on average. Some weeks 46, some 2,979.' },
+  { k: 'first', h: 'I bet on machine learning.', p: 'XGBoost lost, even to “same as last week”.' },
+  { k: 'insight', h: 'Simple structure won.', p: 'With 86 weeks of history, a classic SARIMA model beat them all: 18.5% error.' },
+  { k: 'delivery', h: 'Promised 23 days. Delivered in 12.', p: 'Olist padded its estimates. 92.1% arrived on time.' },
+  { k: 'sellers', h: '881 sellers. One real problem.', p: 'One seller was late on 32.1% of orders.' },
+  { k: 'real', h: 'With more data, ML wins.', p: 'In the M5 contest on Walmart data, all top 50 teams used LightGBM.', src: m5 },
+  { k: 'next', h: 'Next: find the crossover.', p: 'Rerun as history grows, and see when ML takes over.' },
+];
+const n = (en: string, d: string) => (de ? d : en);
+const pc = (v: number) => (de ? `${String(v).replace('.', ',')} %` : `${v}%`);
+const models = [
+  { name: 'SARIMA', v: 18.5, cls: 'bar hl', show: 'insight' },
+  { name: n('Same as last week', 'Wie letzte Woche'), v: 25.82, cls: 'bar', show: 'first insight' },
+  { name: n('4 week average', '4 Wochen Schnitt'), v: 25.85, cls: 'bar', show: 'first insight' },
+  { name: n('12 week average', '12 Wochen Schnitt'), v: 25.89, cls: 'bar', show: 'first insight' },
+  { name: 'XGBoost', v: 26.93, cls: 'bar bad', show: 'first insight' },
+  { name: 'Holt-Winters', v: 30.55, cls: 'bar', show: 'first insight' },
+];
+const sx = (v: number) => (v / 31) * 300;
+// 881 sellers as dots: 807 low risk, 72 medium, 1 high (seller risk tiers from the notebook)
+const cols = 41;
+const sellers = Array.from({ length: 881 }, (_, i) => ({ x: 60 + (i % cols) * 12, y: 110 + Math.floor(i / cols) * 12, t: i === 440 ? 'bad' : i % 12 === 5 && i < 860 ? 'mid' : 'low' }));
+---
+<ScrollStory steps={steps} label={de ? 'Die Geschichte' : 'The story'} sources={de ? 'Quellen' : 'Sources'}>
+  <g data-show="q">
+    <text x="300" y="170" class="t-huge mid">{n('1,142', '1.142')}</text>
+    <text x="300" y="206" class="t-cap mid">{n('orders a week, on average', 'Bestellungen pro Woche, im Schnitt')}</text>
+    <line x1="60" x2="540" y1="310" y2="310" class="ln" />
+    <rect x="60" y="300" width="480" height="20" rx="10" class="bar grow-x" />
+    <circle cx={60 + (1142 - 46) / (2979 - 46) * 480} cy="310" r="14" class="dot hl pop" />
+    <text x="60" y="356" class="t-mid">46</text>
+    <text x="540" y="356" class="t-mid end">{n('2,979', '2.979')}</text>
+    <text x="300" y="420" class="t-cap mid">{n('86 weeks · Jan 2017 to Aug 2018', '86 Wochen · Jan. 2017 bis Aug. 2018')}</text>
+  </g>
+
+  <g data-show="first insight">
+    <text x="40" y="60" class="t-cap">{n('Forecast error (MAPE), lower is better', 'Prognosefehler (MAPE), weniger ist besser')}</text>
+    {models.map((m, i) => (
+      <g data-show={m.show}>
+        <text x="200" y={112 + i * 58} class="t-lbl end">{m.name}</text>
+        <rect x="214" y={92 + i * 58} width={sx(m.v)} height="28" rx="6" class={`${m.cls} grow-x`} style={`--i:${i}`} />
+        <text x={224 + sx(m.v)} y={113 + i * 58} class={`t-lbl ${m.cls.includes('hl') ? 't-hl' : m.cls.includes('bad') ? 't-bad' : ''}`}>{pc(m.v)}</text>
+      </g>
+    ))}
+    <g data-show="insight">
+      <line x1={214 + sx(20)} x2={214 + sx(20)} y1="78" y2="440" class="ln bad" />
+      <text x={220 + sx(20)} y="450" class="t-cap">{n('20% benchmark', '20 % Richtwert')}</text>
+    </g>
+  </g>
+
+  <g data-show="delivery">
+    <text x="40" y="80" class="t-cap">{n('Days to deliver', 'Tage bis zur Lieferung')}</text>
+    <text x="40" y="128" class="t-lbl t-dim">{n('Promised', 'Versprochen')}</text>
+    <rect x="40" y="140" width={23.4 / 23.4 * 420} height="40" rx="8" class="bar grow-x" />
+    <text x="470" y="170" class="t-mid">{n('23.4', '23,4')}</text>
+    <text x="40" y="228" class="t-lbl t-hl">{n('Actual', 'Tatsächlich')}</text>
+    <rect x="40" y="240" width={11.9 / 23.4 * 420} height="40" rx="8" class="bar hl grow-x" style="--i:1" />
+    <text x={54 + 11.9 / 23.4 * 420} y="270" class="t-mid t-hl">{n('11.9', '11,9')}</text>
+    <text x="40" y="390" class="t-big t-hl">{pc(92.1)}</text>
+    <text x="40" y="420" class="t-cap">{n('of 110,123 orders arrived on time', 'von 110.123 Bestellungen pünktlich')}</text>
+  </g>
+
+  <g data-show="sellers">
+    <text x="60" y="80" class="t-cap">{n('881 sellers, scored for risk', '881 Verkäufer, nach Risiko bewertet')}</text>
+    {sellers.map((s) => <circle cx={s.x} cy={s.y} r={s.t === 'bad' ? 9 : 4} class={s.t === 'bad' ? 'dot bad' : s.t === 'mid' ? 'dot hl' : 'dot'} />)}
+    <text x="60" y="420" class="t-lbl t-dim">● 807 {n('low', 'gering')}</text>
+    <text x="230" y="420" class="t-lbl t-hl">● 72 {n('medium', 'mittel')}</text>
+    <text x="410" y="420" class="t-lbl t-bad">● 1 {n('high: 32.1% late', 'hoch: 32,1 % spät')}</text>
+  </g>
+
+  <g data-show="real next">
+    <rect x="40" y="90" width="240" height="250" rx="16" class="box pop" />
+    <text x="160" y="140" class="t-cap mid">Olist</text>
+    <text x="160" y="210" class="t-big mid">86</text>
+    <text x="160" y="240" class="t-cap mid">{n('weeks', 'Wochen')}</text>
+    <text x="160" y="300" class="t-mid mid t-hl">SARIMA</text>
+    <rect x="320" y="90" width="240" height="250" rx="16" class="box hl pop" style="--i:1" />
+    <text x="440" y="140" class="t-cap mid">M5 · Walmart</text>
+    <text x="440" y="210" class="t-big mid">{n('42,840', '42.840')}</text>
+    <text x="440" y="240" class="t-cap mid">{n('sales series', 'Verkaufsreihen')}</text>
+    <text x="440" y="300" class="t-mid mid t-hl">LightGBM</text>
+    <text x="300" y="400" class="t-lbl mid t-dim">{n('More history, different winner.', 'Mehr Historie, anderer Sieger.')}</text>
+  </g>
+</ScrollStory>

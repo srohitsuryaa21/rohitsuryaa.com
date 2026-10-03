@@ -1,0 +1,75 @@
+---
+// DeFi farmer platform. Facts: README/app of github.com/srohitsuryaa21/defi_Farmer_Platform and the published IEEE paper
+// (adoption figures). Real world: Walmart and IBM mango tracing (LF Decentralized Trust case study).
+import ScrollStory, { type Step } from '../ScrollStory.astro';
+import type { Lang } from '../../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const src = [{ label: de ? 'Walmart Fallstudie, LF Decentralized Trust' : 'Walmart case study, LF Decentralized Trust', url: 'https://www.lfdecentralizedtrust.org/case-studies/walmart-case-study' }];
+const steps: Step[] = de ? [
+  { k: 'q', h: 'Vertrauen zwischen Fremden.', p: 'Wie traut man dem Kredit und der Ernte eines Bauern, den man nie getroffen hat?' },
+  { k: 'insight', h: 'Nur Unveränderliches kommt auf die Blockchain.', p: 'Alltägliches in einer Datenbank. Chargen und Verkäufe auf Ethereum, verknüpft per ID.' },
+  { k: 'result', h: 'Von unter 50 % auf etwa 80 %.', p: 'So stieg die Nutzung digitaler Nachweise im veröffentlichten Modell. IEEE, 2024.' },
+  { k: 'real', h: 'Walmart: 7 Tage → 2,2 Sekunden.', p: 'So schnell ließen sich Mangos auf der Blockchain zurückverfolgen. Danach über 25 Produkte.', src },
+] : [
+  { k: 'q', h: 'Trust between strangers.', p: 'How do you trust the loan and harvest of a farmer you have never met?' },
+  { k: 'insight', h: 'Only what must not change goes on chain.', p: 'Everyday data in a database. Batches and sales on Ethereum, linked by ID.' },
+  { k: 'result', h: 'From under 50% to about 80%.', p: 'Use of digital records in the published model. IEEE, 2024.' },
+  { k: 'real', h: 'Walmart: 7 days → 2.2 seconds.', p: 'Tracing mangoes on a blockchain. Then over 25 products.', src },
+];
+const n = (en: string, d: string) => (de ? d : en);
+const people = [
+  { x: 300, y: 110, t: n('Farmer', 'Bauer') },
+  { x: 130, y: 330, t: n('Lender', 'Kreditgeber') },
+  { x: 470, y: 330, t: n('Buyer', 'Käufer') },
+];
+const offChain = de ? ['Konten', 'Angebote', 'Bestellungen'] : ['Accounts', 'Listings', 'Orders'];
+const onChain = de ? ['Produktcharge', 'Verkaufsstatus'] : ['Product batch', 'Sale status'];
+// 7 days vs 2.2 seconds on a log scale: 604,800 s and 2.2 s
+const lg = (s: number) => (Math.log10(s) + 1) / (Math.log10(604800) + 1) * 440;
+---
+<ScrollStory steps={steps} label={de ? 'Die Geschichte' : 'The story'} sources={de ? 'Quellen' : 'Sources'}>
+  <g data-show="q">
+    <line x1="300" y1="140" x2="140" y2="300" class="ln draw" pathLength="1" style="stroke-dasharray:1" />
+    <line x1="300" y1="140" x2="460" y2="300" class="ln draw" pathLength="1" />
+    <line x1="160" y1="330" x2="440" y2="330" class="ln draw" pathLength="1" />
+    {people.map((p, i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <circle cx={p.x} cy={p.y} r="46" class={i === 0 ? 'box hl' : 'box'} />
+        <text x={p.x} y={p.y + 6} class="t-lbl mid">{p.t}</text>
+      </g>
+    ))}
+    <text x="205" y="230" class="t-mid mid t-hl">?</text>
+    <text x="395" y="230" class="t-mid mid t-hl">?</text>
+    <text x="300" y="370" class="t-mid mid t-hl">?</text>
+  </g>
+
+  <g data-show="insight">
+    <text x="150" y="70" class="t-cap mid">{n('Database', 'Datenbank')}</text>
+    <text x="450" y="70" class="t-cap mid t-hl">Ethereum</text>
+    {offChain.map((t, i) => <g class="pop" style={`--i:${i}`}><rect x="40" y={96 + i * 90} width="220" height="66" rx="12" class="box" /><text x="150" y={136 + i * 90} class="t-lbl mid">{t}</text></g>)}
+    {onChain.map((t, i) => <g class="pop" style={`--i:${i + 3}`}><rect x="340" y={140 + i * 110} width="220" height="66" rx="12" class="box hl" /><text x="450" y={180 + i * 110} class="t-lbl mid">{t}</text></g>)}
+    <line x1="262" y1="310" x2="336" y2="282" class="arrow draw" pathLength="1" />
+    <text x="300" y="420" class="t-cap mid">{n('linked by the on-chain ID', 'verknüpft über die ID auf der Blockchain')}</text>
+  </g>
+
+  <g data-show="result">
+    <text x="40" y="70" class="t-cap">{n('Use of digital records, published model', 'Nutzung digitaler Nachweise, Modell')}</text>
+    <rect x="130" y={420 - 0.5 * 320} width="130" height={0.5 * 320} rx="10" class="bar grow-y" />
+    <rect x="340" y={420 - 0.8 * 320} width="130" height={0.8 * 320} rx="10" class="bar hl grow-y" style="--i:2" />
+    <text x="195" y={404 - 0.5 * 320} class="t-mid mid">&lt;{n('50%', '50 %')}</text>
+    <text x="405" y={404 - 0.8 * 320} class="t-mid mid t-hl">≈{n('80%', '80 %')}</text>
+    <text x="195" y="448" class="t-cap mid">{n('Before', 'Vorher')}</text>
+    <text x="405" y="448" class="t-cap mid">{n('With the platform', 'Mit Plattform')}</text>
+  </g>
+
+  <g data-show="real">
+    <text x="40" y="90" class="t-cap">{n('Time to trace mangoes to the farm (log scale)', 'Zeit bis zum Hof der Mangos (log. Skala)')}</text>
+    <text x="40" y="160" class="t-lbl t-dim">{n('Before', 'Vorher')}</text>
+    <rect x="40" y="174" width={lg(604800)} height="44" rx="8" class="bar grow-x" />
+    <text x="40" y="262" class="t-big">{n('7 days', '7 Tage')}</text>
+    <text x="40" y="330" class="t-lbl t-hl">{n('On the blockchain', 'Auf der Blockchain')}</text>
+    <rect x="40" y="344" width={lg(2.2)} height="44" rx="8" class="bar hl grow-x" style="--i:3" />
+    <text x={56 + lg(2.2)} y="380" class="t-big t-hl">{n('2.2 s', '2,2 s')}</text>
+  </g>
+</ScrollStory>

@@ -1,0 +1,99 @@
+---
+// Luxury concierge agent. Facts: README and tests of github.com/srohitsuryaa21/luxury-concierge-agent
+// (catalogue sizes are the project's illustrative catalogue). Real world: Moffatt v. Air Canada (2024), the $1 Tahoe (2023).
+import ScrollStory, { type Step } from '../ScrollStory.astro';
+import type { Lang } from '../../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const src = [
+  { label: 'Moffatt v. Air Canada, McCarthy Tétrault', url: 'https://www.mccarthy.ca/en/insights/blogs/techlex/moffatt-v-air-canada-misrepresentation-ai-chatbot' },
+  { label: 'The $1 Tahoe, The Autopian', url: 'https://www.theautopian.com/chevy-dealers-ai-chatbot-allegedly-recommended-fords-gave-free-access-to-chatgpt/' },
+];
+const steps: Step[] = de ? [
+  { k: 'q', h: 'Ein Traumauto verkaufen. Nichts erfinden.', p: 'Ein KI Concierge für Luxusautos nach Maß, gestützt auf eine Katalogdatenbank.' },
+  { k: 'first', h: 'Das Modell ignorierte das Budget.', p: 'Eine Sonderanfertigung für 95.000 blieb drin, obwohl nur noch 65.000 übrig waren.' },
+  { k: 'insight', h: 'Das Modell schlägt vor. Code entscheidet.', p: 'Preise, Termine und Budgets setzt Python durch. Nie das Modell.' },
+  { k: 'flow', h: 'Fünf Schritte, eine Schleife.', p: 'Über dem Budget? Dann wird einmal neu konfiguriert.' },
+  { k: 'result', h: '20 Tests. 1,5 Sekunden. 0 Tokens.', p: 'Jede Regel wird offline geprüft.' },
+  { k: 'real', h: 'Chatbots kosten Firmen echtes Geld.', p: 'Ein Tahoe für 1 Dollar, 2023. Air Canada haftete 2024 für ihren Chatbot.', src },
+] : [
+  { k: 'q', h: 'Sell a dream car. Invent nothing.', p: 'An AI concierge for bespoke luxury cars, grounded in a catalogue database.' },
+  { k: 'first', h: 'The model ignored the budget.', p: 'A 95,000 commission stayed in with only 65,000 left.' },
+  { k: 'insight', h: 'The model proposes. Code decides.', p: 'Prices, dates and budgets are enforced in Python. Never by the model.' },
+  { k: 'flow', h: 'Five steps, one loop.', p: 'Over budget? It goes back and reconfigures, once.' },
+  { k: 'result', h: '20 tests. 1.5 seconds. 0 tokens.', p: 'Every rule is checked offline.' },
+  { k: 'real', h: 'Chatbots have cost companies.', p: 'A $1 Tahoe in 2023. Air Canada held liable for its chatbot in 2024.', src },
+];
+const n = (en: string, d: string) => (de ? d : en);
+const catalogue = de
+  ? [['4', 'Modelle'], ['20', 'Lackierungen'], ['14', 'Leder'], ['10', 'Hölzer'], ['8', 'Räder'], ['57', 'Optionen']]
+  : [['4', 'models'], ['20', 'paints'], ['14', 'leathers'], ['10', 'veneers'], ['8', 'wheels'], ['57', 'options']];
+const llm = de ? ['Versteht den Wunsch', 'Wählt aus dem Katalog', 'Schreibt die Zusammenfassung'] : ['Understands the brief', 'Picks from the catalogue', 'Writes the summary'];
+const py = de ? ['Preis', 'Lieferzeit', 'Budget', 'Neuer Versuch?'] : ['Price', 'Lead time', 'Budget fit', 'Retry or not'];
+const flow = de ? ['Wunsch', 'Wissen', 'Vorschlag', 'Werkzeuge', 'Antwort'] : ['Brief', 'Retrieve', 'Propose', 'Tools', 'Respond'];
+// budget scene: bars scaled so 100,000 = 330 px
+const by = (v: number) => 410 - (v / 100000) * 330;
+---
+<ScrollStory steps={steps} label={de ? 'Die Geschichte' : 'The story'} sources={de ? 'Quellen' : 'Sources'}>
+  <g data-show="q">
+    <text x="40" y="70" class="t-cap">{n('The catalogue database', 'Die Katalogdatenbank')}</text>
+    {catalogue.map(([v, l], i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x={40 + (i % 3) * 180} y={100 + Math.floor(i / 3) * 170} width="160" height="150" rx="14" class={i === 5 ? 'box hl' : 'box'} />
+        <text x={120 + (i % 3) * 180} y={185 + Math.floor(i / 3) * 170} class="t-big mid">{v}</text>
+        <text x={120 + (i % 3) * 180} y={218 + Math.floor(i / 3) * 170} class="t-cap mid">{l}</text>
+      </g>
+    ))}
+  </g>
+
+  <g data-show="first">
+    <line x1="40" x2="560" y1={by(65000)} y2={by(65000)} class="ln hl" />
+    <text x="40" y={by(65000) - 14} class="t-lbl t-hl">{n('Budget left: 65,000', 'Budget übrig: 65.000')}</text>
+    <rect x="330" y={by(95000)} width="200" height={410 - by(95000)} rx="10" class="bar grow-y" />
+    <rect x="330" y={by(95000)} width="200" height={by(65000) - by(95000)} rx="10" class="bar bad grow-y" style="--i:3" />
+    <text x="430" y={by(95000) - 16} class="t-mid mid t-bad">{n('95,000', '95.000')}</text>
+    <text x="430" y="440" class="t-cap mid">{n('Commission kept by the model', 'Vom Modell behalten')}</text>
+  </g>
+
+  <g data-show="insight">
+    <text x="150" y="70" class="t-cap mid">{n('The model', 'Das Modell')}</text>
+    <text x="450" y="70" class="t-cap mid t-hl">Python</text>
+    {llm.map((t, i) => <g class="pop" style={`--i:${i}`}><rect x="30" y={96 + i * 84} width="240" height="64" rx="12" class="box" /><text x="150" y={134 + i * 84} class="t-lbl mid">{t}</text></g>)}
+    {py.map((t, i) => <g class="pop" style={`--i:${i + 3}`}><rect x="330" y={96 + i * 84} width="240" height="64" rx="12" class="box hl" /><text x="450" y={134 + i * 84} class="t-lbl mid">{t}</text></g>)}
+    <text x="450" y="452" class="t-cap mid">{n('no path from the model to a price', 'kein Weg vom Modell zum Preis')}</text>
+  </g>
+
+  <g data-show="flow">
+    {flow.map((t, i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x="190" y={40 + i * 82} width="220" height="56" rx="12" class={i === 2 || i === 3 ? 'box hl' : 'box'} />
+        <text x="300" y={74 + i * 82} class="t-lbl mid">{t}</text>
+        {i < 4 && <line x1="300" x2="300" y1={98 + i * 82} y2={118 + i * 82} class="arrow" />}
+      </g>
+    ))}
+    <path d="M410 314 C 520 314, 520 232, 412 232" class="arrow draw" pathLength="1" />
+    <text x="500" y="250" class="t-cap">{n('over budget', 'zu teuer')}</text>
+    <text x="500" y="270" class="t-cap">{n('once', 'einmal')}</text>
+  </g>
+
+  <g data-show="result">
+    {[['20', n('scenario tests', 'Testszenarien')], [n('1.5 s', '1,5 s'), n('to run', 'Laufzeit')], ['0', n('tokens spent', 'Tokens verbraucht')]].map(([v, l], i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <text x="300" y={130 + i * 130} class="t-huge mid">{v}</text>
+        <text x="300" y={162 + i * 130} class="t-cap mid">{l}</text>
+      </g>
+    ))}
+  </g>
+
+  <g data-show="real">
+    <rect x="40" y="90" width="240" height="260" rx="16" class="box pop" />
+    <text x="160" y="210" class="t-huge mid t-bad">$1</text>
+    <text x="160" y="260" class="t-lbl mid">Chevrolet Tahoe</text>
+    <text x="160" y="290" class="t-cap mid">{n('Dealer chatbot, Dec 2023', 'Chatbot eines Händlers, Dez. 2023')}</text>
+    <rect x="320" y="90" width="240" height="260" rx="16" class="box pop" style="--i:1" />
+    <text x="440" y="200" class="t-big mid t-bad">{n('C$812', '812 C$')}</text>
+    <text x="440" y="260" class="t-lbl mid">Air Canada</text>
+    <text x="440" y="290" class="t-cap mid">{n('Liable for its chatbot, 2024', 'Haftbar für den Chatbot, 2024')}</text>
+    <text x="300" y="410" class="t-lbl mid t-dim">{n('A company owns what its bot says.', 'Eine Firma haftet für ihren Bot.')}</text>
+  </g>
+</ScrollStory>

@@ -1,0 +1,114 @@
+---
+// FinGuard PayOps. Facts: RiskScoringService.java and docs/fraud-risk-model.md in github.com/srohitsuryaa21/FinGuard-PayOps.
+// Real world: EU Instant Payments Regulation, Verification of Payee from 9 October 2025.
+import ScrollStory, { type Step } from '../ScrollStory.astro';
+import type { Lang } from '../../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const src = [{ label: de ? 'Finextra: die Frist am 9. Oktober' : 'Finextra: the 9 October deadline', url: 'https://www.finextra.com/the-long-read/1471/europes-instant-payments-regulation-and-the-9-october-deadline-explained' }];
+const steps: Step[] = de ? [
+  { k: 'q', h: '8.500 € an einen Fremden. Freigeben?', p: 'Im EU Zahlungsverkehr muss jede Entscheidung später erklärbar sein.' },
+  { k: 'insight', h: 'Regeln statt Blackbox.', p: 'Sieben Regeln vergeben Risikopunkte. Jede ist ein Grund.' },
+  { k: 'example', h: 'Diese hier: 85 Punkte.', p: 'Über 5.000 €, neuer Empfänger, nicht verifiziert: Ein Analyst prüft.' },
+  { k: 'result', h: 'Eine ganze Plattform drumherum.', p: 'Java und Spring Boot, React, ein Scoring Service in Python und ein Audit Log jedes Schritts.' },
+  { k: 'real', h: 'Die EU prüft jetzt Namen.', p: 'Seit dem 9. Oktober 2025 müssen Banken Empfängername und IBAN abgleichen.', src },
+  { k: 'next', h: 'Als Nächstes: Lernen neben den Regeln.', p: 'Ein gelerntes Modell steht auf der Roadmap. Jeder Grund bleibt.' },
+] : [
+  { k: 'q', h: '€8,500 to a stranger. Approve?', p: 'In EU payments, every decision must be explained later.' },
+  { k: 'insight', h: 'Rules, not a black box.', p: 'Seven rules add up risk points. Each one is a reason.' },
+  { k: 'example', h: 'This one scores 85.', p: 'Over €5,000, new beneficiary, unverified customer: an analyst reviews it.' },
+  { k: 'result', h: 'A whole platform around it.', p: 'Java and Spring Boot, React, a Python scoring service and an audit log of every step.' },
+  { k: 'real', h: 'The EU now checks names.', p: 'Since 9 October 2025, banks must match the payee name to the IBAN.', src },
+  { k: 'next', h: 'Next: learning beside the rules.', p: 'A learned model is on the roadmap. Every reason stays.' },
+];
+const n = (en: string, d: string) => (de ? d : en);
+// the seven rules and their points (RiskScoringService.java); hit = part of the €8,500 example
+const rules = [
+  { t: n('Identity not verified', 'Identität nicht verifiziert'), p: 35, hit: true },
+  { t: n('Amount over €5,000', 'Betrag über 5.000 €'), p: 30, hit: true },
+  { t: n('Duplicate within 24 h', 'Duplikat in 24 h'), p: 30 },
+  { t: n('Over 3 payments in 10 min', 'Über 3 Zahlungen in 10 Min'), p: 25 },
+  { t: n('High risk customer', 'Kunde mit hohem Risiko'), p: 25 },
+  { t: n('New beneficiary', 'Neuer Empfänger'), p: 20, hit: true },
+  { t: n('Between 00:00 and 05:00', 'Zwischen 0 und 5 Uhr'), p: 10 },
+];
+const sx = (v: number) => (v / 100) * 480;
+const parts = [{ v: 30, t: n('amount', 'Betrag') }, { v: 20, t: n('new', 'neu') }, { v: 35, t: n('unverified', 'unverifiziert') }];
+const arch = [
+  { x: 40, y: 80, t: 'React', s: n('analyst dashboard', 'Dashboard') },
+  { x: 220, y: 200, t: 'Spring Boot', s: 'Java 21 API' },
+  { x: 400, y: 80, t: 'Python', s: n('fraud scoring', 'Scoring') },
+  { x: 40, y: 320, t: 'PostgreSQL', s: n('payments, alerts', 'Zahlungen, Alerts') },
+  { x: 400, y: 320, t: 'Audit log', s: n('every step', 'jeder Schritt') },
+];
+---
+<ScrollStory steps={steps} label={de ? 'Die Geschichte' : 'The story'} sources={de ? 'Quellen' : 'Sources'}>
+  <g data-show="q">
+    <rect x="90" y="110" width="420" height="240" rx="22" class="box hl pop" />
+    <text x="130" y="170" class="t-cap">{n('SEPA transfer', 'SEPA Überweisung')}</text>
+    <text x="130" y="250" class="t-huge">{n('€8,500', '8.500 €')}</text>
+    <text x="130" y="310" class="t-lbl t-dim">→ {n('new beneficiary', 'neuer Empfänger')}</text>
+    <text x="300" y="420" class="t-big mid t-hl">?</text>
+  </g>
+
+  <g data-show="insight">
+    <text x="40" y="54" class="t-cap">{n('Risk points per rule', 'Risikopunkte je Regel')}</text>
+    {rules.map((r, i) => (
+      <g>
+        <text x="40" y={96 + i * 54} class="t-lbl">{r.t}</text>
+        <rect x="40" y={106 + i * 54} width={(r.p / 35) * 440} height="14" rx="7" class="bar hl grow-x" style={`--i:${i}`} />
+        <text x="560" y={96 + i * 54} class="t-lbl end t-hl">+{r.p}</text>
+      </g>
+    ))}
+  </g>
+
+  <g data-show="example">
+    <text x="60" y="110" class="t-cap">{n('Risk score, 0 to 100', 'Risikoscore, 0 bis 100')}</text>
+    <rect x="60" y="150" width="480" height="56" rx="10" class="bar" />
+    {parts.map((p, i) => {
+      const x0 = 60 + sx(parts.slice(0, i).reduce((a, q) => a + q.v, 0));
+      return (
+        <g>
+          <rect x={x0} y="150" width={sx(p.v) - 3} height="56" rx="8" class="bar hl grow-x" style={`--i:${i * 3}`} />
+          <text x={x0 + sx(p.v) / 2} y="186" class="t-lbl mid" style="fill:var(--ink)">+{p.v}</text>
+          <text x={x0 + sx(p.v) / 2} y="236" class="t-cap mid">{p.t}</text>
+        </g>
+      );
+    })}
+    <line x1={60 + sx(70)} x2={60 + sx(70)} y1="130" y2="290" class="ln bad" />
+    <text x={60 + sx(70)} y="312" class="t-cap mid">70 · {n('review', 'Prüfung')}</text>
+    <line x1={60 + sx(90)} x2={60 + sx(90)} y1="130" y2="290" class="ln bad" />
+    <text x={60 + sx(90)} y="336" class="t-cap mid">90 · {n('block', 'Sperre')}</text>
+    <text x="60" y="420" class="t-big t-hl">85</text>
+    <text x="160" y="420" class="t-lbl">→ {n('to an analyst, with 3 reasons', 'an einen Analysten, mit 3 Gründen')}</text>
+  </g>
+
+  <g data-show="result next">
+    {arch.map((b, i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x={b.x} y={b.y} width="160" height="80" rx="12" class={i === 1 ? 'box hl' : 'box'} />
+        <text x={b.x + 80} y={b.y + 36} class="t-lbl mid">{b.t}</text>
+        <text x={b.x + 80} y={b.y + 60} class="t-cap mid">{b.s}</text>
+      </g>
+    ))}
+    <line x1="200" y1="140" x2="232" y2="196" class="arrow" />
+    <line x1="400" y1="140" x2="368" y2="196" class="arrow" />
+    <line x1="240" y1="282" x2="200" y2="316" class="arrow" />
+    <line x1="360" y1="282" x2="400" y2="316" class="arrow" />
+    <g data-show="next">
+      <rect x="400" y="200" width="160" height="80" rx="12" class="box" style="stroke-dasharray:6 6" />
+      <text x="480" y="236" class="t-lbl mid t-hl">{n('Learned model', 'Gelerntes Modell')}</text>
+      <text x="480" y="260" class="t-cap mid">{n('roadmap', 'Roadmap')}</text>
+    </g>
+  </g>
+
+  <g data-show="real">
+    <text x="300" y="150" class="t-cap mid">{n('Verification of Payee, EU', 'Empfängerüberprüfung, EU')}</text>
+    <text x="300" y="250" class="t-huge mid">{n('9 Oct 2025', '9.10.2025')}</text>
+    <rect x="110" y="310" width="160" height="64" rx="12" class="box pop" />
+    <text x="190" y="349" class="t-lbl mid">{n('Payee name', 'Name')}</text>
+    <text x="300" y="352" class="t-mid mid t-hl">⇄</text>
+    <rect x="330" y="310" width="160" height="64" rx="12" class="box pop" style="--i:1" />
+    <text x="410" y="349" class="t-lbl mid">IBAN</text>
+  </g>
+</ScrollStory>

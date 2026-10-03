@@ -137,7 +137,7 @@ const glyphs = [0, 1, 2];
                 <h3><a href={work(p.slug)}>{p.short}</a></h3>
                 <p class="panel-desc">{p.description}</p>
                 <div class="panel-links">
-                  <a href={work(p.slug)}>{t.work.caseStudy} <span>↗</span></a>
+                  <a href={work(p.slug)}>{p.slug === 'silverstone-telemetry' ? t.work.story : t.work.caseStudy} <span>↗</span></a>
                   <a href={`${site.github}/${p.repo}`} target="_blank" rel="noopener">{t.work.source} <span>↗</span></a>
                   {p.doi && <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">IEEE <span>↗</span></a>}
                 </div>

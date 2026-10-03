@@ -1,0 +1,107 @@
+---
+// Windmill pitch prediction. Numbers: notebook outputs in github.com/srohitsuryaa21/windmill-pitch-prediction
+// (simulated 3 × 250 kW turbines, 10 min data), the published IEEE paper (kWh figures), and Google DeepMind (2019).
+import ScrollStory, { type Step } from '../ScrollStory.astro';
+import type { Lang } from '../../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const deepmind = [{ label: 'Google DeepMind, 2019', url: 'https://deepmind.google/blog/machine-learning-can-boost-the-value-of-wind-energy/' }];
+
+const steps: Step[] = de ? [
+  { k: 'q', h: 'Der Wind ist zuerst da.', p: 'Kann ein Windrad sein Blatt auf den Wind einstellen, der gleich kommt?' },
+  { k: 'data', h: '77.760 Messwerte.', p: 'Drei simulierte Anlagen mit 250 kW, alle 10 Minuten, sechs Monate lang. Das Paper nutzte Stundenwerte.' },
+  { k: 'first', h: 'Ein einfaches Modell liegt ein Drittel daneben.', p: 'Lineare Regression: 33,95 % Fehler beim Blattwinkel.' },
+  { k: 'insight', h: 'Vorhersagen. Dann den Fehler korrigieren.', p: 'XGBoost sagt den Winkel voraus. Ein zweites Modell lernt nur aus dessen Fehlern.' },
+  { k: 'result', h: '33,95 % → 1,11 %.', p: 'Der Fehler sinkt um 96,7 %.' },
+  { k: 'energy', h: '+21 % Energie.', p: 'Im veröffentlichten Paper: 841,54 → 1.019,41 kWh an einem Beispieltag.' },
+  { k: 'real', h: 'Google, im großen Maßstab.', p: 'DeepMind sagte 700 MW Windleistung 36 Stunden voraus. Ihr Wert stieg um rund 20 %.', src: deepmind },
+  { k: 'next', h: 'Als Nächstes: echter Wind.', p: 'Simulierte Daten sind sauber. Der echte Test ist eine laufende Anlage.' },
+] : [
+  { k: 'q', h: 'The wind moves first.', p: 'Can a turbine set its blade for the wind that is coming?' },
+  { k: 'data', h: '77,760 readings.', p: 'Three simulated 250 kW turbines, every 10 minutes for six months. The paper used hourly data.' },
+  { k: 'first', h: 'A simple model misses by a third.', p: 'Linear regression: 33.95% error on the blade angle.' },
+  { k: 'insight', h: 'Predict. Then correct the miss.', p: 'XGBoost predicts the angle. A second model learns only from its mistakes.' },
+  { k: 'result', h: '33.95% → 1.11%.', p: 'Error down 96.7%.' },
+  { k: 'energy', h: '+21% energy.', p: 'In the published paper: 841.54 → 1,019.41 kWh on a sample day.' },
+  { k: 'real', h: 'Google did it at scale.', p: 'DeepMind predicted 700 MW of wind 36 hours ahead. Its value rose about 20%.', src: deepmind },
+  { k: 'next', h: 'Next: real wind.', p: 'Simulated data is clean. A working turbine is the real test.' },
+];
+const L = de
+  ? { readings: 'Messwerte', spec: '3 Anlagen · 250 kW · 6 Monate', paper: 'Paper: stündlich', rebuild: 'Neu: alle 10 Min', hour: '1 Stunde', err: 'Fehler beim Blattwinkel (MAPE)', models: ['Lineare Regression', 'XGBoost', 'XGBoost + Korrektur'], flow: ['26 Merkmale', 'XGBoost', 'Korrektur', 'Blattwinkel'], flowSub: ['Wind, Drehzahl, Zeit', 'sagt voraus', 'lernt die Fehler', 'eingestellt'], kwh: 'kWh, Beispieltag (Paper)', before: 'Vorher', after: 'Nachher', value: 'mehr Wert der Windenergie', dm: '700 MW · 36 h im Voraus · DeepMind 2019', sim: 'Simuliert', field: 'Felddaten' }
+  : { readings: 'readings', spec: '3 turbines · 250 kW · 6 months', paper: 'Paper: hourly', rebuild: 'Rebuild: every 10 min', hour: '1 hour', err: 'Error on the blade angle (MAPE)', models: ['Linear regression', 'XGBoost', 'XGBoost + correction'], flow: ['26 features', 'XGBoost', 'Corrector', 'Blade angle'], flowSub: ['wind, rpm, time', 'predicts', 'learns the misses', 'set'], kwh: 'kWh, sample day (paper)', before: 'Before', after: 'After', value: 'more value from wind energy', dm: '700 MW · 36 h ahead · DeepMind 2019', sim: 'Simulated', field: 'Field data' };
+const n = (en: string, d: string) => (de ? d : en);
+const mape = [33.95, 1.38, 1.11];
+---
+<ScrollStory steps={steps} label={de ? 'Die Geschichte' : 'The story'} sources={de ? 'Quellen' : 'Sources'}>
+  <!-- turbine: the question and the closing step -->
+  <g data-show="q next">
+    {[150, 200, 250].map((y, i) => <line x1="40" x2="560" y1={y + 20} y2={y + 20} class="gust" style={`animation-delay:${i * 0.5}s`} />)}
+    <line x1="300" y1="190" x2="300" y2="440" stroke="#ffffff55" stroke-width="6" stroke-linecap="round" />
+    <g class="spin">
+      {[0, 120, 240].map((a) => <path d="M300 190 C 292 150, 296 80, 300 40 C 306 80, 310 150, 300 190 Z" fill="var(--hl)" transform={`rotate(${a} 300 190)`} />)}
+    </g>
+    <circle cx="300" cy="190" r="10" fill="var(--paper)" />
+  </g>
+  <g data-show="next">
+    <text x="120" y="430" class="t-cap mid">{L.sim}</text>
+    <text x="480" y="430" class="t-cap mid t-hl">{L.field} →</text>
+  </g>
+
+  <!-- the data -->
+  <g data-show="data">
+    <text x="300" y="150" class="t-huge mid">{n('77,760', '77.760')}</text>
+    <text x="300" y="186" class="t-cap mid">{L.readings} · {L.spec}</text>
+    <text x="60" y="290" class="t-lbl t-dim">{L.paper}</text>
+    <line x1="60" x2="540" y1="320" y2="320" class="ln" />
+    <circle cx="60" cy="320" r="7" class="dot" />
+    <text x="60" y="380" class="t-lbl t-hl">{L.rebuild}</text>
+    <line x1="60" x2="540" y1="410" y2="410" class="ln" />
+    {[0, 1, 2, 3, 4, 5].map((i) => <circle cx={60 + i * 96} cy="410" r="7" class="dot hl pop" style={`--i:${i}`} />)}
+    <text x="540" y="445" class="t-cap end">{L.hour}</text>
+  </g>
+
+  <!-- error bars: the baseline first, then the models that beat it -->
+  <g data-show="first result">
+    <text x="40" y="80" class="t-cap">{L.err}</text>
+    {mape.map((v, i) => (
+      <g data-show={i === 0 ? 'first result' : 'result'}>
+        <text x="40" y={146 + i * 100} class="t-lbl">{L.models[i]}</text>
+        <rect x="40" y={160 + i * 100} width={Math.max(6, (v / 34) * 440)} height="34" rx="6" class={`grow-x ${i === 0 ? 'bar bad' : i === 2 ? 'bar hl' : 'bar'}`} />
+        <text x={Math.max(6, (v / 34) * 440) + 56} y={186 + i * 100} class={`t-mid ${i === 0 ? 't-bad' : i === 2 ? 't-hl' : ''}`}>{n(`${v}%`, `${String(v).replace('.', ',')} %`)}</text>
+      </g>
+    ))}
+  </g>
+
+  <!-- predict, then correct -->
+  <g data-show="insight">
+    {L.flow.map((t, i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x="30" y={60 + i * 100} width="250" height="70" rx="12" class={i === 2 ? 'box hl' : 'box'} />
+        <text x="50" y={92 + i * 100} class="t-lbl">{t}</text>
+        <text x="50" y={114 + i * 100} class="t-cap">{L.flowSub[i]}</text>
+        {i < 3 && <line x1="155" x2="155" y1={132 + i * 100} y2={156 + i * 100} class="arrow" />}
+      </g>
+    ))}
+    <path d="M300 195 C 420 195, 420 295, 300 295" class="arrow draw" pathLength="1" />
+    <text x="430" y="250" class="t-lbl t-hl">{n('fixes the error', 'korrigiert')}</text>
+  </g>
+
+  <!-- energy, sample day from the paper -->
+  <g data-show="energy">
+    <text x="40" y="60" class="t-cap">{L.kwh}</text>
+    <text x="560" y="70" class="t-big end t-hl">{n('+21%', '+21 %')}</text>
+    <rect x="120" y={420 - 841.54 / 1019.41 * 250} width="120" height={841.54 / 1019.41 * 250} rx="8" class="bar grow-y" />
+    <rect x="340" y="170" width="120" height="250" rx="8" class="bar hl grow-y" style="--i:1" />
+    <text x="180" y={406 - 841.54 / 1019.41 * 250} class="t-mid mid">{n('841.54', '841,54')}</text>
+    <text x="400" y="156" class="t-mid mid t-hl">{n('1,019.41', '1.019,41')}</text>
+    <text x="180" y="448" class="t-cap mid">{L.before}</text>
+    <text x="400" y="448" class="t-cap mid">{L.after}</text>
+  </g>
+
+  <!-- the real world -->
+  <g data-show="real">
+    <text x="300" y="230" class="t-huge mid">≈{n('20%', '20 %')}</text>
+    <text x="300" y="272" class="t-cap mid">{L.value}</text>
+    <text x="300" y="340" class="t-lbl mid t-dim">{L.dm}</text>
+  </g>
+</ScrollStory>

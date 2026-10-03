@@ -1,0 +1,96 @@
+---
+// Aviation delay ontology. Facts: README and pipeline of github.com/srohitsuryaa21/aviation-delay-ontology
+// (US BTS on-time data, June 2018, departures from ATL and ORD). Real world: O'Hare 21 expansion, approved 28 March 2018.
+import ScrollStory, { type Step } from '../ScrollStory.astro';
+import type { Lang } from '../../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const src = [
+  { label: 'ABC7 Chicago', url: 'https://abc7chicago.com/ohare-expansion-ohare-airport-american-airlines/3273774/' },
+  { label: 'WTTW, 28 March 2018', url: 'https://news.wttw.com/2018/03/28/85-billion-o-hare-expansion-cleared-takeoff' },
+];
+const steps: Step[] = de ? [
+  { k: 'q', h: "Atlanta oder O'Hare?", p: '63.029 Flüge im Juni 2018. Wo kommt man zu spät an?' },
+  { k: 'insight', h: 'Flüge als Objekte, nicht als Zeilen.', p: 'Jeder Flug ist mit seinem Flughafen verknüpft. Jede Frage wird zum Filter.' },
+  { k: 'result', h: "O'Hare: 21,1 Minuten zu spät.", p: 'Atlanta: 13,6. Durchschnittliche Ankunftsverspätung.' },
+  { k: 'share', h: 'Fast jeder dritte Flug.', p: "32 % der Flüge in O'Hare waren verspätet, in Atlanta 24 %." },
+  { k: 'hour', h: 'Am schlimmsten um 23 Uhr.', p: 'Späte Abflüge hatten die größten Verspätungen.' },
+  { k: 'real', h: 'Chicago baute schon.', p: 'Drei Monate vorher wurde ein Ausbau für 8,5 Milliarden Dollar beschlossen: 180 → 220 Gates.', src },
+] : [
+  { k: 'q', h: "Atlanta or O'Hare?", p: '63,029 flights in June 2018. Which airport makes you late?' },
+  { k: 'insight', h: 'Flights as objects, not rows.', p: 'Each flight links to its airport. Every question becomes a filter.' },
+  { k: 'result', h: "O'Hare: 21.1 minutes late.", p: 'Atlanta: 13.6. Average arrival delay.' },
+  { k: 'share', h: 'Almost one in three.', p: "32% of O'Hare flights were delayed, 24% at Atlanta." },
+  { k: 'hour', h: 'Worst at 11 pm.', p: 'Late evening departures had the biggest delays.' },
+  { k: 'real', h: 'Chicago was already building.', p: 'Three months earlier, an $8.5 billion expansion was approved: 180 → 220 gates.', src },
+];
+const n = (en: string, d: string) => (de ? d : en);
+// donut helper: a share of a circle as a stroke on pathLength 100
+const ring = (cx: number, cy: number, r: number) => `M${cx} ${cy - r} a${r} ${r} 0 1 1 0 ${2 * r} a${r} ${r} 0 1 1 0 ${-2 * r}`;
+const flights = Array.from({ length: 14 }, (_, i) => ({ x: 60 + (i % 7) * 80, y: i < 7 ? 90 : 370, to: i % 3 === 0 ? 'ORD' : 'ATL' }));
+---
+<ScrollStory steps={steps} label={de ? 'Die Geschichte' : 'The story'} sources={de ? 'Quellen' : 'Sources'}>
+  <g data-show="q">
+    <text x="300" y="170" class="t-huge mid">{n('63,029', '63.029')}</text>
+    <text x="300" y="206" class="t-cap mid">{n('flights · June 2018 · US BTS data', 'Flüge · Juni 2018 · Daten der US BTS')}</text>
+    <circle cx="180" cy="330" r="64" class="box pop" /><text x="180" y="340" class="t-mid mid">ATL</text>
+    <circle cx="420" cy="330" r="64" class="box hl pop" style="--i:1" /><text x="420" y="340" class="t-mid mid">ORD</text>
+    <text x="300" y="340" class="t-mid mid t-hl">?</text>
+  </g>
+
+  <g data-show="insight">
+    {flights.map((f, i) => (
+      <g>
+        <line x1={f.x} y1={f.y} x2={f.to === 'ORD' ? 420 : 180} y2="230" class="ln draw" pathLength="1" style={`--i:${i % 5}`} />
+        <rect x={f.x - 24} y={f.y - 14} width="48" height="28" rx="6" class="box pop" style={`--i:${i % 7}`} />
+        <text x={f.x} y={f.y + 5} class="t-cap mid" style="font-size:10px">{n('flight', 'Flug')}</text>
+      </g>
+    ))}
+    <circle cx="180" cy="230" r="46" class="box" /><text x="180" y="238" class="t-lbl mid">ATL</text>
+    <circle cx="420" cy="230" r="46" class="box hl" /><text x="420" y="238" class="t-lbl mid">ORD</text>
+  </g>
+
+  <g data-show="result">
+    <text x="40" y="70" class="t-cap">{n('Average arrival delay, minutes', 'Durchschnittliche Ankunftsverspätung, Minuten')}</text>
+    <rect x="140" y={420 - 13.6 * 14} width="120" height={13.6 * 14} rx="10" class="bar grow-y" />
+    <rect x="340" y={420 - 21.1 * 14} width="120" height={21.1 * 14} rx="10" class="bar bad grow-y" style="--i:2" />
+    <text x="200" y={404 - 13.6 * 14} class="t-big mid">{n('13.6', '13,6')}</text>
+    <text x="400" y={404 - 21.1 * 14} class="t-big mid t-bad">{n('21.1', '21,1')}</text>
+    <text x="200" y="448" class="t-cap mid">Atlanta</text>
+    <text x="400" y="448" class="t-cap mid">O'Hare</text>
+  </g>
+
+  <g data-show="share">
+    {[{ cx: 170, v: 24, t: 'Atlanta', cls: 'ln hl' }, { cx: 430, v: 32, t: "O'Hare", cls: 'ln bad' }].map((d, i) => (
+      <g>
+        <path d={ring(d.cx, 230, 110)} class="ln" style="stroke-width:26;stroke:#ffffff14" />
+        <path d={ring(d.cx, 230, 110)} pathLength="100" class={`pop ${d.cls}`} style={`stroke-width:26;stroke-dasharray:${d.v} 100;stroke-linecap:butt;--i:${i}`} />
+        <text x={d.cx} y="246" class="t-big mid">{d.v}{n('%', ' %')}</text>
+        <text x={d.cx} y="400" class="t-cap mid">{d.t}</text>
+      </g>
+    ))}
+    <text x="300" y="440" class="t-cap mid">{n('of flights delayed (over 15 min)', 'der Flüge verspätet (über 15 Min)')}</text>
+  </g>
+
+  <g data-show="hour">
+    <text x="40" y="150" class="t-cap">{n('Departure hour', 'Abflugstunde')}</text>
+    {Array.from({ length: 24 }, (_, h) => (
+      <g>
+        <rect x={40 + h * 22} y="200" width="16" height="60" rx="4" class={h === 23 ? 'bar bad pop' : 'bar pop'} style={`--i:${h % 8}`} />
+        {h % 6 === 0 && <text x={48 + h * 22} y="296" class="t-cap mid">{String(h).padStart(2, '0')}</text>}
+      </g>
+    ))}
+    <text x={48 + 23 * 22} y="296" class="t-cap mid t-bad">23</text>
+    <text x={56 + 23 * 22} y="186" class="t-lbl end t-bad">{n('worst average delay', 'größte Verspätung')}</text>
+  </g>
+
+  <g data-show="real">
+    <text x="40" y="70" class="t-cap">{n("O'Hare gates", "Gates in O'Hare")}</text>
+    <rect x="140" y={420 - 180 * 1.3} width="120" height={180 * 1.3} rx="10" class="bar grow-y" />
+    <rect x="340" y={420 - 220 * 1.3} width="120" height={220 * 1.3} rx="10" class="bar hl grow-y" style="--i:2" />
+    <text x="200" y={404 - 180 * 1.3} class="t-big mid">180</text>
+    <text x="400" y={404 - 220 * 1.3} class="t-big mid t-hl">220</text>
+    <text x="200" y="448" class="t-cap mid">2018</text>
+    <text x="400" y="448" class="t-cap mid">O'Hare 21 · {n('$8.5B', '8,5 Mrd. $')}</text>
+  </g>
+</ScrollStory>

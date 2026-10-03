@@ -1,0 +1,143 @@
+---
+// Employee attrition. Numbers: the notebook in github.com/srohitsuryaa21/employee-attrition-prediction, rerun on the
+// real IBM HR Analytics dataset (1,470 employees, 237 left). Group rates computed directly from that dataset.
+// Real world: CNBC, April 2019 (IBM's predictive attrition program).
+import ScrollStory, { type Step } from '../ScrollStory.astro';
+import type { Lang } from '../../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const src = [{ label: 'CNBC, April 2019', url: 'https://www.cnbc.com/2019/04/03/ibm-ai-can-predict-with-95-percent-accuracy-which-employees-will-quit.html' }];
+const steps: Step[] = de ? [
+  { k: 'q', h: 'Wer geht als Nächstes, und warum?', p: '1.470 Mitarbeiter in den HR Daten von IBM. 237 davon sind gegangen.' },
+  { k: 'trap', h: 'Genauigkeit lügt hier.', p: 'Wer sagt, dass niemand geht, liegt schon zu 83,9 % richtig. Also habe ich nach AUC verglichen.' },
+  { k: 'mirage', h: 'Mein erstes Ergebnis war eine Täuschung.', p: 'Eine synthetische Kopie der Daten ergab AUC 0,565, fast Zufall. Mit den echten Daten: 0,80.' },
+  { k: 'result', h: 'Das einfachste Modell gewann.', p: 'Logistische Regression: AUC 0,80, vor drei komplexeren Modellen.' },
+  { k: 'why', h: 'Überstunden verdreifachen das Risiko fast.', p: 'Mit Überstunden gingen 30,5 %, ohne 10,4 %.' },
+  { k: 'roles', h: 'Vertrieb geht am häufigsten.', p: '39,8 % der Vertriebsmitarbeiter gingen. 2,5 % der Forschungsleiter.' },
+  { k: 'pay', h: 'Das Gehalt zählt.', p: 'Wer ging, verdiente im Median 3.202 im Monat. Wer blieb, 5.204.' },
+  { k: 'real', h: 'IBM macht das wirklich.', p: '2019 sagte IBM, seine KI erkenne Abgänge mit 95 % Genauigkeit und spare rund 300 Millionen Dollar.', src },
+  { k: 'next', h: 'Als Nächstes: mehr davon erkennen.', p: 'Das Modell findet 36 % der Abgänge. Das zu steigern ist der nächste Schritt.' },
+] : [
+  { k: 'q', h: 'Who leaves next, and why?', p: '1,470 employees in IBM’s HR data. 237 of them left.' },
+  { k: 'trap', h: 'Accuracy lies here.', p: 'Predict that nobody leaves and you are 83.9% right. So I compared models by AUC.' },
+  { k: 'mirage', h: 'My first result was a mirage.', p: 'A synthetic copy of the data gave AUC 0.565, close to a coin flip. On the real data: 0.80.' },
+  { k: 'result', h: 'The simplest model won.', p: 'Logistic regression: AUC 0.80, ahead of three more complex models.' },
+  { k: 'why', h: 'Overtime nearly triples the risk.', p: '30.5% of people on overtime left. Without overtime, 10.4%.' },
+  { k: 'roles', h: 'Sales reps leave most.', p: '39.8% of sales representatives left. 2.5% of research directors.' },
+  { k: 'pay', h: 'Pay matters.', p: 'Leavers earned a median 3,202 a month. Stayers, 5,204.' },
+  { k: 'real', h: 'IBM does this for real.', p: 'In 2019 IBM said its AI spots leavers with 95% accuracy, saving about $300 million.', src },
+  { k: 'next', h: 'Next: catch more of them.', p: 'The model finds 36% of leavers. Raising that is the next job.' },
+];
+const n = (en: string, d: string) => (de ? d : en);
+const pc = (v: number, digits = 1) => (de ? `${v.toFixed(digits).replace('.', ',')} %` : `${v.toFixed(digits)}%`);
+const dec = (v: number, d = 2) => (de ? v.toFixed(d).replace('.', ',') : v.toFixed(d));
+// 1,470 people as dots, 237 who left (the real split)
+const cols = 49;
+const people = Array.from({ length: 1470 }, (_, i) => ({ x: 64 + (i % cols) * 9.8, y: 90 + Math.floor(i / cols) * 9.8, left: false }));
+// mark 237 of them as leavers, scattered with a fixed seed so the picture is the same on every build
+let seed = 7;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const order = people.map((_, i) => [rnd(), i] as const).sort((a, b) => a[0] - b[0]).slice(0, 237);
+order.forEach(([, i]) => { people[i].left = true; });
+const models = [
+  { t: n('Logistic regression', 'Logistische Regression'), v: 0.7983, hl: true },
+  { t: n('Gradient boosting', 'Gradient Boosting'), v: 0.7847 },
+  { t: 'Random Forest', v: 0.7721 },
+  { t: n('Decision tree', 'Entscheidungsbaum'), v: 0.6629 },
+];
+const ax = (v: number) => ((v - 0.5) / 0.35) * 330;
+const groups = [
+  { t: n('Overtime', 'Überstunden'), a: 30.5, b: 10.4, la: n('yes', 'ja'), lb: n('no', 'nein') },
+  { t: n('Business travel', 'Dienstreisen'), a: 24.9, b: 8.0, la: n('frequent', 'häufig'), lb: n('none', 'keine') },
+  { t: n('Marital status', 'Familienstand'), a: 25.5, b: 12.5, la: n('single', 'ledig'), lb: n('married', 'verheiratet') },
+  { t: n('Age', 'Alter'), a: 25.9, b: 12.6, la: n('30 or under', 'bis 30'), lb: n('over 30', 'über 30') },
+];
+const roles = [
+  [n('Sales representative', 'Vertrieb'), 39.8], [n('Lab technician', 'Labortechnik'), 23.9], [n('Human resources', 'Personal'), 23.1],
+  [n('Sales executive', 'Vertriebsleitung'), 17.5], [n('Research scientist', 'Forschung'), 16.1], [n('Manufacturing director', 'Fertigungsleitung'), 6.9],
+  [n('Healthcare rep', 'Gesundheitswesen'), 6.9], ['Manager', 4.9], [n('Research director', 'Forschungsleitung'), 2.5],
+] as [string, number][];
+---
+<ScrollStory steps={steps} label={de ? 'Die Geschichte' : 'The story'} sources={de ? 'Quellen' : 'Sources'}>
+  <g data-show="q trap">
+    {people.map((p) => <circle cx={p.x} cy={p.y} r="3.4" class={p.left ? 'dot hl' : 'dot'} />)}
+    <text x="64" y="420" class="t-lbl t-hl">● 237 {n('left', 'gegangen')}</text>
+    <text x="230" y="420" class="t-lbl t-dim">● {n('1,233 stayed', '1.233 geblieben')}</text>
+  </g>
+  <g data-show="trap">
+    <rect x="80" y="150" width="440" height="150" rx="18" class="box pop" style="fill:#0d0d0ce6" />
+    <text x="300" y="232" class="t-big mid">{pc(83.9)}</text>
+    <text x="300" y="268" class="t-cap mid">{n('right by predicting “nobody leaves”', 'richtig mit „niemand geht“')}</text>
+  </g>
+
+  <g data-show="mirage">
+    <text x="40" y="70" class="t-cap">AUC · 0.5 = {n('coin flip', 'Zufall')}</text>
+    <line x1="60" x2="540" y1={420 - 0.5 * 360} y2={420 - 0.5 * 360} class="ln bad" />
+    <rect x="130" y={420 - 0.565 * 360} width="130" height={0.565 * 360} rx="10" class="bar grow-y" />
+    <rect x="340" y={420 - 0.798 * 360} width="130" height={0.798 * 360} rx="10" class="bar hl grow-y" style="--i:3" />
+    <text x="195" y={404 - 0.565 * 360} class="t-mid mid">{dec(0.565, 3)}</text>
+    <text x="405" y={404 - 0.798 * 360} class="t-mid mid t-hl">{dec(0.80)}</text>
+    <text x="195" y="448" class="t-cap mid">{n('Synthetic copy', 'Synthetische Kopie')}</text>
+    <text x="405" y="448" class="t-cap mid">{n('Real IBM data', 'Echte IBM Daten')}</text>
+  </g>
+
+  <g data-show="result">
+    <text x="40" y="70" class="t-cap">{n('AUC on the test set', 'AUC auf den Testdaten')}</text>
+    {models.map((m, i) => (
+      <g>
+        <text x="40" y={130 + i * 84} class="t-lbl">{m.t}</text>
+        <rect x="40" y={144 + i * 84} width={ax(m.v)} height="30" rx="6" class={`grow-x ${m.hl ? 'bar hl' : 'bar'}`} style={`--i:${i}`} />
+        <text x={54 + ax(m.v)} y={167 + i * 84} class={`t-mid ${m.hl ? 't-hl' : ''}`}>{dec(m.v)}</text>
+      </g>
+    ))}
+    <text x="40" y="452" class="t-cap">{n('axis starts at 0.5, a coin flip', 'Achse beginnt bei 0,5, dem Zufall')}</text>
+  </g>
+
+  <g data-show="why">
+    <text x="40" y="60" class="t-cap">{n('Share who left', 'Anteil, der ging')}</text>
+    {groups.map((g, i) => (
+      <g>
+        <text x="40" y={104 + i * 92} class="t-lbl">{g.t}</text>
+        <rect x="40" y={114 + i * 92} width={g.a * 10} height="18" rx="5" class="bar hl grow-x" style={`--i:${i}`} />
+        <text x={50 + g.a * 10} y={129 + i * 92} class="t-lbl t-hl">{pc(g.a)} <tspan class="t-cap">{g.la}</tspan></text>
+        <rect x="40" y={138 + i * 92} width={g.b * 10} height="18" rx="5" class="bar grow-x" style={`--i:${i}`} />
+        <text x={50 + g.b * 10} y={153 + i * 92} class="t-lbl t-dim">{pc(g.b)} <tspan class="t-cap">{g.lb}</tspan></text>
+      </g>
+    ))}
+  </g>
+
+  <g data-show="roles">
+    <text x="40" y="54" class="t-cap">{n('Share who left, by role', 'Anteil, der ging, nach Rolle')}</text>
+    {roles.map(([t, v], i) => (
+      <g>
+        <text x="210" y={98 + i * 40} class="t-lbl end">{t}</text>
+        <rect x="222" y={84 + i * 40} width={v * 7.5} height="20" rx="5" class={`grow-x ${i === 0 ? 'bar hl' : 'bar'}`} style={`--i:${i}`} />
+        <text x={232 + v * 7.5} y={100 + i * 40} class={`t-lbl ${i === 0 ? 't-hl' : 't-dim'}`}>{pc(v)}</text>
+      </g>
+    ))}
+  </g>
+
+  <g data-show="pay">
+    <text x="40" y="70" class="t-cap">{n('Median monthly income', 'Medianes Monatseinkommen')}</text>
+    <rect x="130" y={420 - 3202 / 5204 * 300} width="130" height={3202 / 5204 * 300} rx="10" class="bar hl grow-y" />
+    <rect x="340" y="120" width="130" height="300" rx="10" class="bar grow-y" style="--i:2" />
+    <text x="195" y={404 - 3202 / 5204 * 300} class="t-mid mid t-hl">{n('3,202', '3.202')}</text>
+    <text x="405" y="104" class="t-mid mid">{n('5,204', '5.204')}</text>
+    <text x="195" y="448" class="t-cap mid">{n('Left', 'Gegangen')}</text>
+    <text x="405" y="448" class="t-cap mid">{n('Stayed', 'Geblieben')}</text>
+  </g>
+
+  <g data-show="real">
+    <text x="300" y="200" class="t-huge mid">{n('$300M', '300 Mio. $')}</text>
+    <text x="300" y="240" class="t-cap mid">{n('saved in retention costs, IBM says', 'gespart an Bindungskosten, laut IBM')}</text>
+    <text x="300" y="330" class="t-big mid">{n('95%', '95 %')}</text>
+    <text x="300" y="362" class="t-cap mid">{n('claimed accuracy, 2019', 'behauptete Genauigkeit, 2019')}</text>
+  </g>
+
+  <g data-show="next">
+    <text x="300" y="120" class="t-cap mid">{n('Of the leavers in the test set, the model found', 'Von den Abgängen im Test fand das Modell')}</text>
+    {Array.from({ length: 47 }, (_, i) => <circle cx={102 + (i % 12) * 36} cy={170 + Math.floor(i / 12) * 44} r="13" class={i < 17 ? 'dot hl pop' : 'dot pop'} style={`--i:${i % 6}`} />)}
+    <text x="300" y="400" class="t-big mid t-hl">17 / 47</text>
+    <text x="300" y="432" class="t-cap mid">{n('about 36%', 'etwa 36 %')}</text>
+  </g>
+</ScrollStory>

@@ -216,9 +216,29 @@ function setupNumberNotes() {
   });
 }
 
+/* Scroll story: whichever step crosses the middle of the screen sets the chart's scene */
+function setupStory() {
+  const fig = $('.story-fig');
+  const steps = $$('.story-step');
+  if (!fig || !steps.length) return;
+  const show = (step: HTMLElement) => {
+    steps.forEach((s) => s.classList.toggle('is-on', s === step));
+    const k = step.dataset.step ?? '';
+    fig.dataset.step = k;
+    // chart pieces list the steps they belong to
+    fig.querySelectorAll<SVGElement>('[data-show]').forEach((el) => el.classList.toggle('is-on', (el.dataset.show ?? '').split(' ').includes(k)));
+  };
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) show(e.target as HTMLElement); });
+  }, { rootMargin: matchMedia('(max-width: 899px)').matches ? '-74% 0px -24% 0px' : '-48% 0px -48% 0px' });
+  steps.forEach((s) => io.observe(s));
+  show(steps[0]);
+}
+
 setupCopy();
 setupClock();
 setupNumberNotes();
+setupStory();
 setupZigzag();
 setupWorkRow();
 const heroName = $('.hero-name');

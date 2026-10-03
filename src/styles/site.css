@@ -257,7 +257,7 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 /* line height leaves room under the line, so p, y and g aren't clipped by the ellipsis overflow */
 .motion-h .panel-info h3{grid-area:title;margin:4px 0 0;padding-bottom:.08em;font-size:clamp(22px,min(2.2vw,3.8vh),38px);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .motion-h .panel-desc{grid-area:desc;margin-top:8px}
-.motion-h .panel-desc{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.motion-h .panel-desc{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .motion-h .panel-links{grid-area:links;margin-top:0;padding-bottom:4px;gap:18px;font-size:14px}
 /* short windows (laptops with browser bars): drop the label and the card text so the artwork keeps its height */
 @media (max-height:780px){
@@ -433,10 +433,116 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .case-art .exhibit-art{inset:-8%}
 .case-art .panel-metric{left:clamp(20px,3vw,44px);bottom:clamp(20px,3vw,40px)}
 .case-art .panel-metric b{font-size:clamp(64px,10vw,180px)}
-.case-body{padding:clamp(80px,10vw,150px) var(--gutter)}
+.case-body{padding:clamp(40px,5vw,70px) var(--gutter)}
 .case-body article{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr);gap:40px;padding:clamp(34px,4vw,56px) 0;border-top:1px solid var(--line-l)}
 .case-body h2{color:#6d6a63}
 .case-body article p{font:500 clamp(21px,2.3vw,38px)/1.28 var(--display);letter-spacing:-.035em;max-width:32ch}
+/* story case studies: the question is the headline, the other parts read as calmer body text */
+.case-body article p:not(.story-q){font-size:clamp(18px,1.55vw,25px);line-height:1.5;letter-spacing:-.015em;max-width:44ch}
+.case-body article p.story-src{margin-top:18px;font:450 12px/1.8 var(--mono);letter-spacing:.02em;color:#6d6a63;max-width:none}
+.case-body .story-src a{border-bottom:1px solid var(--line-l)}
+.case-body .story-src a:hover{color:var(--ink);border-color:var(--ink)}
+.case-body article p.story-q{font-size:clamp(26px,3vw,48px);line-height:1.12;max-width:26ch}
+/* ───────── Scroll story (Silverstone) ─────────
+   The chart stays put while the steps scroll past; each step sets data-step on the figure and the scenes respond. */
+.story{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:clamp(30px,5vw,90px);padding:clamp(60px,8vw,120px) var(--gutter);background:var(--ink);color:var(--paper)}
+.story-fig{grid-column:2;grid-row:1;position:sticky;top:12vh;height:76vh;margin:0;display:grid;place-items:center}
+.story-fig svg{width:100%;height:100%;max-height:76vh;overflow:visible;font-family:var(--display)}
+.story-steps{grid-column:1;grid-row:1;padding:16vh 0 30vh}
+.story-step{min-height:72vh;display:flex;flex-direction:column;justify-content:center;opacity:.28;transition:opacity .5s var(--ease)}
+.story-step.is-on{opacity:1}
+.story-k{color:var(--accent);margin-bottom:16px}
+.story-k span{color:var(--fg-dim);margin-right:10px}
+.story-p{font:500 clamp(20px,1.9vw,30px)/1.35 var(--display);letter-spacing:-.025em;max-width:30ch}
+/* svg text and marks */
+.story text{fill:var(--paper);font-size:16px}
+.story .big{font-size:58px;font-weight:700;letter-spacing:-.04em;fill:var(--accent)}
+.story .big.q{font-size:120px;text-anchor:middle;dominant-baseline:middle;fill:var(--paper);opacity:.9}
+.story .cap{font:500 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;fill:var(--fg-dim)}
+.story .lbl{font-size:15px;font-weight:600}
+.story .tick{font:500 13px var(--mono);fill:var(--fg-dim)}
+.story .mid{text-anchor:middle}.story .end{text-anchor:end}.story .dim{fill:var(--fg-dim)}.story .strong{fill:var(--accent)}
+.story .grid{stroke:#ffffff10}.story .axis{stroke:#ffffff30}
+.story .lap-bg{fill:#ffffff14}.story .straight{fill:var(--accent)}
+.story .sc-q circle{fill:#ffffff30}
+.story .pt{fill:#ece8df99;transition:fill .6s,opacity .6s,transform .8s var(--ease)}
+.story .fit{stroke-width:3;stroke-linecap:round;fill:none;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1s var(--ease)}
+.story .fit.all{stroke:var(--accent)}
+.story .fit.s{stroke:#ff8a5b}.story .fit.r{stroke:#7fb2ff}
+.story .bar rect{fill:#ffffff30;transform-box:fill-box;transform-origin:left;transform:scaleX(0);transition:transform .9s var(--ease) calc(var(--i) * 60ms)}
+.story .bar.top rect{fill:var(--accent)}
+.story .bar text{opacity:0;transition:opacity .5s calc(var(--i) * 60ms + .3s)}
+/* scenes: hidden unless their step is showing */
+.story .sc{opacity:0;transition:opacity .6s var(--ease)}
+.story [data-step="q"] .sc-q,.story [data-step="lap"] .sc-lap,.story [data-step="stall"] .sc-lap,
+.story [data-step="scatter"] .sc-scatter,.story [data-step="answer"] .sc-scatter,.story [data-step="trap"] .sc-scatter,
+.story [data-step="team"] .sc-team,.story [data-step="next"] .sc-team,.story [data-step="real"] .sc-real{opacity:1}
+.story .real-name{font-size:24px;font-weight:700}
+.story .real-pos{font-size:24px;font-weight:700}
+.story .real-pos.win{fill:var(--accent)}
+.story .real-row{opacity:0;transform:translateY(12px);transition:opacity .5s calc(var(--i) * 120ms),transform .6s var(--ease) calc(var(--i) * 120ms)}
+.story [data-step="real"] .real-row{opacity:1;transform:none}
+.story-src{margin-top:18px;color:var(--fg-dim);line-height:1.8}
+.story-src a{border-bottom:1px solid var(--line-d)}
+.story-src a:hover{color:var(--paper)}
+.story .stall rect{fill:#ffffff24;transform-box:fill-box;transform-origin:bottom;transform:scaleY(0);transition:transform .8s var(--ease) calc(var(--i) * 90ms)}
+.story .stall text,.story .stall-total{opacity:0;transition:opacity .5s .4s}
+.story [data-step="stall"] .stall rect{transform:none}
+.story [data-step="stall"] .stall text,.story [data-step="stall"] .stall-total{opacity:1}
+.story .r-read,.story .split-read{opacity:0;transition:opacity .5s .3s}
+.story [data-step="answer"] .fit.all{stroke-dashoffset:0}
+.story [data-step="answer"] .r-read{opacity:1}
+.story [data-step="trap"] .fit.by{stroke-dashoffset:0}
+.story [data-step="trap"] .split-read{opacity:1}
+.story [data-step="trap"] .pt{opacity:.25}
+.story [data-step="trap"] .pt.s-S{fill:#ff8a5b;opacity:1}
+.story [data-step="trap"] .pt.s-R{fill:#7fb2ff;opacity:1}
+.story .s-S-t{fill:#ff8a5b}.story .s-R-t{fill:#7fb2ff}
+.story [data-step="team"] .bar rect,.story [data-step="next"] .bar rect{transform:none}
+.story [data-step="team"] .bar text,.story [data-step="next"] .bar text{opacity:1}
+/* without scripts, show the final chart and every step at full strength */
+.no-js .story-step{opacity:1}
+@media (max-width:899px){
+  .story{grid-template-columns:1fr;padding-top:40px}
+  .story-fig{grid-column:1;top:56px;height:40svh;z-index:2;background:var(--ink);border-bottom:1px solid var(--line-d)}
+  .story-fig svg{max-height:40svh}
+  .story-steps{grid-row:2;padding:6vh 0 20vh}
+  .story-step{min-height:40svh;justify-content:flex-start;padding-top:2svh}
+  .story-p{font-size:20px}
+}
+/* ───────── Scroll stories (every case study) ─────────
+   Short steps, one chart. Pieces with data-show appear on their steps; grow/draw/pop animate in when shown. */
+.story-x{--hl:var(--c,var(--accent))}
+.story-h{font:700 clamp(28px,3vw,50px)/1.02 var(--display);letter-spacing:-.045em;max-width:16ch}
+.story-x .story-p{margin-top:14px;font-size:clamp(17px,1.4vw,22px);font-weight:500;line-height:1.45;color:#c3bfb6;max-width:34ch}
+.story-x .story-k{color:var(--hl)}
+.story [data-show]{opacity:0;transition:opacity .6s var(--ease)}
+.story [data-show].is-on{opacity:1}
+.story .grow-x{transform-box:fill-box;transform-origin:left;transform:scaleX(0);transition:transform 1s var(--ease) calc(var(--i,0) * 90ms)}
+.story .grow-y{transform-box:fill-box;transform-origin:bottom;transform:scaleY(0);transition:transform 1s var(--ease) calc(var(--i,0) * 90ms)}
+.story .pop{transform-box:fill-box;transform-origin:center;transform:scale(.6);transition:transform .7s var(--ease) calc(var(--i,0) * 70ms)}
+.story .draw{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.3s var(--ease) calc(var(--i,0) * 120ms)}
+.story .is-on .grow-x,.story .grow-x.is-on,.story .is-on .grow-y,.story .grow-y.is-on,.story .is-on .pop,.story .pop.is-on{transform:none}
+.story .is-on .draw,.story .draw.is-on{stroke-dashoffset:0}
+.story-x text{fill:var(--paper);font-size:16px}
+.story-x .t-huge{font-size:104px;font-weight:700;letter-spacing:-.05em;fill:var(--hl)}
+.story-x .t-big{font-size:56px;font-weight:700;letter-spacing:-.045em}
+.story-x .t-mid{font-size:30px;font-weight:700;letter-spacing:-.03em}
+.story-x .t-lbl{font-size:16px;font-weight:600}
+.story-x .t-cap{font:500 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;fill:var(--fg-dim)}
+.story-x .t-hl{fill:var(--hl)}.story-x .t-dim{fill:var(--fg-dim)}.story-x .t-bad{fill:#ff6b6b}
+.story-x .mid{text-anchor:middle}.story-x .end{text-anchor:end}
+.story-x .bar{fill:#ffffff24}.story-x .bar.hl{fill:var(--hl)}.story-x .bar.bad{fill:#ff6b6b}
+.story-x .ln{stroke:#ffffff30;stroke-width:1.5;fill:none}.story-x .ln.hl{stroke:var(--hl);stroke-width:3}.story-x .ln.bad{stroke:#ff6b6b;stroke-width:2;stroke-dasharray:6 6}
+.story-x .box{fill:#ffffff0d;stroke:#ffffff2e;stroke-width:1.5}.story-x .box.hl{fill:color-mix(in srgb,var(--hl) 16%,transparent);stroke:var(--hl)}
+.story-x .dot{fill:#ffffff2e}.story-x .dot.hl{fill:var(--hl)}.story-x .dot.bad{fill:#ff6b6b}
+.story-x .arrow{stroke:var(--hl);stroke-width:2.5;fill:none;marker-end:url(#arrowhead)}
+.story-x .arrow-tip{fill:var(--hl)}
+.story-x .spin{transform-box:view-box;transform-origin:300px 190px;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.story-x .gust{stroke:#ffffff40;stroke-width:2;stroke-dasharray:40 260;animation:gust 2.4s linear infinite}
+@keyframes gust{from{stroke-dashoffset:300}to{stroke-dashoffset:0}}
+@media (max-width:899px){.story-h{font-size:28px}.story-x .story-p{font-size:17px}}
 .case-links{display:flex;flex-wrap:wrap;gap:12px;padding-top:30px;border-top:1px solid var(--line-l)}
 .next-case{display:block;padding:clamp(70px,10vw,150px) var(--gutter);background:var(--ink);color:var(--paper);border-top:1px solid var(--line-d)}
 .next-case b{display:flex;justify-content:space-between;align-items:center;gap:30px;font:800 clamp(44px,8.5vw,160px)/.9 var(--display);letter-spacing:-.07em;margin-top:18px;transition:color .4s}

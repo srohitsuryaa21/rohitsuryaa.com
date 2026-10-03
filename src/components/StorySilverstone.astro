@@ -1,0 +1,178 @@
+---
+// The Silverstone case study told as a scroll story: the text steps on one side, one chart that changes with them.
+// Every number comes from src/data/stories/silverstone.json, built from the project's own processed data.
+import data from '../data/stories/silverstone.json';
+import type { Lang } from '../i18n/content';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const de = lang === 'de';
+const num = (v: number, d = 2) => v.toLocaleString(de ? 'de-DE' : 'en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (v: number) => `${Math.round(v * 100)}${de ? ' %' : '%'}`;
+const minus = (s: string) => s.replace('-', '−');
+
+const S = Object.fromEntries(data.straights.map((s) => [s.name, s]));
+const pit = S['National Pit Straight'];
+const rAll = minus(num(data.r, 2));
+const rS = minus(num(data.bySession.S.r, 2)), rR = '+' + num(data.bySession.R.r, 2);
+
+// ── chart geometry (one 600 × 460 canvas, every scene draws into it) ──
+const W = 600, H = 460, L = 64, R = 24, T = 40, B = 60;
+const xMin = 212, xMax = 250, yLim = 1.5;
+const sx = (v: number) => L + ((v - xMin) / (xMax - xMin)) * (W - L - R);
+const sy = (g: number) => T + ((yLim - g) / (2 * yLim)) * (H - T - B);
+const clampY = (g: number) => Math.max(-yLim, Math.min(yLim, g));
+const points = data.stints.map((p) => ({ ...p, x: sx(p.v), y: sy(clampY(p.g)), off: Math.abs(p.g) > yLim }));
+const offScale = points.filter((p) => p.off).length;
+// least squares line for a group of stints, drawn across the visible x range
+const fit = (list: typeof data.stints) => {
+  const n = list.length, mx = list.reduce((a, p) => a + p.v, 0) / n, my = list.reduce((a, p) => a + p.g, 0) / n;
+  const b = list.reduce((a, p) => a + (p.v - mx) * (p.g - my), 0) / list.reduce((a, p) => a + (p.v - mx) ** 2, 0);
+  const at = (v: number) => my + b * (v - mx);
+  return { x1: sx(215), y1: sy(clampY(at(215))), x2: sx(248), y2: sy(clampY(at(248))) };
+};
+const lineAll = fit(data.stints);
+const lineS = fit(data.stints.filter((p) => p.s === 'S'));
+const lineR = fit(data.stints.filter((p) => p.s === 'R'));
+const xTicks = [215, 225, 235, 245];
+const yTicks = [-1, 0, 1];
+
+// the lap as one strip, with the four straights from the project's config
+const lap = 5891, lx = (m: number) => 40 + (m / lap) * (W - 80);
+const maxGap = data.teammates[0].gap;
+const names: Record<string, string> = de
+  ? { 'National Pit Straight': 'Start-Ziel', 'Copse to Maggotts Run': 'Maggotts', 'Wellington Straight': 'Wellington', 'Hangar Straight': 'Hangar' }
+  : { 'National Pit Straight': 'Pit straight', 'Copse to Maggotts Run': 'Maggotts', 'Wellington Straight': 'Wellington', 'Hangar Straight': 'Hangar' };
+const shortName = (n: string) => names[n] ?? n;
+
+const copy = de ? {
+  label: 'Die Geschichte',
+  steps: [
+    { k: 'q', h: `Kostet die Batterie Reifen?`, p: `Silverstone 2026. Die Annahme: Wer auf den Geraden pusht, zahlt später mit den Reifen.` },
+    { k: 'lap', h: `Niemand sieht die Batterie.`, p: `Die F1 veröffentlicht Tempo und Gaspedal, keinen Ladezustand. Also las ich ihre Spuren.` },
+    { k: 'stall', h: `${pct(data.derateShare)} der Fahrten brachen ein.`, p: `Vollgas, aber nicht schneller: Die Batterie war leer. ${num(pit.derateMs / 1000, 1)} Sekunden auf der Start-Ziel-Geraden.` },
+    { k: 'scatter', h: `${data.stintCount} Stints, ein Test.`, p: `Kostet Batterieeinsatz Reifen, steigen die Punkte nach rechts an.` },
+    { k: 'answer', h: `r = ${rAll}.`, p: `Kein Zusammenhang. Die Annahme hält den Daten nicht stand.` },
+    { k: 'trap', h: `Die Falle.`, p: `Sprint: r = ${rS}. Rennen: r = ${rR}. Kleine Stichproben, gegensätzliche Geschichten.` },
+    { k: 'team', h: `Sie entschied das Tempo, nicht die Reifen.`, p: `Vorsprung auf den Teamkollegen, gleiches Auto, Ende der Geraden.` },
+    { k: 'real', h: `Wie das Wochenende lief.`, p: `Antonelli gewann den Sprint mit einem Manöver auf der Hangar Geraden. Ein Defekt beendete sein Rennen. Leclerc gewann.` },
+    { k: 'next', h: `Was ich mitnehme.`, p: `Energie ist Fahrstil und Abstimmung. Als Nächstes: andere Strecken. Die Batteriewerte sind abgeleitet, nicht gemessen.` },
+  ],
+  axisX: 'Tempo vor dem Bremspunkt (km/h)', axisY: 'Reifenabbau (s pro Runde)', off: `${offScale} Stints außerhalb der Skala`,
+  lapLabel: 'Eine Runde Silverstone, 5,9 km', stall: 'Fahrten mit Leistungsabfall', stallSub: 'bei Vollgas', sessions: { S: 'Sprint', R: 'Rennen', SQ: 'Sprint-Qualifying' }, teamLabel: 'Vorsprung gegenüber dem Teamkollegen (km/h)',
+  realHead: ['Fahrer', 'Vorsprung', 'Sprint', 'Rennen'], realRows: [['Antonelli', 'P1', 'Keine Punkte'], ['Norris', 'P3', 'P4'], ['Gasly', 'P11', 'P10'], ['Leclerc', 'P5', 'P1']], sources: 'Quellen',
+} : {
+  label: 'The story',
+  steps: [
+    { k: 'q', h: `Does the battery cost tyres?`, p: `Silverstone 2026. The belief: push hard on the straights, pay later in the tyres.` },
+    { k: 'lap', h: `Nobody can see the battery.`, p: `F1 publishes speed and throttle, not charge. So I read it from its footprints.` },
+    { k: 'stall', h: `${pct(data.derateShare)} of runs stalled.`, p: `Flat out, yet no faster: the battery had run dry. ${num(pit.derateMs / 1000, 1)} seconds on the pit straight.` },
+    { k: 'scatter', h: `${data.stintCount} stints, one test.`, p: `If deployment cost tyres, the dots would climb to the right.` },
+    { k: 'answer', h: `r = ${rAll}.`, p: `No relationship. The belief does not survive the data.` },
+    { k: 'trap', h: `The trap.`, p: `Sprint: r = ${rS}. Race: r = ${rR}. Small samples, opposite stories.` },
+    { k: 'team', h: `It decided speed, not tyres.`, p: `Gain over the teammate, same car, end of the straights.` },
+    { k: 'real', h: `How the weekend went.`, p: `Antonelli won the Sprint, passing on the Hangar Straight. A broken part ended his race. Leclerc won.` },
+    { k: 'next', h: `What I take from it.`, p: `Energy is about driving and setup. Next: other circuits. Battery figures are inferred, not measured.` },
+  ],
+  axisX: 'Speed before the braking point (km/h)', axisY: 'Tyre wear (s lost per lap)', off: `${offScale} stints off the scale`,
+  lapLabel: 'One lap of Silverstone, 5.9 km', stall: 'runs where the speed stalled', stallSub: 'while flat out', sessions: { S: 'Sprint', R: 'Race', SQ: 'Sprint qualifying' }, teamLabel: 'Gain over teammate (km/h)',
+  realHead: ['Driver', 'Gain', 'Sprint', 'Race'], realRows: [['Antonelli', 'P1', 'No points'], ['Norris', 'P3', 'P4'], ['Gasly', 'P11', 'P10'], ['Leclerc', 'P5', 'P1']], sources: 'Sources',
+};
+---
+<section class="story story-x" aria-label={copy.label}>
+  <figure class="story-fig" data-step="team" aria-hidden="true">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img">
+      <!-- scene: the question (a single dot field, like the data before anyone looks at it) -->
+      <g class="sc sc-q">
+        {points.map((_, i) => <circle cx={300 + Math.cos(i * 2.4) * (40 + (i % 9) * 18)} cy={230 + Math.sin(i * 2.4) * (30 + (i % 7) * 20)} r="4" />)}
+        <text x="300" y="236" class="big q">?</text>
+      </g>
+
+      <!-- scene: the lap and its four straights -->
+      <g class="sc sc-lap">
+        <rect x="40" y="226" width={W - 80} height="10" rx="5" class="lap-bg" />
+        {data.straights.map((s, i) => (
+          <g style={`--i:${i}`}>
+            <rect x={lx(s.start)} y="222" width={lx(s.end) - lx(s.start)} height="18" rx="4" class="straight" />
+            <text x={(lx(s.start) + lx(s.end)) / 2} y={i % 2 ? 292 : 268} class="lbl mid">{shortName(s.name)}</text>
+          </g>
+        ))}
+        <text x="40" y="330" class="cap">{copy.lapLabel}</text>
+        <!-- stall bars: share of runs where the speed stalled while flat out -->
+        {data.straights.map((s, i) => (
+          <g class="stall" style={`--i:${i}`}>
+            <rect x={(lx(s.start) + lx(s.end)) / 2 - 22} y={208 - s.derateShare * 130} width="44" height={s.derateShare * 130} rx="4" />
+            <text x={(lx(s.start) + lx(s.end)) / 2} y={198 - s.derateShare * 130} class="lbl mid strong">{pct(s.derateShare)}</text>
+          </g>
+        ))}
+        <g class="stall-total">
+          <text x="300" y="398" class="big mid">{pct(data.derateShare)}</text>
+          <text x="300" y="426" class="cap mid">{copy.stall}</text>
+          <text x="300" y="448" class="cap mid dim">{copy.stallSub}</text>
+        </g>
+      </g>
+
+      <!-- scene: the scatter of 90 stints -->
+      <g class="sc sc-scatter">
+        <line x1={L} x2={W - R} y1={sy(0)} y2={sy(0)} class="axis zero" />
+        {xTicks.map((v) => <g><line x1={sx(v)} x2={sx(v)} y1={T} y2={H - B} class="grid" /><text x={sx(v)} y={H - B + 22} class="tick mid">{v}</text></g>)}
+        {yTicks.map((g) => <text x={L - 10} y={sy(g) + 5} class="tick end">{g > 0 ? `+${g}` : minus(String(g))}</text>)}
+        <text x={(L + W - R) / 2} y={H - 12} class="cap mid">{copy.axisX}</text>
+        <text x="16" y={(T + H - B) / 2} class="cap mid" transform={`rotate(-90 16 ${(T + H - B) / 2})`}>{copy.axisY}</text>
+        {points.map((p, i) => p.off
+          ? <path d={p.g > 0 ? `M${p.x - 5} ${p.y + 6} L${p.x} ${p.y - 3} L${p.x + 5} ${p.y + 6} Z` : `M${p.x - 5} ${p.y - 6} L${p.x} ${p.y + 3} L${p.x + 5} ${p.y - 6} Z`} class={`pt off s-${p.s}`} style={`--i:${i}`} />
+          : <circle cx={p.x} cy={p.y} r="5" class={`pt s-${p.s}`} style={`--i:${i}`} />)}
+        <text x={W - R} y={T - 14} class="tick end dim">{copy.off}</text>
+        <line {...lineAll} pathLength="1" class="fit all" />
+        <line {...lineS} pathLength="1" class="fit by s" />
+        <line {...lineR} pathLength="1" class="fit by r" />
+        <g class="r-read">
+          <text x={W - R - 8} y={T + 34} class="big end" data-r={data.r}>r = {rAll}</text>
+          <text x={W - R - 8} y={T + 60} class="cap end">{data.stintCount} stints</text>
+        </g>
+        <g class="split-read">
+          <text x={W - R - 8} y={T + 30} class="lbl end s-S-t">{copy.sessions.S}: r = {rS}</text>
+          <text x={W - R - 8} y={T + 54} class="lbl end s-R-t">{copy.sessions.R}: r = {rR}</text>
+        </g>
+      </g>
+
+      <!-- scene: teammate gains -->
+      <g class="sc sc-team">
+        <text x="40" y="44" class="cap">{copy.teamLabel}</text>
+        {data.teammates.map((m, i) => (
+          <g style={`--i:${i}`} class={i < 4 ? 'bar top' : 'bar'}>
+            <text x="150" y={84 + i * 33} class="lbl end">{m.lead} <tspan class="dim">vs {m.other}</tspan></text>
+            <rect x="162" y={70 + i * 33} width={(m.gap / maxGap) * 360} height="20" rx="4" />
+            <text x={168 + (m.gap / maxGap) * 360} y={85 + i * 33} class="lbl strong">+{num(m.gap, 1)}</text>
+          </g>
+        ))}
+      </g>
+      <!-- scene: how the weekend actually went (official results, see the sources under the step) -->
+      <g class="sc sc-real">
+        {copy.realHead.map((h, c) => <text x={[40, 220, 330, 430][c]} y="96" class="cap">{h}</text>)}
+        {copy.realRows.map((row, i) => (
+          <g style={`--i:${i}`} class="real-row">
+            <line x1="40" x2={W - 30} y1={124 + i * 74} y2={124 + i * 74} class="grid" />
+            <text x="40" y={168 + i * 74} class="lbl real-name">{row[0]}</text>
+            <text x="220" y={168 + i * 74} class="lbl strong">+{num(data.teammates[i].gap, 1)}</text>
+            <text x="330" y={168 + i * 74} class={`lbl real-pos ${row[1] === 'P1' ? 'win' : ''}`}>{row[1]}</text>
+            <text x="430" y={168 + i * 74} class={`lbl real-pos ${row[2] === 'P1' ? 'win' : ''}`}>{row[2]}</text>
+          </g>
+        ))}
+      </g>
+    </svg>
+  </figure>
+
+  <div class="story-steps">
+    {copy.steps.map((s, i) => (
+      <article class="story-step" data-step={s.k}>
+        <p class="mono story-k"><span>{String(i + 1).padStart(2, '0')}</span></p>
+        <h2 class="story-h">{s.h}</h2>
+        <p class="story-p">{s.p}</p>
+        {s.k === 'real' && (
+          <p class="story-src mono">{copy.sources}: <a href="https://www.formula1.com/en/latest/article/leclerc-wins-dramatic-british-grand-prix-from-russell-and-hamilton-as-antonelli-suffers-issue.3bGl6laB38GIr1PfxJTNmY" target="_blank" rel="noopener">Formula 1, race report ↗</a> · <a href="https://www.the-race.com/formula-1/british-gp-2026-formula-1-sprint-race-results/" target="_blank" rel="noopener">The Race, Sprint results ↗</a></p>
+        )}
+      </article>
+    ))}
+  </div>
+</section>
