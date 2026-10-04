@@ -139,7 +139,7 @@ const glyphs = [0, 1, 2];
                 <p class="panel-desc">{p.description}</p>
                 <div class="panel-links">
                   <a href={work(p.slug)}>{p.slug === 'silverstone-telemetry' ? t.work.story : t.work.caseStudy} <span>↗</span></a>
-                  <a href={`${site.github}/${p.repo}`} target="_blank" rel="noopener">{t.work.source} <span>↗</span></a>
+                  {p.repo && <a href={`${site.github}/${p.repo}`} target="_blank" rel="noopener">{t.work.source} <span>↗</span></a>}
                   {p.doi && <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener">IEEE <span>↗</span></a>}
                 </div>
               </div>
@@ -154,9 +154,12 @@ const glyphs = [0, 1, 2];
     </a>
   </section>
 
+  <!-- 03 ON MY DESK (up next) -->
+  <OnMyDesk lang={lang} />
+
   <!-- 05 PRINCIPLES (stacking cards) -->
   <section class="principles light" aria-labelledby="principles-title">
-    <div class="section-label mono"><span>(03)</span><span id="principles-title">{t.principles.label}</span><span>{t.principles.aside}</span></div>
+    <div class="section-label mono"><span>(04)</span><span id="principles-title">{t.principles.label}</span><span>{t.principles.aside}</span></div>
     <div class="stack">
       {t.principles.items.map((p, i) => (
         <article class={`card card-${i}`}>
@@ -179,7 +182,7 @@ const glyphs = [0, 1, 2];
   <section class="experience" id="experience" aria-labelledby="exp-title">
     <div class="exp-grid">
       <div class="exp-head">
-        <div class="section-label mono"><span>(04)</span><span>{t.experience.label}</span></div>
+        <div class="section-label mono"><span>(05)</span><span>{t.experience.label}</span></div>
         <h2 id="exp-title" data-split>{t.experience.title} <em>{t.experience.titleEm}</em></h2>
       </div>
       <ol class="timeline" data-more={t.experience.more}>
@@ -206,9 +209,6 @@ const glyphs = [0, 1, 2];
       </div>
     </div>
   </section>
-
-  <!-- ON MY DESK (work in progress) -->
-  <OnMyDesk lang={lang} />
 
   <!-- 07 TOOLKIT (a network you travel down) -->
   <Network lang={lang} />

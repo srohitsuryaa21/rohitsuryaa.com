@@ -1,0 +1,171 @@
+---
+// JUMO laser trimming (MSc team project, Hochschule Fulda, 2026). Facts: the team's final presentation,
+// weekly status reports and validation results (04_ML_MODELING_AND_VALIDATION_RESULTS.md). No teammate names.
+// Real world: EU AI Act Article 50 transparency rules, in force from 2 August 2026.
+import ScrollStory, { type Step } from '../ScrollStory.astro';
+import type { Lang } from '../../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const src = [{ label: de ? 'Cooley: EU AI Act Transparenzpflichten' : 'Cooley: EU AI Act transparency obligations', url: 'https://www.cooley.com/news/insight/2026/2026-08-03-eu-ai-act-transparency-obligations-take-effect-2-august-2026' }];
+const steps: Step[] = de ? [
+  { k: 'q', h: 'Eine Zahl treffen, bevor sie sich bewegt.', p: 'JUMO baut Platin Temperatursensoren. Jeder muss einen exakten Widerstand treffen.' },
+  { k: 'line', h: 'Der Laser stellt zu früh ein.', p: 'Siebdruck und Selektion verschieben den Widerstand danach. Die Korrektur muss das vorhersehen.' },
+  { k: 'data', h: '47.115 Substrate. 2.737 bewertete Aufträge.', p: 'Acht Dateien, die Stufe für Stufe schrumpfen. Ein blinder Merge hätte gelogen.' },
+  { k: 'gaps', h: 'Jede Lücke hatte einen Grund.', p: '294 Substrate zerbrachen vor dem Sputtern. Über 8.000 hatten keinen Auftrag. Eine ID lautete 9,22E+18.' },
+  { k: 'target', h: 'Welche Korrektur?', p: 'Manche Sensoren werden zweimal getrimmt. Das Ziel ist die letzte Korrektur im Reinraum: NCTr.' },
+  { k: 'refused', h: 'R² 0,987. Nicht ausgeliefert.', p: 'Der erste Lauf glänzte, aber auf dem falschen Ziel. Wir sind zurückgegangen.' },
+  { k: 'result', h: '5× weniger Fehler.', p: 'RMSE 0,1044 → 0,0202. 99,63 % innerhalb von ±0,1.' },
+  { k: 'groups', h: '73 Sensortypen → 12 Gruppen.', p: 'Ein Parser liest Typ, Geometrie und Widerstand direkt aus der Teilenummer.' },
+  { k: 'trust', h: 'Jede Antwort ist nachvollziehbar.', p: 'Modellversion, KI Kennzeichnung und Eingaben werden mit jeder Empfehlung gespeichert. Der Bediener entscheidet.' },
+  { k: 'mine', h: 'Mein Teil.', p: 'Problemstellung, Quelleninventar, Join Protokolle, Trust Controls, der Teilenummer Parser, die NCTr Korrektur und der End to End Test.' },
+  { k: 'real', h: 'Das Gesetz zieht nach.', p: 'Seit dem 2. August 2026 gelten die Transparenzpflichten des EU AI Act. Unsere App kennzeichnete KI Ausgaben schon vorher.', src },
+  { k: 'next', h: 'Als Nächstes: SHAP und Drift.', p: 'Erklärungen pro Empfehlung und eine Warnung, wenn sich die Fertigung verändert.' },
+] : [
+  { k: 'q', h: 'Hit one number. Before it moves.', p: 'JUMO makes platinum temperature sensors. Each must hit an exact resistance.' },
+  { k: 'line', h: 'The laser sets it too early.', p: 'Printing and selection shift the resistance afterwards. The correction has to predict that.' },
+  { k: 'data', h: '47,115 substrates. 2,737 graded orders.', p: 'Eight files that shrink stage by stage. One blind merge would have lied.' },
+  { k: 'gaps', h: 'Every gap meant something.', p: '294 substrates broke before sputtering. 8,000+ had no order. One ID read 9.22E+18.' },
+  { k: 'target', h: 'Which correction?', p: 'Some sensors are trimmed twice. The target is the last correction in the clean room: NCTr.' },
+  { k: 'refused', h: 'R² 0.987. We did not ship it.', p: 'The first run looked brilliant, on the wrong target. We went back.' },
+  { k: 'result', h: '5× lower error.', p: 'RMSE 0.1044 → 0.0202. 99.63% inside ±0.1 tolerance.' },
+  { k: 'groups', h: '73 sensor types → 12 groups.', p: 'A parser reads type, geometry and resistance straight from the part number.' },
+  { k: 'trust', h: 'Every answer is traceable.', p: 'Model version, AI label and inputs are saved with each recommendation. The operator decides.' },
+  { k: 'mine', h: 'My part.', p: 'Framing, the source inventory, join audits, trust controls, the part number parser, the NCTr fix and the end to end test.' },
+  { k: 'real', h: 'The law caught up.', p: 'EU AI Act transparency rules apply from 2 August 2026. Our app already labelled every AI output.', src },
+  { k: 'next', h: 'Next: SHAP and drift.', p: 'An explanation for every recommendation, and an alert when the line changes.' },
+];
+const n = (en: string, d: string) => (de ? d : en);
+const num = (v: number) => v.toLocaleString(de ? 'de-DE' : 'en-US');
+const stages = [n('Sputtering', 'Sputtern'), n('Lithography', 'Lithografie'), 'Laser', n('Printing', 'Siebdruck'), n('Selection', 'Selektion')];
+const funnel: [string, number][] = [['Substrate', 47115], ['Sputter', 46828], ['Laser', 37118], [n('Screen print', 'Siebdruck'), 3121], [n('Selection', 'Selektion'), 2737]];
+const fx = (v: number) => (v / 47115) * 360;
+const chain = ['N', 'NT', 'NC'];
+const part = [{ t: 'PCA', l: n('type', 'Typ') }, { t: '2005', l: n('geometry', 'Geometrie') }, { t: '10', l: 'Pt1000' }];
+const mine = de
+  ? ['Problemstellung', 'Quelleninventar', 'Join Protokolle', 'Trust Controls', 'Teilenummer Parser', 'NCTr Korrektur', 'End to End Test']
+  : ['Framing', 'Source inventory', 'Join audits', 'Trust controls', 'Part number parser', 'NCTr fix', 'End to end test'];
+---
+<ScrollStory steps={steps} label={de ? 'Die Geschichte' : 'The story'} sources={de ? 'Quellen' : 'Sources'}>
+  <g data-show="q">
+    {[['Pt100', '100 Ω'], ['Pt500', '500 Ω'], ['Pt1000', '1000 Ω']].map(([a, b], i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x={40 + i * 180} y="150" width="160" height="160" rx="16" class={i === 2 ? 'box hl' : 'box'} />
+        <text x={120 + i * 180} y="230" class="t-mid mid">{a}</text>
+        <text x={120 + i * 180} y="262" class="t-cap mid">{b} · 0 °C</text>
+      </g>
+    ))}
+    <text x="300" y="380" class="t-lbl mid t-dim">{n('Graded F 0.1 · F 0.15 · F 0.3', 'Klassen F 0,1 · F 0,15 · F 0,3')}</text>
+  </g>
+
+  <g data-show="line">
+    {stages.map((s, i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x={20 + i * 116} y="190" width="100" height="64" rx="12" class={i === 2 ? 'box hl' : 'box'} />
+        <text x={70 + i * 116} y="228" class="t-lbl mid" style="font-size:14px">{s}</text>
+        {i < 4 && <line x1={122 + i * 116} x2={134 + i * 116} y1="222" y2="222" class="arrow" />}
+      </g>
+    ))}
+    <text x="302" y="170" class="t-cap mid t-hl">{n('NC is set here', 'Hier wird NC gesetzt')}</text>
+    <path d="M418 258 C 418 330, 302 330, 302 260" class="arrow draw" pathLength="1" />
+    <text x="360" y="356" class="t-cap mid">{n('second trim for some types', 'zweiter Trim bei manchen Typen')}</text>
+    <text x="500" y="160" class="t-cap mid">{n('shifts after', 'Verschiebung danach')} →</text>
+  </g>
+
+  <g data-show="data">
+    <text x="40" y="60" class="t-cap">{n('Rows per file', 'Zeilen je Datei')}</text>
+    {funnel.map(([t, v], i) => (
+      <g>
+        <text x="40" y={112 + i * 74} class="t-lbl">{t}</text>
+        <rect x="40" y={122 + i * 74} width={Math.max(6, fx(v))} height="26" rx="6" class={`grow-x ${i === 4 ? 'bar hl' : 'bar'}`} style={`--i:${i}`} />
+        <text x={52 + Math.max(6, fx(v))} y={142 + i * 74} class={`t-lbl ${i === 4 ? 't-hl' : ''}`}>{num(v)}</text>
+      </g>
+    ))}
+  </g>
+
+  <g data-show="gaps">
+    {[['294', n('broke before sputtering', 'vor dem Sputtern zerbrochen')], ['8,000+', n('substrates with no order', 'Substrate ohne Auftrag')], ['9.22E+18', n('one ID, mangled by Excel', 'eine ID, von Excel zerlegt')]].map(([v, l], i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <text x="300" y={130 + i * 130} class={`t-big mid ${i === 2 ? 't-bad' : 't-hl'}`}>{de ? v.replace(',', '.').replace('9.22', '9,22') : v}</text>
+        <text x="300" y={162 + i * 130} class="t-cap mid">{l}</text>
+      </g>
+    ))}
+  </g>
+
+  <g data-show="target">
+    <text x="300" y="120" class="t-cap mid">{n('Take the latest correction that exists', 'Die letzte vorhandene Korrektur nehmen')}</text>
+    {chain.map((c, i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x={60 + i * 180} y="170" width="120" height="90" rx="14" class={i === 0 ? 'box hl' : 'box'} />
+        <text x={120 + i * 180} y="225" class="t-mid mid">{c}</text>
+        {i < 2 && <line x1={184 + i * 180} x2={236 + i * 180} y1="215" y2="215" class="arrow" />}
+      </g>
+    ))}
+    <text x="300" y="340" class="t-big mid t-hl">= NCTr</text>
+  </g>
+
+  <g data-show="refused">
+    <text x="300" y="220" class="t-huge mid">0{n('.', ',')}987</text>
+    <line x1="120" y1="190" x2="480" y2="190" stroke="#ff6b6b" stroke-width="10" class="draw" pathLength="1" />
+    <text x="300" y="276" class="t-cap mid">R² {n('on the wrong target', 'auf dem falschen Ziel')}</text>
+  </g>
+
+  <g data-show="result">
+    <text x="40" y="60" class="t-cap">RMSE</text>
+    <text x="40" y="108" class="t-lbl t-dim">{n('Linear baseline', 'Lineare Baseline')}</text>
+    <rect x="40" y="118" width="420" height="30" rx="6" class="bar grow-x" />
+    <text x="472" y="140" class="t-lbl">{n('0.1044', '0,1044')}</text>
+    <text x="40" y="190" class="t-lbl t-hl">XGBoost (NCTr)</text>
+    <rect x="40" y="200" width={0.0202 / 0.1044 * 420} height="30" rx="6" class="bar hl grow-x" style="--i:2" />
+    <text x={52 + 0.0202 / 0.1044 * 420} y="222" class="t-lbl t-hl">{n('0.0202', '0,0202')}</text>
+    <text x="40" y="300" class="t-cap">{n('Within ±0.1 tolerance', 'Innerhalb ±0,1 Toleranz')}</text>
+    <text x="40" y="370" class="t-big t-dim">{n('82.40%', '82,40 %')}</text>
+    <text x="300" y="370" class="t-big t-hl">→ {n('99.63%', '99,63 %')}</text>
+  </g>
+
+  <g data-show="groups">
+    <text x="300" y="120" class="t-mid mid">PCA  1.2005.10S  10</text>
+    {part.map((p, i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x={60 + i * 170} y="190" width="140" height="90" rx="14" class={i === 2 ? 'box hl' : 'box'} />
+        <text x={130 + i * 170} y="240" class="t-mid mid">{p.t}</text>
+        <text x={130 + i * 170} y="266" class="t-cap mid">{p.l}</text>
+      </g>
+    ))}
+    <text x="300" y="380" class="t-big mid t-hl">73 → 12</text>
+  </g>
+
+  <g data-show="trust">
+    <rect x="70" y="80" width="460" height="320" rx="20" class="box hl pop" />
+    <text x="110" y="132" class="t-cap">{n('Recommended NC', 'Empfohlene NC')}</text>
+    <text x="110" y="200" class="t-huge" style="font-size:80px">−0{n('.', ',')}045</text>
+    {[['model_version', 'fe5c8e4a…14c6'], ['is_ai_generated', 'true'], [n('saved', 'gespeichert'), n('inputs · time · fallbacks', 'Eingaben · Zeit · Fallbacks')]].map(([k, v], i) => (
+      <g><text x="110" y={268 + i * 40} class="t-cap">{k}</text><text x="490" y={268 + i * 40} class="t-lbl end">{v}</text></g>
+    ))}
+  </g>
+
+  <g data-show="mine">
+    {mine.map((m, i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x={i % 2 ? 310 : 50} y={70 + Math.floor(i / 2) * 92} width="240" height="70" rx="12" class="box hl" />
+        <text x={(i % 2 ? 310 : 50) + 120} y={112 + Math.floor(i / 2) * 92} class="t-lbl mid">{m}</text>
+      </g>
+    ))}
+  </g>
+
+  <g data-show="real">
+    <text x="300" y="200" class="t-huge mid">{n('2 Aug 2026', '2.8.2026')}</text>
+    <text x="300" y="244" class="t-cap mid">{n('EU AI Act transparency rules apply', 'EU AI Act Transparenzpflichten gelten')}</text>
+    <rect x="160" y="300" width="280" height="64" rx="12" class="box hl pop" />
+    <text x="300" y="339" class="t-lbl mid">is_ai_generated: true</text>
+  </g>
+
+  <g data-show="next">
+    {[['SHAP', n('why this NC', 'warum diese NC')], ['Evidently', n('drift alerts', 'Drift Warnungen')], [n('FA_ID −1', 'FA_ID −1'), n('recover 8,000+ rows', '8.000+ Zeilen zurückholen')]].map(([a, b], i) => (
+      <g class="pop" style={`--i:${i}`}>
+        <rect x="120" y={90 + i * 110} width="360" height="80" rx="14" class="box" style="stroke-dasharray:6 6" />
+        <text x="300" y={126 + i * 110} class="t-lbl mid t-hl">{a}</text>
+        <text x="300" y={150 + i * 110} class="t-cap mid">{b}</text>
+      </g>
+    ))}
+  </g>
+</ScrollStory>
