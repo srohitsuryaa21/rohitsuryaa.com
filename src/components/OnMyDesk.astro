@@ -5,6 +5,17 @@ import type { Lang } from '../i18n/content';
 interface Props { lang: Lang }
 const de = Astro.props.lang === 'de';
 const n = (en: string, d: string) => (de ? d : en);
+const plan = de ? [
+    ['01', 'Sammeln', 'Monatliche DB Verspätungsdaten für jeden Bahnhof, ab 2024.'],
+    ['02', 'Lernen', 'Verspätung als Bandbreite von Ergebnissen, nicht als eine Schätzung.'],
+    ['03', 'Verbinden', 'P(Anschluss) = Chance, dass die Verspätung in die Umstiegszeit passt.'],
+    ['04', 'Beraten', 'Ein Agent vergleicht Routen und wählt die, die am ehesten klappt.'],
+  ] : [
+    ['01', 'Collect', 'Monthly DB delay files for every station, from 2024 on.'],
+    ['02', 'Learn', 'Arrival delay as a range of outcomes, not one guess.'],
+    ['03', 'Connect', 'P(make it) = chance the delay fits inside the transfer time.'],
+    ['04', 'Advise', 'An agent compares routes and picks the one most likely to work.'],
+  ];
 const src = 'https://eisenbahn.de/geramond-vgb/jahresbilanz-2025-puenktlichkeit-der-deutschen-bahn-sinkt-weiter_17653';
 // a bell shaped arrival curve for the incoming train; the connection leaves at the dashed line
 const W = 640, base = 300, x0 = 60, peak = 250, spread = 70, depart = 360;
@@ -42,4 +53,25 @@ const lateArea = `M${depart} ${base} L` + late.map(([x, y]) => `${x} ${y.toFixed
       <text x={W / 2} y="372" text-anchor="middle" class="desk-big">P({n('make it', 'Anschluss')}) = ?</text>
     </svg>
   </div>
+  <!-- the deeper plan: opens on hover (mouse) or with the button (touch) -->
+  <button class="desk-toggle mono" type="button" aria-expanded="false" aria-controls="desk-more">{n('The plan', 'Der Plan')} <span aria-hidden="true">+</span></button>
+  <div class="desk-more" id="desk-more"><div class="desk-more-in">
+    <ol class="desk-plan">
+      {plan.map(([k, h, p]) => <li><span class="mono">{k}</span><b>{h}</b><p>{p}</p></li>)}
+    </ol>
+    <div class="desk-meta">
+      <p><span class="mono">{n('Stack', 'Stack')}</span>Python · DuckDB · LightGBM · {n('conformal prediction', 'Conformal Prediction')} · FastAPI · LangGraph</p>
+      <p><span class="mono">{n('Done when', 'Fertig, wenn')}</span>{n('Of the transfers it calls 80% likely, about 80% are actually made.', 'Von den Umstiegen, die es mit 80 % ansagt, klappen auch etwa 80 %.')}</p>
+    </div>
+  </div></div>
 </section>
+
+<script>
+  const desk = document.querySelector<HTMLElement>('.desk');
+  const btn = desk?.querySelector<HTMLButtonElement>('.desk-toggle');
+  btn?.addEventListener('click', () => {
+    const open = !desk!.classList.contains('is-open');
+    desk!.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+  });
+</script>

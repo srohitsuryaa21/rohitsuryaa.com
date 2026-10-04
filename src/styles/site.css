@@ -573,7 +573,31 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .demo-note{color:var(--fg-dim);line-height:1.7}
 @media (max-width:899px){.demo-grid{grid-template-columns:1fr}.demo-out{position:static}}
 /* ───────── On my desk (work in progress) ───────── */
-.desk{padding:clamp(80px,10vw,140px) var(--gutter);background:var(--ink)}
+.desk{padding:clamp(28px,3vw,48px) var(--gutter) clamp(60px,7vw,100px);background:var(--ink)}
+/* sits right under the work section: drop that section's bottom padding so there is no double gap */
+.motion-h .work:has(+ .desk),.work:has(+ .desk){padding-bottom:0}
+.desk .section-label{margin-bottom:clamp(20px,3vw,40px)}
+.desk-toggle{display:none;margin-top:18px;padding:9px 16px;border:1px solid var(--line-d);border-radius:99px;background:none;color:var(--paper);font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.desk-toggle span{display:inline-block;color:var(--accent);margin-left:6px;transition:transform .4s var(--ease)}
+.desk.is-open .desk-toggle span{transform:rotate(45deg)}
+.desk-more{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .6s var(--ease),opacity .4s,margin .6s var(--ease)}
+.desk-more>*{min-height:0;overflow:hidden}
+.desk-more{grid-template-columns:1fr}
+.desk:hover .desk-more,.desk:focus-within .desk-more,.desk.is-open .desk-more{grid-template-rows:1fr;opacity:1;margin-top:clamp(28px,3vw,44px)}
+.desk-plan{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.desk-plan li{padding:20px;border:1px solid var(--line-d);border-radius:16px;background:var(--ink-2)}
+.desk-plan li span{color:var(--accent)}
+.desk-plan b{display:block;margin:8px 0 6px;font-size:20px;letter-spacing:-.02em}
+.desk-plan p{color:#c3bfb6;font-size:15px;line-height:1.45}
+.desk-meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.desk-meta p{display:grid;gap:6px;padding:16px 20px;border-top:1px solid var(--line-d);color:#c3bfb6;font-size:15px}
+.desk-meta span{color:var(--fg-dim)}
+@media (hover:none),(max-width:899px){
+  .desk-toggle{display:inline-block}
+  .desk:hover .desk-more,.desk:focus-within .desk-more{grid-template-rows:0fr;opacity:0;margin-top:0}
+  .desk.is-open .desk-more{grid-template-rows:1fr;opacity:1;margin-top:24px}
+  .desk-plan,.desk-meta{grid-template-columns:1fr}
+}
 .desk-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(30px,5vw,80px);align-items:center}
 .desk h2{font:700 clamp(34px,3.6vw,60px)/.98 var(--display);letter-spacing:-.05em}
 .desk h2 em{display:block;color:var(--accent)}
