@@ -15,6 +15,7 @@ export const projects: Project[] = [
     challenge:'Every step after laser trimming shifts a sensor’s resistance, yet the correction has to be set before those steps happen.',
     approach:'Joined eight production files in process order, resolved which correction the model should learn, and trained tracked XGBoost models behind a FastAPI and React app.',
     result:'RMSE fell from 0.1044 to 0.0202, and 99.63% of predictions landed inside the ±0.1 tolerance.',
+    repo:'laser-correction-prediction-system',
     de: { name:'Vertrauenswürdige KI für eine Fertigungslinie.', category:'Industrielles ML', year:'Teamprojekt im Master, 2026', metric:'99,63 %', metricLabel:'Innerhalb ±0,1 Toleranz', description:'Ein Modell, das bei JUMO die Laserkorrektur für Platin Temperatursensoren empfiehlt, mit einem Audit Trail, dem Bediener vertrauen können.', challenge:'Jeder Schritt nach dem Lasertrimmen verschiebt den Widerstand, doch die Korrektur muss vorher feststehen.', approach:'Acht Fertigungsdateien in Prozessreihenfolge verknüpft, das richtige Korrekturziel bestimmt und nachverfolgte XGBoost Modelle hinter einer App mit FastAPI und React trainiert.', result:'Der RMSE sank von 0,1044 auf 0,0202, und 99,63 % der Vorhersagen lagen innerhalb der Toleranz von ±0,1.' } },
   { slug:'windmill-pitch-prediction', name:'Teaching a turbine to anticipate the wind.', short:'Windmill Pitch Prediction', category:'Research', year:'IEEE, 2023', art:'wind', color:'#c8f169',
     metric:'+21%', metricLabel:'Power output', tags:['Python','XGBoost','Time series'],
