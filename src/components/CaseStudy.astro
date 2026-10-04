@@ -10,6 +10,7 @@ import StoryFinGuard from './stories/StoryFinGuard.astro';
 import StoryDefi from './stories/StoryDefi.astro';
 import StoryAviation from './stories/StoryAviation.astro';
 import StoryAttrition from './stories/StoryAttrition.astro';
+import StoryJumo from './stories/StoryJumo.astro';
 import AttritionDemo from './AttritionDemo.astro';
 import { caseCopy, home, site, localePath, type Lang } from '../i18n/content';
 
@@ -26,7 +27,7 @@ const [first, ...rest] = project.name.split(' ');
 const Story = ({
   'windmill-pitch-prediction': StoryWindmill, 'supply-chain-intelligence': StorySupply, 'luxury-concierge': StoryConcierge,
   'finguard-payops': StoryFinGuard, 'defi-farmer-platform': StoryDefi, 'aviation-delay-ontology': StoryAviation,
-  'silverstone-telemetry': StorySilverstone, 'employee-attrition': StoryAttrition,
+  'silverstone-telemetry': StorySilverstone, 'employee-attrition': StoryAttrition, 'jumo-laser-trimming': StoryJumo,
 } as Record<string, any>)[project.slug];
 const path = `/work/${project.slug}/`;
 ---
@@ -56,12 +57,12 @@ const path = `/work/${project.slug}/`;
   </div>
   {Story && <Story lang={lang} />}
   {project.slug === 'employee-attrition' && <AttritionDemo lang={lang} />}
-  <section class="case-body light" aria-label={project.short}>
+  {(project.repo || project.doi) && <section class="case-body light" aria-label={project.short}>
     <div class="case-links">
-      <a class="pill-link" href={`${site.github}/${project.repo}`} target="_blank" rel="noopener">{t.code} <span>↗</span></a>
+      {project.repo && <a class="pill-link" href={`${site.github}/${project.repo}`} target="_blank" rel="noopener">{t.code} <span>↗</span></a>}
       {project.doi && <a class="pill-link ghost" href={`https://doi.org/${project.doi}`} target="_blank" rel="noopener">{t.paper} <span>↗</span></a>}
     </div>
-  </section>
+  </section>}
   <a class="next-case" href={localePath(lang, `/work/${next.slug}/`)} style={`--c:${next.color}`}>
     <span class="mono">{t.next}</span>
     <b>{next.short}<span>↗</span></b>

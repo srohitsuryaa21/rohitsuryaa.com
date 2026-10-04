@@ -49,8 +49,8 @@ export const home = {
       { value: 2, suffix: '', label: 'IEEE papers', note: 'Machine learning and blockchain finance', pad: true, why: 'Windmill pitch prediction (2023) and blockchain finance for farmers (2024).' },
     ],
     work: {
-      label: 'What I built', title: 'Eight projects,', titleEm: 'all open source.',
-      intro: 'Each one started with a real question. All the code is on GitHub.',
+      label: 'What I built', title: 'Nine projects.', titleEm: 'Real questions.',
+      intro: 'One from a real factory line. Eight with all the code on GitHub.',
       index: 'Project index', cursor: 'View case', caseStudy: 'Case study', story: 'Interactive story', source: 'Source', more: 'More on GitHub',
       prev: 'Previous project', next: 'Next project',
     },
@@ -130,8 +130,8 @@ export const home = {
       { value: 2, suffix: '', label: 'Veröffentlichungen', note: 'IEEE, Machine Learning und Blockchain', pad: true, why: 'Windrad Pitch Prognose (2023) und Blockchain Finanzierung für Bauern (2024).' },
     ],
     work: {
-      label: 'Was ich gebaut habe', title: 'Acht Projekte,', titleEm: 'alle Open Source.',
-      intro: 'Jedes begann mit einer echten Frage. Der ganze Code liegt auf GitHub.',
+      label: 'Was ich gebaut habe', title: 'Neun Projekte.', titleEm: 'Echte Fragen.',
+      intro: 'Eins aus einer echten Fertigungslinie. Acht mit dem ganzen Code auf GitHub.',
       index: 'Projektübersicht', cursor: 'Ansehen', caseStudy: 'Fallstudie', story: 'Interaktive Story', source: 'Code', more: 'Mehr auf GitHub',
       prev: 'Vorheriges Projekt', next: 'Nächstes Projekt',
     },
