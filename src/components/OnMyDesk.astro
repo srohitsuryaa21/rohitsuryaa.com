@@ -18,7 +18,7 @@ const late = pts.filter(([x]) => x >= depart);
 const lateArea = `M${depart} ${base} L` + late.map(([x, y]) => `${x} ${y.toFixed(1)}`).join(' L') + ` L${late[late.length - 1][0]} ${base} Z`;
 ---
 <section class="desk" aria-labelledby="desk-title">
-  <div class="section-label mono"><span>(03)</span><span>{n('On my desk', 'Auf meinem Tisch')}</span><span>{n('Up next', 'Als Nächstes')}</span></div>
+  <div class="section-label mono"><span>(03)</span><span>{n('Next stop', 'Nächster Halt')}</span><span>{n('Boarding soon', 'Einstieg bald')}</span></div>
   <div class="desk-grid">
     <div class="desk-copy">
       <h2 id="desk-title">{n('Will I make my connection?', 'Erwische ich meinen Anschluss?')} <em>Anschluss.</em></h2>
