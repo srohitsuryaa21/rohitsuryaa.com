@@ -543,6 +543,54 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .story-x .gust{stroke:#ffffff40;stroke-width:2;stroke-dasharray:40 260;animation:gust 2.4s linear infinite}
 @keyframes gust{from{stroke-dashoffset:300}to{stroke-dashoffset:0}}
 @media (max-width:899px){.story-h{font-size:28px}.story-x .story-p{font-size:17px}}
+/* ───────── Try it: attrition demo ───────── */
+.demo{--hl:var(--c,var(--accent));padding:clamp(60px,8vw,120px) var(--gutter);background:var(--ink-2,#151514);border-top:1px solid var(--line-d)}
+.demo-k{color:var(--hl);margin-bottom:14px}
+.demo h2{font:700 clamp(32px,4vw,64px)/1 var(--display);letter-spacing:-.05em;max-width:18ch}
+.demo h2 em{display:block;color:var(--hl)}
+.demo-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(30px,5vw,90px);margin-top:clamp(36px,5vw,64px)}
+.demo-controls{display:grid;gap:18px;align-content:start}
+.demo-toggle{display:flex;gap:12px;align-items:center;font-weight:600;cursor:pointer}
+.demo-toggle input{width:22px;height:22px;accent-color:var(--hl)}
+.demo-row{display:grid;gap:8px;font-weight:600}
+.demo-row>span{display:flex;justify-content:space-between}
+.demo-row output{font:500 13px var(--mono);color:var(--hl)}
+.demo-row input[type=range]{width:100%;accent-color:var(--hl)}
+.demo-row select{background:var(--ink);color:var(--paper);border:1px solid var(--line-d);border-radius:10px;padding:10px 12px;font:inherit}
+.demo-out{align-self:start;position:sticky;top:110px;padding:clamp(24px,3vw,40px);border:1px solid var(--line-d);border-radius:22px;background:var(--ink)}
+.demo-cap{color:var(--fg-dim)}
+.demo-risk{font:700 clamp(80px,10vw,150px)/.9 var(--display);letter-spacing:-.06em;color:var(--hl);margin:8px 0 18px}
+.demo-risk span{font-size:.4em;margin-left:4px}
+.demo-meter{position:relative;height:12px;border-radius:6px;background:#ffffff14;margin-bottom:44px}
+.demo-meter i{position:absolute;inset:0;border-radius:6px;background:var(--hl);transform-origin:left;transform:scaleX(.16);transition:transform .5s var(--ease)}
+.demo-base{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--paper)}
+.demo-base small{position:absolute;top:26px;left:-30px;white-space:nowrap;color:var(--fg-dim)}
+.demo-why{display:grid;gap:10px;margin:12px 0 26px;min-height:120px}
+.demo-why li{display:grid;grid-template-columns:minmax(0,1fr) 120px;align-items:center;gap:14px;font-weight:600}
+.demo-why li i{display:block;height:8px;border-radius:4px;justify-self:start}
+.demo-why li.up{color:#ff8a7a}.demo-why li.up i{background:#ff8a7a}
+.demo-why li.down{color:#8fd19e}.demo-why li.down i{background:#8fd19e}
+.demo-note{color:var(--fg-dim);line-height:1.7}
+@media (max-width:899px){.demo-grid{grid-template-columns:1fr}.demo-out{position:static}}
+/* ───────── On my desk (work in progress) ───────── */
+.desk{padding:clamp(80px,10vw,140px) var(--gutter);background:var(--ink)}
+.desk-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(30px,5vw,80px);align-items:center}
+.desk h2{font:700 clamp(34px,3.6vw,60px)/.98 var(--display);letter-spacing:-.05em}
+.desk h2 em{display:block;color:var(--accent)}
+.desk-points{display:grid;gap:14px;margin-top:34px}
+.desk-points li{display:grid;grid-template-columns:110px 1fr;gap:16px;font-size:17px;line-height:1.45;color:#c3bfb6;padding-bottom:14px;border-bottom:1px solid var(--line-d)}
+.desk-points b{font:500 12px/1.9 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--fg-dim)}
+.desk-status{margin-top:26px;color:var(--paper)}
+.desk-map{width:100%;height:auto;overflow:visible;font-family:var(--display)}
+.desk-map .link line{stroke:#ffffff40;stroke-width:2.5;stroke-dasharray:1;stroke-dashoffset:0}
+.desk-map .link.warn line{stroke:var(--accent);stroke-dasharray:.03 .02}
+.desk-map .link text{fill:var(--paper);font:600 17px var(--display);paint-order:stroke;stroke:var(--ink);stroke-width:8px}
+.desk-map .link.warn text{fill:var(--accent)}
+.desk-map .node rect{fill:var(--ink-2);stroke:#ffffff2e;stroke-width:1.5}
+.desk-map .node.main rect{stroke:var(--accent)}
+.desk-map .nt{fill:var(--paper);font:700 17px var(--display);text-transform:none;letter-spacing:-.01em}
+.desk-map .nc{fill:var(--fg-dim);font:500 12px var(--mono);text-transform:uppercase;letter-spacing:.04em}
+@media (max-width:899px){.desk-grid{grid-template-columns:1fr}.desk-points li{grid-template-columns:90px 1fr;font-size:16px}}
 .case-links{display:flex;flex-wrap:wrap;gap:12px;padding-top:30px;border-top:1px solid var(--line-l)}
 .next-case{display:block;padding:clamp(70px,10vw,150px) var(--gutter);background:var(--ink);color:var(--paper);border-top:1px solid var(--line-d)}
 .next-case b{display:flex;justify-content:space-between;align-items:center;gap:30px;font:800 clamp(44px,8.5vw,160px)/.9 var(--display);letter-spacing:-.07em;margin-top:18px;transition:color .4s}

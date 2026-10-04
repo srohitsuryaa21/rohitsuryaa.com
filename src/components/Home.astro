@@ -2,6 +2,7 @@
 import Layout from './Layout.astro';
 import Exhibit from './Exhibit.astro';
 import Network from './Network.astro';
+import OnMyDesk from './OnMyDesk.astro';
 import { projects, localize } from '../data/projects';
 import { home, site, localePath, type Lang } from '../i18n/content';
 
@@ -206,6 +207,9 @@ const glyphs = [0, 1, 2];
     </div>
   </section>
 
+  <!-- ON MY DESK (work in progress) -->
+  <OnMyDesk lang={lang} />
+
   <!-- 07 TOOLKIT (a network you travel down) -->
   <Network lang={lang} />
 </main>
@@ -213,7 +217,7 @@ const glyphs = [0, 1, 2];
 <!-- 08 CONTACT (curtain reveal) -->
 <footer class="contact" id="contact" aria-labelledby="contact-title">
   <div class="contact-inner">
-    <div class="section-label mono"><span>(06)</span><span>{t.contact.label}</span><span><i class="pulse"></i> {t.contact.aside}</span></div>
+    <div class="section-label mono"><span>(07)</span><span>{t.contact.label}</span><span><i class="pulse"></i> {t.contact.aside}</span></div>
     <p class="contact-kicker">{t.contact.kicker}</p>
     <h2 id="contact-title" class="contact-title">{t.contact.title}<br/><em>{t.contact.titleEm}</em></h2>
     <div class="contact-actions">

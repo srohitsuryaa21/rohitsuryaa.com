@@ -10,6 +10,7 @@ import StoryFinGuard from './stories/StoryFinGuard.astro';
 import StoryDefi from './stories/StoryDefi.astro';
 import StoryAviation from './stories/StoryAviation.astro';
 import StoryAttrition from './stories/StoryAttrition.astro';
+import AttritionDemo from './AttritionDemo.astro';
 import { caseCopy, home, site, localePath, type Lang } from '../i18n/content';
 
 interface Props { slug: string; lang: Lang }
@@ -54,6 +55,7 @@ const path = `/work/${project.slug}/`;
     <span class="panel-metric"><b>{project.metric}</b><small class="mono">{project.metricLabel}</small></span>
   </div>
   {Story && <Story lang={lang} />}
+  {project.slug === 'employee-attrition' && <AttritionDemo lang={lang} />}
   <section class="case-body light" aria-label={project.short}>
     <div class="case-links">
       <a class="pill-link" href={`${site.github}/${project.repo}`} target="_blank" rel="noopener">{t.code} <span>↗</span></a>

@@ -1,0 +1,95 @@
+---
+// "Try it": a logistic regression on eight features of the real IBM HR dataset, run live in the browser.
+// The model and its cross validated AUC come from scripts/demos/attrition-model.py.
+import model from '../data/demos/attrition.json';
+import type { Lang } from '../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const n = (en: string, d: string) => (de ? d : en);
+const fmt = (v: number, d = 2) => (de ? v.toFixed(d).replace('.', ',') : v.toFixed(d));
+const base = Math.round(model.baseRate * 1000) / 10;
+const labels: Record<string, string> = {
+  overtime: n('Works overtime', 'Macht Überstunden'),
+  income: n('Monthly income', 'Monatseinkommen'),
+  age: n('Age', 'Alter'),
+  years: n('Years at the company', 'Jahre im Unternehmen'),
+  travel: n('Business travel', 'Dienstreisen'),
+  single: n('Single', 'Ledig'),
+  satisfaction: n('Job satisfaction', 'Zufriedenheit im Job'),
+  distance: n('Distance from home', 'Weg zur Arbeit'),
+};
+---
+<section class="demo" aria-labelledby="demo-title" data-labels={JSON.stringify(labels)} data-model={JSON.stringify(model)} data-lang={Astro.props.lang}>
+  <div class="demo-head">
+    <p class="mono demo-k">{n('Try it', 'Ausprobieren')}</p>
+    <h2 id="demo-title">{n('Build an employee.', 'Bau dir einen Mitarbeiter.')} <em>{n('See the risk, and why.', 'Sieh das Risiko und warum.')}</em></h2>
+  </div>
+  <div class="demo-grid">
+    <form class="demo-controls" onsubmit="return false">
+      <label class="demo-toggle"><input type="checkbox" name="overtime" /> <span>{labels.overtime}</span></label>
+      <label class="demo-toggle"><input type="checkbox" name="single" /> <span>{labels.single}</span></label>
+      <label class="demo-row"><span>{labels.travel}</span>
+        <select name="travel"><option value="0">{n('Never', 'Nie')}</option><option value="1" selected>{n('Sometimes', 'Manchmal')}</option><option value="2">{n('Often', 'Oft')}</option></select>
+      </label>
+      <label class="demo-row"><span>{labels.income} <output data-for="income"></output></span><input type="range" name="income" min="1" max="20" step="0.5" value="5" /></label>
+      <label class="demo-row"><span>{labels.age} <output data-for="age"></output></span><input type="range" name="age" min="18" max="60" step="1" value="36" /></label>
+      <label class="demo-row"><span>{labels.years} <output data-for="years"></output></span><input type="range" name="years" min="0" max="40" step="1" value="5" /></label>
+      <label class="demo-row"><span>{labels.satisfaction} <output data-for="satisfaction"></output></span><input type="range" name="satisfaction" min="1" max="4" step="1" value="3" /></label>
+      <label class="demo-row"><span>{labels.distance} <output data-for="distance"></output></span><input type="range" name="distance" min="1" max="29" step="1" value="7" /></label>
+    </form>
+    <div class="demo-out" aria-live="polite">
+      <p class="mono demo-cap">{n('Chance of leaving', 'Wahrscheinlichkeit zu gehen')}</p>
+      <p class="demo-risk"><b data-risk>16</b><span>%</span></p>
+      <div class="demo-meter"><i data-meter></i><span class="demo-base" style={`left:${base}%`}><small class="mono">{n('average', 'Schnitt')} {de ? String(base).replace('.', ',') : base}%</small></span></div>
+      <p class="mono demo-cap">{n('Why', 'Warum')}</p>
+      <ul class="demo-why" data-why></ul>
+      <p class="demo-note mono">{n(`Logistic regression on ${model.rows.toLocaleString('en-US')} real IBM HR records, 8 features, cross validated AUC ${fmt(model.auc)}. A learning tool, not a way to judge real people.`, `Logistische Regression auf ${model.rows.toLocaleString('de-DE')} echten HR Datensätzen von IBM, 8 Merkmale, kreuzvalidierte AUC ${fmt(model.auc)}. Ein Lernwerkzeug, kein Urteil über echte Menschen.`)}</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  type Feature = { key: string; mean: number; scale: number; coef: number };
+  const box = document.querySelector<HTMLElement>('.demo');
+  if (box) {
+    const model = JSON.parse(box.dataset.model!) as { intercept: number; features: Feature[] };
+    const labels = JSON.parse(box.dataset.labels!) as Record<string, string>;
+    const de = box.dataset.lang === 'de';
+    const form = box.querySelector('form')!;
+    const riskEl = box.querySelector<HTMLElement>('[data-risk]')!;
+    const meter = box.querySelector<HTMLElement>('[data-meter]')!;
+    const why = box.querySelector<HTMLElement>('[data-why]')!;
+    const show: Record<string, (v: number) => string> = {
+      income: (v) => (de ? `${String(v).replace('.', ',')}k / Monat` : `${v}k / month`),
+      age: (v) => String(v),
+      years: (v) => String(v),
+      satisfaction: (v) => `${v} / 4`,
+      distance: (v) => `${v} / 29`,
+    };
+    const read = (k: string) => {
+      const el = form.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement;
+      return el instanceof HTMLInputElement && el.type === 'checkbox' ? (el.checked ? 1 : 0) : Number(el.value);
+    };
+    const update = () => {
+      // each feature's push on the log odds, measured from the average employee
+      const parts = model.features.map((f) => ({ key: f.key, z: (f.coef * (read(f.key) - f.mean)) / f.scale }));
+      const logit = model.intercept + parts.reduce((a, p) => a + p.z, 0);
+      const risk = 1 / (1 + Math.exp(-logit));
+      riskEl.textContent = String(Math.round(risk * 100));
+      meter.style.transform = `scaleX(${risk})`;
+      box.querySelectorAll<HTMLOutputElement>('output[data-for]').forEach((o) => { o.textContent = show[o.dataset.for!](read(o.dataset.for!)); });
+      why.innerHTML = '';
+      parts.filter((p) => Math.abs(p.z) > 0.08).sort((a, b) => Math.abs(b.z) - Math.abs(a.z)).slice(0, 4).forEach((p) => {
+        const li = document.createElement('li');
+        li.className = p.z > 0 ? 'up' : 'down';
+        const bar = document.createElement('i');
+        bar.style.width = `${Math.min(100, Math.abs(p.z) * 60)}%`;
+        li.append(Object.assign(document.createElement('span'), { textContent: `${p.z > 0 ? '↑' : '↓'} ${labels[p.key]}` }), bar);
+        why.append(li);
+      });
+      if (!why.children.length) why.append(Object.assign(document.createElement('li'), { textContent: de ? 'Nah am Durchschnitt.' : 'Close to average.' }));
+    };
+    form.addEventListener('input', update);
+    update();
+  }
+</script>

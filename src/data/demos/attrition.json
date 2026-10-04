@@ -1,0 +1,81 @@
+{
+ "source": "IBM HR Analytics Employee Attrition (1,470 employees), https://raw.githubusercontent.com/IBM/employee-attrition-aif360/master/data/emp_attrition.csv",
+ "auc": 0.784,
+ "rows": 1470,
+ "baseRate": 0.1612,
+ "intercept": -2.104108120486524,
+ "features": [
+  {
+   "key": "overtime",
+   "mean": 0.2829931972789116,
+   "scale": 0.4504531580228632,
+   "coef": 0.673583832452321,
+   "min": 0.0,
+   "max": 1.0,
+   "median": 0.0
+  },
+  {
+   "key": "income",
+   "mean": 6.502931292517006,
+   "scale": 4.706355164823003,
+   "coef": -0.36420930873826934,
+   "min": 1.009,
+   "max": 19.999,
+   "median": 4.9190000000000005
+  },
+  {
+   "key": "age",
+   "mean": 36.923809523809524,
+   "scale": 9.132265690615387,
+   "coef": -0.27270487712584907,
+   "min": 18.0,
+   "max": 60.0,
+   "median": 36.0
+  },
+  {
+   "key": "years",
+   "mean": 7.0081632653061225,
+   "scale": 6.124440945793706,
+   "coef": -0.2601367311338826,
+   "min": 0.0,
+   "max": 40.0,
+   "median": 5.0
+  },
+  {
+   "key": "travel",
+   "mean": 1.0863945578231293,
+   "scale": 0.5319888822661019,
+   "coef": 0.37146434218951063,
+   "min": 0.0,
+   "max": 2.0,
+   "median": 1.0
+  },
+  {
+   "key": "single",
+   "mean": 0.3197278911564626,
+   "scale": 0.46637106125177175,
+   "coef": 0.44822075709288983,
+   "min": 0.0,
+   "max": 1.0,
+   "median": 0.0
+  },
+  {
+   "key": "satisfaction",
+   "mean": 2.7285714285714286,
+   "scale": 1.1024709415085499,
+   "coef": -0.36277669422051856,
+   "min": 1.0,
+   "max": 4.0,
+   "median": 3.0
+  },
+  {
+   "key": "distance",
+   "mean": 9.19251700680272,
+   "scale": 8.104106529671768,
+   "coef": 0.27707216662447937,
+   "min": 1.0,
+   "max": 29.0,
+   "median": 7.0
+  }
+ ]
+}
