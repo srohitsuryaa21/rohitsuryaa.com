@@ -19,7 +19,7 @@ export const home = {
     description: 'Rohit Suryaa Saravanan is a software developer and data scientist in Fulda, Germany, building backend systems, data pipelines, machine learning models and AI agents.',
     role: 'Software developer & data scientist',
     loaderWords: ['Code', 'Data', 'Models', 'Systems'],
-    nav: { work: 'Work', about: 'Who am I', experience: 'Experience', contact: 'Contact', home: 'Rohit Suryaa, back to top', switchLabel: 'Deutsch', switchText: 'DE' },
+    nav: { work: 'Work', about: 'Who am I', experience: 'Experience', contact: 'Contact', home: 'Rohit Suryaa, back to top', switchLabel: 'Deutsch', switchText: 'DE', toLight: 'Switch to white mode', toDark: 'Switch to dark mode' },
     hero: {
       sr: 'Rohit Suryaa Saravanan. I turn raw data into forecasts, AI agents, APIs, pipelines and decisions people trust.',
       before: 'I turn raw data', mid: 'into', after: 'people trust.',
@@ -51,7 +51,7 @@ export const home = {
     work: {
       label: 'What I built', title: 'Nine projects.', titleEm: 'Real questions.',
       intro: 'One from a real factory line. Eight with all the code on GitHub.',
-      index: 'Project index', cursor: 'View case', caseStudy: 'Case study', story: 'Interactive story', source: 'Source', more: 'More on GitHub',
+      index: 'Project index', cursor: 'Play ▶', play: 'Play the story', scenes: 'scenes', caseStudy: 'Case study', story: 'Interactive story', source: 'Source', more: 'More on GitHub',
       prev: 'Previous project', next: 'Next project',
     },
     principles: {
@@ -100,7 +100,7 @@ export const home = {
     description: 'Rohit Suryaa Saravanan ist Softwareentwickler und Data Scientist in Fulda. Er entwickelt Backends, Datenpipelines, Modelle für Machine Learning und Agentensysteme.',
     role: 'Softwareentwickler & Data Scientist',
     loaderWords: ['Code', 'Daten', 'Modelle', 'Systeme'],
-    nav: { work: 'Projekte', about: 'Wer bin ich', experience: 'Erfahrung', contact: 'Kontakt', home: 'Rohit Suryaa, nach oben', switchLabel: 'English', switchText: 'EN' },
+    nav: { work: 'Projekte', about: 'Wer bin ich', experience: 'Erfahrung', contact: 'Kontakt', home: 'Rohit Suryaa, nach oben', switchLabel: 'English', switchText: 'EN', toLight: 'Zum hellen Modus wechseln', toDark: 'Zum dunklen Modus wechseln' },
     hero: {
       sr: 'Rohit Suryaa Saravanan. Ich mache aus Rohdaten Prognosen, Agenten, APIs, Pipelines und Entscheidungen, denen man vertraut.',
       before: 'Ich mache Rohdaten', mid: 'zu', after: 'denen man vertraut.',
@@ -132,7 +132,7 @@ export const home = {
     work: {
       label: 'Was ich gebaut habe', title: 'Neun Projekte.', titleEm: 'Echte Fragen.',
       intro: 'Eins aus einer echten Fertigungslinie. Acht mit dem ganzen Code auf GitHub.',
-      index: 'Projektübersicht', cursor: 'Ansehen', caseStudy: 'Fallstudie', story: 'Interaktive Story', source: 'Code', more: 'Mehr auf GitHub',
+      index: 'Projektübersicht', cursor: 'Abspielen ▶', play: 'Story abspielen', scenes: 'Szenen', caseStudy: 'Fallstudie', story: 'Interaktive Story', source: 'Code', more: 'Mehr auf GitHub',
       prev: 'Vorheriges Projekt', next: 'Nächstes Projekt',
     },
     principles: {
@@ -179,6 +179,6 @@ export const home = {
 };
 
 export const caseCopy = {
-  en: { studies: 'Case study', back: '← Back to selected work', all: 'All work', contact: 'Contact', problem: '01 The problem', built: '02 What I built', outcome: '03 What came out of it', code: 'View the code', paper: 'Read the IEEE paper', next: 'Next project' },
-  de: { studies: 'Fallstudie', back: '← Zurück zu den Projekten', all: 'Alle Projekte', contact: 'Kontakt', problem: '01 Das Problem', built: '02 Was ich gebaut habe', outcome: '03 Was dabei herauskam', code: 'Code ansehen', paper: 'Veröffentlichung lesen', next: 'Nächstes Projekt' },
+  en: { studies: 'Case study', back: '← Back to selected work', all: 'All work', contact: 'Contact', problem: '01 The problem', built: '02 What I built', outcome: '03 What came out of it', code: 'View the code', paper: 'Read the IEEE paper', next: 'Next story', play: 'Press play', scroll: 'scroll to watch it unfold', scenes: 'scenes' },
+  de: { studies: 'Fallstudie', back: '← Zurück zu den Projekten', all: 'Alle Projekte', contact: 'Kontakt', problem: '01 Das Problem', built: '02 Was ich gebaut habe', outcome: '03 Was dabei herauskam', code: 'Code ansehen', paper: 'Veröffentlichung lesen', next: 'Nächste Story', play: 'Auf Play drücken', scroll: 'scrollen und zusehen', scenes: 'Szenen' },
 };

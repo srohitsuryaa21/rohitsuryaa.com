@@ -35,6 +35,7 @@ export function createField(canvas: HTMLCanvasElement, { animate }: FieldOptions
   };
 
   const draw = () => {
+    const ink = document.documentElement.dataset.theme === 'light' ? '13,13,12' : '236,232,223';
     ctx.clearRect(0, 0, w, h);
     const sigma = gap * (0.55 + 1.1 * (1 - progress));
     const twoS2 = 2 * sigma * sigma;
@@ -61,7 +62,7 @@ export function createField(canvas: HTMLCanvasElement, { animate }: FieldOptions
     for (const [x, y, k, m, r] of hot) {
       // signal dots are vermilion, pointer-lit dots are bone
       const a = Math.min(0.9, k * 0.8 + m * 0.35);
-      ctx.fillStyle = k >= m ? `rgba(255,77,31,${a})` : `rgba(236,232,223,${a})`;
+      ctx.fillStyle = k >= m ? `rgba(255,77,31,${a})` : `rgba(${ink},${a})`;
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();

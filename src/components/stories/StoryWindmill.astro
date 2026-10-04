@@ -36,7 +36,7 @@ const mape = [33.95, 1.38, 1.11];
   <!-- turbine: the question and the closing step -->
   <g data-show="q next">
     {[150, 200, 250].map((y, i) => <line x1="40" x2="560" y1={y + 20} y2={y + 20} class="gust" style={`animation-delay:${i * 0.5}s`} />)}
-    <line x1="300" y1="190" x2="300" y2="440" stroke="#ffffff55" stroke-width="6" stroke-linecap="round" />
+    <line x1="300" y1="190" x2="300" y2="440" style="stroke:rgb(var(--wr) / .33)" stroke-width="6" stroke-linecap="round" />
     <g class="spin">
       {[0, 120, 240].map((a) => <path d="M300 190 C 292 150, 296 80, 300 40 C 306 80, 310 150, 300 190 Z" fill="var(--hl)" transform={`rotate(${a} 300 190)`} />)}
     </g>

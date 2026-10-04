@@ -216,12 +216,68 @@ function setupNumberNotes() {
   });
 }
 
+/* White mode: remembered per visitor; the new theme opens as a circle from the switch */
+function setupTheme() {
+  const btns = $$<HTMLButtonElement>('[data-theme-toggle]');
+  const meta = $<HTMLMetaElement>('meta[name="theme-color"]');
+  const label = () => btns.forEach((b) => b.setAttribute('aria-label', (root.dataset.theme === 'light' ? b.dataset.toDark : b.dataset.toLight) ?? ''));
+  const apply = (light: boolean) => {
+    if (light) root.dataset.theme = 'light'; else delete root.dataset.theme;
+    if (meta) meta.content = light ? '#f6f4ef' : '#0d0d0c';
+    try { localStorage.setItem('theme', light ? 'light' : 'dark'); } catch { /* private mode */ }
+    label();
+  };
+  label();
+  btns.forEach((b) => b.addEventListener('click', (e) => {
+    const light = root.dataset.theme !== 'light';
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => { ready: Promise<void>; finished: Promise<void> } };
+    if (!doc.startViewTransition || reduced || document.hidden) return apply(light);
+    const r = b.getBoundingClientRect();
+    const x = e.clientX || r.left + r.width / 2, y = e.clientY || r.top + r.height / 2;
+    const end = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    const vt = doc.startViewTransition(() => apply(light));
+    vt.ready.then(() => {
+      root.animate({ clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${end}px at ${x}px ${y}px)`] },
+        { duration: 750, easing: 'cubic-bezier(.65,0,.35,1)', pseudoElement: '::view-transition-new(root)' });
+    }).catch(() => {});
+    // if the browser skips the transition, still switch
+    vt.finished.catch(() => {}).finally(() => { if ((root.dataset.theme === 'light') !== light) apply(light); });
+  }));
+}
+
+/* Header: a frosted bar once the page moves, tinted to match the section underneath */
+function setupHeader() {
+  const header = $('.site-header');
+  if (!header) return;
+  const onScroll = () => header.classList.toggle('is-scrolled', scrollY > 40);
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  const under = new Map<Element, boolean>();
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => under.set(e.target, e.isIntersecting));
+    const hit = [...under].filter(([, on]) => on).map(([el]) => el);
+    root.classList.toggle('on-accent', hit.some((el) => el.classList.contains('contact')));
+    root.classList.toggle('on-light', hit.some((el) => el.classList.contains('light')));
+  }, { rootMargin: '-3% 0px -94% 0px' });
+  $$('.light, .contact').forEach((el) => io.observe(el));
+}
+
 /* Scroll story: whichever step crosses the middle of the screen sets the chart's scene */
 function setupStory() {
   const fig = $('.story-fig');
   const steps = $$('.story-step');
   if (!fig || !steps.length) return;
+  // the story reel: one segment per scene, filled up to the scene on screen
+  const reel = document.createElement('div');
+  reel.className = 'story-reel';
+  reel.setAttribute('aria-hidden', 'true');
+  const segs = steps.map(() => reel.appendChild(document.createElement('i')));
+  const count = Object.assign(document.createElement('p'), { className: 'story-reel-n mono' });
+  fig.append(reel, count);
   const show = (step: HTMLElement) => {
+    const idx = steps.indexOf(step);
+    segs.forEach((g, i) => { g.classList.toggle('done', i < idx); g.classList.toggle('now', i === idx); });
+    count.innerHTML = `<b>${String(idx + 1).padStart(2, '0')}</b> / ${String(steps.length).padStart(2, '0')}`;
     steps.forEach((s) => s.classList.toggle('is-on', s === step));
     const k = step.dataset.step ?? '';
     fig.dataset.step = k;
@@ -236,6 +292,8 @@ function setupStory() {
 }
 
 setupCopy();
+setupTheme();
+setupHeader();
 setupClock();
 setupNumberNotes();
 setupStory();
@@ -257,7 +315,7 @@ if (reduced) {
 /* Case pages: smooth scroll, cursor and a light entrance */
 function initLite() {
   root.classList.add('loader-done');
-  const lenis = new Lenis({ lerp: 0.09 });
+  const lenis = new Lenis({ lerp: 0.09, anchors: { offset: -40, duration: 1.4 } });
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
   if (finePointer) { buildCursor(); buildMagnetic(); }
@@ -310,7 +368,6 @@ function initMotion() {
       ['work', () => buildWork(lenis)],
       ['cards', buildCards],
       ['timeline', buildTimeline],
-      ['header', buildHeaderTheme],
       ['headerHide', buildHeaderHide],
       ['network', buildNetwork],
     ];
@@ -647,12 +704,6 @@ function buildHeaderHide() {
   });
 }
 
-function buildHeaderTheme() {
-  ScrollTrigger.create({
-    trigger: '.contact', start: 'top 40px', end: 'bottom top',
-    onToggle: (self) => root.classList.toggle('on-accent', self.isActive),
-  });
-}
 
 function buildTimeline() {
   // S line: the point glides from one entry's dot to the next between the moments they light up.

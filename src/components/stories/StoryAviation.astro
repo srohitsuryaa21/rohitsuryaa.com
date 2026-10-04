@@ -63,7 +63,7 @@ const flights = Array.from({ length: 14 }, (_, i) => ({ x: 60 + (i % 7) * 80, y:
   <g data-show="share">
     {[{ cx: 170, v: 24, t: 'Atlanta', cls: 'ln hl' }, { cx: 430, v: 32, t: "O'Hare", cls: 'ln bad' }].map((d, i) => (
       <g>
-        <path d={ring(d.cx, 230, 110)} class="ln" style="stroke-width:26;stroke:#ffffff14" />
+        <path d={ring(d.cx, 230, 110)} class="ln" style="stroke-width:26;stroke:rgb(var(--wr) / .08)" />
         <path d={ring(d.cx, 230, 110)} pathLength="100" class={`pop ${d.cls}`} style={`stroke-width:26;stroke-dasharray:${d.v} 100;stroke-linecap:butt;--i:${i}`} />
         <text x={d.cx} y="246" class="t-big mid">{d.v}{n('%', ' %')}</text>
         <text x={d.cx} y="400" class="t-cap mid">{d.t}</text>

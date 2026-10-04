@@ -22,6 +22,7 @@ const next = localize(projects[(index + 1) % projects.length], lang);
 const t = caseCopy[lang];
 const other: Lang = lang === 'en' ? 'de' : 'en';
 const pad = (n: number) => String(n).padStart(2, '0');
+const q = (text: string) => (lang === 'de' ? `„${text}“` : `“${text}”`);
 const [first, ...rest] = project.name.split(' ');
 // every case study is a scroll story: short steps, one chart (src/components/stories/)
 const Story = ({
@@ -38,6 +39,7 @@ const path = `/work/${project.slug}/`;
   <nav aria-label="Primary">
     <a href={`${localePath(lang, '/')}#work`}>{t.all}</a>
     <a href={`${localePath(lang, '/')}#contact`} class="nav-cta">{t.contact}</a>
+    <button class="theme-switch" type="button" data-theme-toggle data-to-light={home[lang].nav.toLight} data-to-dark={home[lang].nav.toDark} aria-label={home[lang].nav.toLight}><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
     <a class="lang-switch mono" href={localePath(other, path)} hreflang={other} lang={other} aria-label={home[lang].nav.switchLabel}>{home[lang].nav.switchText}</a>
   </nav>
 </header>
@@ -50,6 +52,11 @@ const path = `/work/${project.slug}/`;
       <p>{project.description}</p>
       <ul class="tags">{project.tags.map((tag) => <li>{tag}</li>)}</ul>
     </div>
+    {Story && <a class="case-play" href="#story">
+      <span class="case-play-btn" aria-hidden="true">▶</span>
+      <span class="case-play-q">{q(project.hook)}</span>
+      <span class="case-play-meta mono"><b>{t.play}</b> · {project.scenes} {t.scenes} · {t.scroll} ↓</span>
+    </a>}
   </section>
   <div class="case-art">
     <Exhibit kind={project.art} />
@@ -66,6 +73,7 @@ const path = `/work/${project.slug}/`;
   <a class="next-case" href={localePath(lang, `/work/${next.slug}/`)} style={`--c:${next.color}`}>
     <span class="mono">{t.next}</span>
     <b>{next.short}<span>↗</span></b>
+    <em class="next-hook">{q(next.hook)}</em>
   </a>
 </main>
 <footer class="case-foot mono"><span>© {new Date().getFullYear()} Rohit Suryaa Saravanan</span><span class="case-foot-links"><a href={`mailto:${site.email}`}>{site.email}</a><a href={site.linkedin} target="_blank" rel="noopener">LinkedIn ↗</a><a href={site.github} target="_blank" rel="noopener">GitHub ↗</a></span></footer>
