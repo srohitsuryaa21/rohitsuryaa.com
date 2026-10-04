@@ -15,8 +15,8 @@ export const localePath = (lang: Lang, path = '/') => (lang === 'en' ? path : `/
 
 export const home = {
   en: {
-    htmlTitle: 'Rohit Suryaa | Software Developer and Data Scientist',
-    description: 'Rohit Suryaa Saravanan is a software developer and data scientist in Fulda, Germany, building backend systems, data pipelines, machine learning models and AI agents.',
+    htmlTitle: 'Rohit Suryaa Saravanan | Software Developer & Data Scientist',
+    description: 'Software developer and data scientist in Fulda, Germany. Backends, data pipelines, machine learning and AI agents, with nine projects told as interactive stories.',
     role: 'Software developer & data scientist',
     loaderWords: ['Code', 'Data', 'Models', 'Systems'],
     nav: { work: 'Work', about: 'Who am I', experience: 'Experience', contact: 'Contact', home: 'Rohit Suryaa, back to top', switchLabel: 'Deutsch', switchText: 'DE', toLight: 'Switch to white mode', toDark: 'Switch to dark mode' },
@@ -96,8 +96,8 @@ export const home = {
     numberLocale: 'en-US',
   },
   de: {
-    htmlTitle: 'Rohit Suryaa | Softwareentwickler und Data Scientist',
-    description: 'Rohit Suryaa Saravanan ist Softwareentwickler und Data Scientist in Fulda. Er entwickelt Backends, Datenpipelines, Modelle für Machine Learning und Agentensysteme.',
+    htmlTitle: 'Rohit Suryaa Saravanan | Softwareentwickler & Data Scientist',
+    description: 'Softwareentwickler und Data Scientist in Fulda. Backends, Datenpipelines, Machine Learning und Agentensysteme, mit neun Projekten als interaktive Stories.',
     role: 'Softwareentwickler & Data Scientist',
     loaderWords: ['Code', 'Daten', 'Modelle', 'Systeme'],
     nav: { work: 'Projekte', about: 'Wer bin ich', experience: 'Erfahrung', contact: 'Kontakt', home: 'Rohit Suryaa, nach oben', switchLabel: 'English', switchText: 'EN', toLight: 'Zum hellen Modus wechseln', toDark: 'Zum dunklen Modus wechseln' },
@@ -179,6 +179,6 @@ export const home = {
 };
 
 export const caseCopy = {
-  en: { studies: 'Case study', back: '← Back to selected work', all: 'All work', contact: 'Contact', problem: '01 The problem', built: '02 What I built', outcome: '03 What came out of it', code: 'View the code', paper: 'Read the IEEE paper', next: 'Next story', play: 'Press play', scroll: 'scroll to watch it unfold', scenes: 'scenes' },
-  de: { studies: 'Fallstudie', back: '← Zurück zu den Projekten', all: 'Alle Projekte', contact: 'Kontakt', problem: '01 Das Problem', built: '02 Was ich gebaut habe', outcome: '03 Was dabei herauskam', code: 'Code ansehen', paper: 'Veröffentlichung lesen', next: 'Nächste Story', play: 'Auf Play drücken', scroll: 'scrollen und zusehen', scenes: 'Szenen' },
+  en: { studies: 'Case study', back: '← Back to selected work', all: 'All work', contact: 'Contact', problem: '01 The problem', built: '02 What I built', outcome: '03 What came out of it', code: 'View the code', paper: 'Read the IEEE paper', next: 'Next story', play: 'Press play', scroll: 'scroll to watch it unfold', scenes: 'scenes', metaTitle: 'Case study by Rohit Suryaa' },
+  de: { studies: 'Fallstudie', back: '← Zurück zu den Projekten', all: 'Alle Projekte', contact: 'Kontakt', problem: '01 Das Problem', built: '02 Was ich gebaut habe', outcome: '03 Was dabei herauskam', code: 'Code ansehen', paper: 'Veröffentlichung lesen', next: 'Nächste Story', play: 'Auf Play drücken', scroll: 'scrollen und zusehen', scenes: 'Szenen', metaTitle: 'Fallstudie von Rohit Suryaa' },
 };

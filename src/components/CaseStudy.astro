@@ -12,6 +12,7 @@ import StoryAviation from './stories/StoryAviation.astro';
 import StoryAttrition from './stories/StoryAttrition.astro';
 import StoryJumo from './stories/StoryJumo.astro';
 import AttritionDemo from './AttritionDemo.astro';
+import { person, caseStudy, breadcrumbs, origin } from '../data/seo';
 import { caseCopy, home, site, localePath, type Lang } from '../i18n/content';
 
 interface Props { slug: string; lang: Lang }
@@ -31,8 +32,12 @@ const Story = ({
   'silverstone-telemetry': StorySilverstone, 'employee-attrition': StoryAttrition, 'jumo-laser-trimming': StoryJumo,
 } as Record<string, any>)[project.slug];
 const path = `/work/${project.slug}/`;
+const pageUrl = `${origin}${localePath(lang, path)}`;
 ---
-<Layout lang={lang} title={`${project.short} | Rohit Suryaa`} description={project.description} path={path} bodyClass="case-page">
+<Layout lang={lang} title={`${project.short} | ${t.metaTitle}`} description={`${project.hook} ${project.description}`} path={path} bodyClass="case-page"
+  type="article" image={`/og/work/${project.slug}-${lang}.jpg`} imageAlt={`${project.short}. ${project.hook}`}
+  schema={[person(lang), caseStudy({ url: pageUrl, name: project.short, headline: `${project.short}: ${project.hook}`, description: project.description, image: `${origin}/og/work/${project.slug}-${lang}.jpg`, lang, keywords: project.tags, code: project.repo && `${site.github}/${project.repo}` }),
+    breadcrumbs([[home[lang].nav.home.split(',')[0], `${origin}${localePath(lang, '/')}`], [t.all, `${origin}${localePath(lang, '/')}#work`], [project.short, pageUrl]])]}>
 <header class="site-header">
   <a class="logo" href={localePath(lang, '/')} aria-label={home[lang].nav.home}><span class="logo-rs">rs</span><sup>©</sup></a>
   <p class="header-role">{t.studies} {pad(index + 1)} / {pad(projects.length)}</p>

@@ -1,5 +1,6 @@
 ---
 import Layout from './Layout.astro';
+import { person, website, profilePage, origin } from '../data/seo';
 import Exhibit from './Exhibit.astro';
 import Network from './Network.astro';
 import OnMyDesk from './OnMyDesk.astro';
@@ -16,7 +17,8 @@ const work = (slug: string) => localePath(lang, `/work/${slug}/`);
 const dois = ['10.1109/ICEMCE57940.2023.10433983', '10.1109/ICSCSS60660.2024.10625462'];
 const glyphs = [0, 1, 2];
 ---
-<Layout lang={lang} title={t.htmlTitle} description={t.description} path="/">
+<Layout lang={lang} title={t.htmlTitle} description={t.description} path="/" imageAlt={t.hero.sr}
+  schema={[person(lang), website(lang), profilePage(`${origin}${localePath(lang, '/')}`, t.htmlTitle, t.description, lang)]}>
 
 <div class="loader" aria-hidden="true">
   <div class="loader-top mono"><span>rs©</span><span>{t.role}</span></div>

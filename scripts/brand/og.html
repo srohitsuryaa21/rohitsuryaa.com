@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Share image</title>
+<!-- The picture Google, LinkedIn, WhatsApp and Slack show when someone shares a page: 1200 × 630.
+     Rendered by render-seo.mjs, which passes the page's text in the URL hash as JSON:
+     home  { kind:'home', lang, title:[before, accent, after], meta, url }
+     work  { kind:'work', lang, index, total, category, short, hook, metric, metricLabel, color, play, url } -->
+<style>
+  @font-face { font-family: 'Manrope'; src: url('../../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2') format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'Instrument Serif'; font-style: italic; src: url('../../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2') format('woff2'); }
+  @font-face { font-family: 'JetBrains Mono'; src: url('../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2') format('woff2'); font-weight: 100 800; }
+  html, body { margin: 0; }
+  .card { --c: #ff4d1f; position: relative; width: 1200px; height: 630px; overflow: hidden; box-sizing: border-box; padding: 56px 64px;
+    display: flex; flex-direction: column; background: #0d0d0c; color: #ece8df; font-family: 'Manrope', sans-serif; }
+  .work .card { background: radial-gradient(ellipse 70% 90% at 92% 10%, color-mix(in srgb, var(--c) 22%, #0d0d0c) 0%, #0d0d0c 62%); }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .top, .bottom { position: relative; display: flex; justify-content: space-between; align-items: center; }
+  .mark { height: 40px; }
+  .mono { font: 500 15px/1.3 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: #8d8a82; }
+  .mono b { color: var(--c); font-weight: 600; }
+  .main { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  h1 { margin: 0; font-weight: 700; letter-spacing: -.055em; line-height: .98; }
+  em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; letter-spacing: -.02em; color: var(--c); }
+  .home h1 { font-size: 92px; max-width: 11ch; }
+  .home h1 em { color: #ff4d1f; font-size: 1.06em; }
+  .home:lang(de) h1 { font-size: 76px; max-width: 15ch; }
+  .work h1 { font-size: 88px; max-width: 13ch; }
+  .hook { margin: 20px 0 0; font: italic 400 38px/1.15 'Instrument Serif', serif; color: var(--c); max-width: 34ch; }
+  .metric { display: flex; align-items: baseline; gap: 16px; }
+  .metric b { font-size: 56px; letter-spacing: -.05em; line-height: 1; }
+  .play { display: inline-flex; align-items: center; gap: 12px; padding: 12px 20px 12px 12px; border-radius: 99px; background: #ece8df14; font-weight: 600; font-size: 20px; }
+  .play i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--c); color: #0d0d0c; font-style: normal; font-size: 12px; padding-left: 2px; box-sizing: border-box; }
+  .reel { position: absolute; top: 0; left: 0; right: 0; display: flex; gap: 6px; padding: 0 64px; }
+  .reel span { flex: 1; height: 5px; border-radius: 0 0 3px 3px; background: #ece8df26; }
+  .reel span:first-child { background: var(--c); }
+</style>
+</head>
+<body>
+<div class="card" id="card"></div>
+<script>
+  const d = JSON.parse(decodeURIComponent(location.hash.slice(1)));
+  const root = document.documentElement;
+  root.classList.add(d.kind);
+  root.lang = d.lang;
+  const card = document.getElementById('card');
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const mark = '<img class="mark" src="../../brand/rs-mark-light.svg" alt="" />';
+  if (d.kind === 'home') {
+    card.innerHTML = `<canvas id="field"></canvas>
+      <div class="top">${mark}<p class="mono">${esc(d.url)}</p></div>
+      <div class="main"><h1>${esc(d.title[0])} <em>${esc(d.title[1])}</em> ${esc(d.title[2])}</h1></div>
+      <div class="bottom"><p class="mono">${esc(d.meta)}</p></div>`;
+    // the site's hero motif: a dot grid where a noisy series settles into one curve
+    const c = document.getElementById('field'), w = 1200, h = 630, dpr = devicePixelRatio || 1;
+    c.width = w * dpr; c.height = h * dpr;
+    const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
+    const gap = 22, cols = Math.ceil(w / gap) + 1, rows = Math.ceil(h / gap) + 1;
+    const series = (i) => { const nx = i / cols; return h * 0.78 - h * 0.34 * nx + h * 0.05 * Math.sin(nx * 5.5); };
+    for (let i = 0; i < cols; i++) {
+      const x = i * gap, sy = series(i);
+      for (let j = 0; j < rows; j++) {
+        const y = j * gap, k = Math.exp(-((y - sy) ** 2) / (2 * 14 ** 2));
+        const fade = Math.min(1, Math.max(0, (x - 520) / 360));
+        if (k < 0.08 || fade <= 0) continue;
+        ctx.fillStyle = `rgba(255,77,31,${(0.15 + k * 0.75) * fade})`;
+        ctx.beginPath(); ctx.arc(x, y, 1 + k * 1.8, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  } else {
+    card.style.setProperty('--c', d.color);
+    card.innerHTML = `<div class="reel">${Array.from({ length: d.scenes }, () => '<span></span>').join('')}</div>
+      <div class="top">${mark}<p class="mono"><b>${esc(d.index)}</b> / ${esc(d.total)} · ${esc(d.category)}</p></div>
+      <div class="main"><h1>${esc(d.short)}</h1><p class="hook">${esc(d.hook)}</p></div>
+      <div class="bottom"><span class="play"><i>▶</i>${esc(d.play)}</span>
+        <span class="metric"><b>${esc(d.metric)}</b><span class="mono">${esc(d.metricLabel)}</span></span></div>`;
+  }
+  document.fonts.ready.then(() => Promise.all([...document.images].map((i) => i.decode().catch(() => {})))).then(() => { document.body.dataset.ready = '1'; });
+</script>
+</body>
+</html>
