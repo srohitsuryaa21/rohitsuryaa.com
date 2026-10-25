@@ -34,9 +34,10 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .light{background:var(--paper);color:var(--ink);color-scheme:light}
 .section-label{display:flex;gap:24px;align-items:baseline;padding-bottom:18px;border-bottom:1px solid var(--line-d);margin-bottom:clamp(40px,7vw,100px)}
 .section-label>span:last-child:not(:first-child){margin-left:auto;text-align:right}
-/* the section name, marked with a small dot instead of a number */
-.section-label>span:first-child::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:10px;vertical-align:1px}
-.contact .section-label>span:first-child::before{background:currentColor}
+/* reading line: the rule under each section name fills as you read through that section */
+.section-label{position:relative}
+.section-label::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);transform-origin:left;transform:scaleX(var(--read,0))}
+.contact .section-label::after{background:currentColor}
 .light .section-label{border-color:var(--line-l)}
 .section-label.pad{margin-inline:var(--gutter)}
 .tags{display:flex;flex-wrap:wrap;gap:6px}

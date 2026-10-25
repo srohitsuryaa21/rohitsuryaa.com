@@ -262,6 +262,33 @@ function setupHeader() {
   $$('.light, .contact').forEach((el) => io.observe(el));
 }
 
+/* Reading line: each section name's rule fills from 0 to 1 while that section passes the middle of the screen */
+function setupReadingLines() {
+  const items = $$('.section-label').map((label) => {
+    const section = label.closest<HTMLElement>('section') ?? label.parentElement!;
+    // pinned sections scroll inside a spacer, which holds the real scroll length
+    return { label, box: () => (section.parentElement?.classList.contains('pin-spacer') ? section.parentElement : section) };
+  });
+  if (!items.length) return;
+  let queued = false;
+  const update = () => {
+    queued = false;
+    const mid = innerHeight / 2;
+    // the last section can never reach the middle, so the bottom of the page completes it
+    const atEnd = scrollY + innerHeight >= document.documentElement.scrollHeight - 4;
+    const reads = items.map(({ box }) => {
+      const r = box().getBoundingClientRect();
+      if (atEnd && r.top < innerHeight) return 1;
+      return Math.min(1, Math.max(0, (mid - r.top) / Math.max(1, r.height)));
+    });
+    items.forEach(({ label }, i) => label.style.setProperty('--read', reads[i].toFixed(3)));
+  };
+  const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+  addEventListener('scroll', queue, { passive: true });
+  addEventListener('resize', queue);
+  update();
+}
+
 /* Scroll story: whichever step crosses the middle of the screen sets the chart's scene */
 function setupStory() {
   const fig = $('.story-fig');
@@ -294,6 +321,7 @@ function setupStory() {
 setupCopy();
 setupTheme();
 setupHeader();
+setupReadingLines();
 setupClock();
 setupNumberNotes();
 setupStory();
