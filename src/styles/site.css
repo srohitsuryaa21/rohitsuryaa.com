@@ -33,7 +33,10 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 @keyframes pulse{70%{box-shadow:0 0 0 8px #43d17a00}100%{box-shadow:0 0 0 0 #43d17a00}}
 .light{background:var(--paper);color:var(--ink);color-scheme:light}
 .section-label{display:flex;gap:24px;align-items:baseline;padding-bottom:18px;border-bottom:1px solid var(--line-d);margin-bottom:clamp(40px,7vw,100px)}
-.section-label>span:last-child:not(:nth-child(2)){margin-left:auto;text-align:right}
+.section-label>span:last-child:not(:first-child){margin-left:auto;text-align:right}
+/* the section name, marked with a small dot instead of a number */
+.section-label>span:first-child::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:10px;vertical-align:1px}
+.contact .section-label>span:first-child::before{background:currentColor}
 .light .section-label{border-color:var(--line-l)}
 .section-label.pad{margin-inline:var(--gutter)}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
@@ -688,7 +691,7 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
   .hero{padding-top:90px}
   .hero-title{font-size:clamp(40px,12vw,64px)}
   .section-label{flex-wrap:wrap;gap:6px 16px}
-  .section-label>span:last-child:not(:nth-child(2)){margin-left:0;text-align:left;width:100%}
+  .section-label>span:last-child:not(:first-child){margin-left:0;text-align:left;width:100%}
   .numbers li{padding:40px 12px 28px}
   .num-label{font-size:15px}
   .facts{grid-template-columns:1fr}
