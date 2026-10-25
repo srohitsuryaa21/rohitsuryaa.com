@@ -14,7 +14,7 @@
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-padding-top:80px;-webkit-text-size-adjust:100%}
+html{scroll-padding-top:80px;-webkit-text-size-adjust:100%;overflow-x:clip}
 html.lenis,html.lenis body{height:auto}
 .lenis.lenis-smooth{scroll-behavior:auto!important}
 body{margin:0;background:var(--ink);color:var(--paper);font:400 16px/1.6 var(--display);font-synthesis:none;-webkit-font-smoothing:antialiased;overflow-x:clip}
@@ -95,6 +95,9 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .header-role{font:450 11px/1.35 var(--mono);text-transform:uppercase;text-align:center;opacity:.8}
 .site-header nav{justify-self:end;display:flex;gap:26px;font-size:14px;font-weight:500}
 .site-header nav a{position:relative}
+/* home, desktop: the text links stay out of the way at the top and arrive with the logo */
+.site-header nav>a:not(.lang-switch){transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.hero-flight:not(.hero-landed) .site-header nav>a:not(.lang-switch){opacity:0;transform:translateY(-8px);pointer-events:none}
 .site-header nav a::after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .45s var(--ease)}
 .site-header nav a:hover::after{transform:scaleX(1);transform-origin:left}
 
@@ -665,10 +668,16 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
   .work-btn{width:44px;height:44px;font-size:17px}
   .hide-sm{display:none!important}
   /* phones: one solid row, hidden while scrolling down, back on scroll up */
-  .site-header{display:flex;justify-content:space-between;align-items:center;padding-block:12px;background:color-mix(in srgb,var(--ink) 60%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding-bottom:34px;-webkit-mask-image:linear-gradient(#000 calc(100% - 26px),transparent);mask-image:linear-gradient(#000 calc(100% - 26px),transparent)}
-  .site-header.is-scrolled{padding-block:12px 34px}
+  /* phones: always a bar; a soft gradient below it instead of a mask, which is cheaper to draw while scrolling */
+  .site-header{display:flex;justify-content:space-between;align-items:center;padding-block:12px;--hdr-fill:color-mix(in srgb,var(--ink) 80%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .site-header,.site-header.is-scrolled{background:var(--hdr-fill)!important;padding-block:12px;-webkit-mask-image:none;mask-image:none}
+  .site-header::after{content:'';position:absolute;left:0;right:0;top:100%;height:22px;background:linear-gradient(var(--hdr-fill),transparent);pointer-events:none}
+  .on-light .site-header{--hdr-fill:#ece8dfd9}
+  :root[data-theme="light"] .on-light .site-header{--hdr-fill:#121211d9}
+  .on-accent .site-header{--hdr-fill:#ff4d1fd9;-webkit-backdrop-filter:none;backdrop-filter:none}
   .site-header>span:empty{display:none}
-  .site-header nav{align-items:center;gap:18px}
+  .site-header nav{align-items:center;gap:14px}
+  .case-page .site-header nav>a:first-child{display:none}
   .site-header.is-hidden{transform:translateY(-100%)}
   .header-role{display:none}
   .numbers ul{grid-template-columns:1fr 1fr}
@@ -690,6 +699,8 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 }
 @media (max-width:520px){
   .hero{padding-top:90px}
+  /* long German words ("Vertrauenswürdige") must fit one line at phone width */
+  .case-hero h1{font-size:10.5vw}
   .hero-title{font-size:clamp(40px,12vw,64px)}
   .section-label{flex-wrap:wrap;gap:6px 16px}
   .section-label>span:last-child:not(:first-child){margin-left:0;text-align:left;width:100%}

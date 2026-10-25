@@ -472,6 +472,8 @@ function buildHero(field: { setProgress: (p: number) => void }) {
       return { x: lr.left - left, y: lr.top + lr.height / 2 - (top + (height * scale) / 2), scale };
     };
     gsap.set(logo, { autoAlpha: 0 });
+    // the menu waits too: it comes in with the logo, once the name has landed
+    root.classList.add('hero-flight');
     gsap.timeline({
       defaults: { ease: 'none' },
       scrollTrigger: {
@@ -479,6 +481,7 @@ function buildHero(field: { setProgress: (p: number) => void }) {
         onUpdate: (self) => {
           field.setProgress(self.progress / 0.5);
           root.classList.toggle('signal-found', self.progress > 0.38);
+          root.classList.toggle('hero-landed', self.progress > 0.9);
         },
       },
     })
@@ -497,6 +500,7 @@ function buildHero(field: { setProgress: (p: number) => void }) {
       .fromTo(folding, { maxWidth: '1.2em', opacity: 1 }, { maxWidth: '0em', opacity: 0, stagger: { each: 0.012, from: 'end' }, duration: 0.2, ease: 'power2.inOut', immediateRender: false }, 0.6)
       .to(name, { autoAlpha: 0, duration: 0.06 }, 0.94)
       .to(logo, { autoAlpha: 1, duration: 0.06 }, 0.94);
+    return () => root.classList.remove('hero-flight', 'hero-landed');
   });
 
   // Scroll, phones and short screens: no pin, so the letters squash flat one by one as the hero leaves.
