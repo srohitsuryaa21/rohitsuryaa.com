@@ -107,11 +107,18 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .hero-main{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(24px,4vh,44px);padding:clamp(16px,3vh,40px) 0}
 .hero-title{font:700 clamp(44px,min(6.6vw,11vh),120px)/.94 var(--display);letter-spacing:-.06em;max-width:none}
 .hero-title em{color:var(--accent);font-size:1.06em;letter-spacing:-.03em}
-.rotator{color:var(--accent);font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.12em;letter-spacing:-.02em}
-.rot-word+.rot-word{display:none}
-.motion .rotator{display:inline-grid;vertical-align:top;overflow:hidden;padding:0 .08em .16em 0;margin-bottom:-.16em;white-space:nowrap}
-.motion .rot-word{grid-area:1/1;display:block}
-.motion .rot-word+.rot-word{display:block;opacity:0}
+/* split flap departure board: one dark tile per letter, the changing word clacks over tile by tile.
+   The tiles size themselves so the longest word always fits the line (or the screen, on phones). */
+.board{--fit:calc((100vw - 2 * var(--gutter) - 3.4em) / (var(--n) * .74));display:inline-flex;gap:.06em;margin:0 .06em 0 .1em;vertical-align:-.04em;font:700 min(.78em,var(--fit))/1 var(--mono);letter-spacing:0}
+.flap{position:relative;display:grid;place-items:center;width:.7em;height:1.06em;border-radius:.09em;background:#1b1a18;color:var(--accent);box-shadow:inset 0 -.05em 0 #0009,0 .02em 0 #ffffff12;overflow:hidden;perspective:4em}
+.flap b{font-weight:inherit}
+/* the hinge line through the middle of each tile */
+.flap::after{content:'';position:absolute;left:0;right:0;top:50%;height:.035em;margin-top:-.017em;background:#0d0d0c;z-index:2}
+/* the falling top leaf, played on each letter change */
+.flap::before{content:'';position:absolute;left:0;right:0;top:0;height:50%;background:linear-gradient(#2a2926,#201f1d);transform-origin:bottom;transform:rotateX(90deg);z-index:1}
+.flap.tick::before{animation:flap-leaf .09s linear}
+@keyframes flap-leaf{from{transform:rotateX(0)}to{transform:rotateX(-90deg)}}
+
 .hero-sub{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px 30px}
 .hero-sub>p{color:var(--fg-dim)}
 .hero-sub .open{color:var(--paper);white-space:nowrap}
@@ -126,9 +133,6 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .legend-signal{display:none;color:var(--accent)}
 .signal-found .legend-noise{display:none}
 .signal-found .legend-signal{display:inline}
-.hero-name{font:800 12.4vw/.84 var(--display);letter-spacing:-.065em;text-transform:uppercase;white-space:nowrap;padding-top:.04em;overflow:hidden}
-.hero-name .char{display:inline-block;will-change:transform;font-variation-settings:'wght' var(--w,800)}
-.motion .hero-name{will-change:transform}
 .motion .hero{height:100svh;min-height:600px}
 
 /* ───────── Manifesto & about ───────── */
@@ -699,6 +703,9 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 }
 @media (max-width:520px){
   .hero{padding-top:90px}
+  .board-line{display:block;margin:.12em 0 .1em}
+  .board-line+br{display:none}
+  .board{--fit:calc((100vw - 2 * var(--gutter) - .4em) / (var(--n) * .76));margin-left:0}
   /* long German words ("Vertrauenswürdige") must fit one line at phone width */
   .case-hero h1{font-size:10.5vw}
   .hero-title{font-size:clamp(40px,12vw,64px)}
@@ -753,6 +760,63 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .next-hook{display:block;margin-top:14px;font-size:clamp(20px,2vw,30px);color:var(--fg-dim)}
 @media (max-width:899px){.story-reel{top:8px}.story-reel-n{display:none}}
 @media (prefers-reduced-motion:reduce){.panel-reel i{animation:none!important;transform:scaleX(calc(1 / var(--n)))}.case-play-btn::after{display:none}}
+
+/* ───────── Boarding pass (the introduction) ─────────
+   A printed object, so its colours stay fixed in both themes. Main part and stub sit side by side,
+   joined by a tear line with two round notches; on phones they stack like a wallet pass. */
+.bp{--pp:#faf8f3;--pi:#0d0d0c;--pd:#8d8a82;--pa:#ff4d1f;position:relative;display:grid;grid-template-columns:minmax(0,1fr) clamp(250px,24vw,330px);max-width:1280px;margin:0 auto clamp(60px,8vw,110px);color:var(--pi);filter:drop-shadow(0 14px 22px #0d0d0c24)}
+.bp-main,.bp-stub{position:relative;background:var(--pp);overflow:hidden;padding-bottom:clamp(20px,2.4vw,30px)}
+.bp-main{border-radius:22px 0 0 22px;--n1:100% 0;--n2:100% 100%}
+/* the two round notches where the stub tears off, cut out of both halves */
+.bp-main,.bp-stub{-webkit-mask:radial-gradient(circle 18px at var(--n1),#0000 98%,#000) 0 0/100% 51% no-repeat,radial-gradient(circle 18px at var(--n2),#0000 98%,#000) 0 100%/100% 51% no-repeat;mask:radial-gradient(circle 18px at var(--n1),#0000 98%,#000) 0 0/100% 51% no-repeat,radial-gradient(circle 18px at var(--n2),#0000 98%,#000) 0 100%/100% 51% no-repeat}
+.bp-stub{border-radius:0 22px 22px 0;--n1:0 0;--n2:0 100%}
+.bp-stub::before{content:'';position:absolute;left:-1px;top:26px;bottom:26px;border-left:2px dashed #0d0d0c2e}
+.bp-band{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px clamp(20px,3vw,40px);background:var(--pi);color:#ece8df}
+.bp-stub .bp-band{padding-inline:clamp(18px,2vw,28px)}
+.bp-logo{font:800 24px/1 var(--display);letter-spacing:-.06em}
+.bp-logo sup{color:var(--pa);font-size:11px}
+.bp-kind{font-size:12px;font-weight:600;letter-spacing:.12em;text-align:right;color:#ece8df}
+.bp-kind small{display:block;font-size:10px;font-weight:450;color:var(--pd)}
+.bp-body{display:grid;gap:clamp(14px,1.6vw,20px);padding:clamp(18px,2.2vw,26px) clamp(20px,3vw,40px) 0}
+.bp-stub .bp-body{padding-inline:clamp(18px,2vw,28px);gap:14px}
+.bp p{margin:0}
+.bp-lab{font-size:10.5px;letter-spacing:.12em;color:var(--pd)}
+.bp-lab i{font-style:normal;opacity:.7}
+.bp-name{margin:4px 0 0;font:800 clamp(44px,7.6vw,120px)/.88 var(--display);letter-spacing:-.07em;color:var(--pi)}
+.bp-name em{font-size:.44em;letter-spacing:-.02em;margin-right:.1em;color:var(--pa)}
+.bp-route{display:grid;grid-template-columns:auto minmax(40px,1fr) auto;align-items:center;gap:clamp(14px,2vw,26px)}
+.bp-to{text-align:right}
+.bp-city{font:800 clamp(30px,4.2vw,64px)/.95 var(--display);letter-spacing:-.05em;margin:6px 0 4px!important}
+.bp-line{position:relative;height:2px;background:repeating-linear-gradient(90deg,#0d0d0c66 0 7px,transparent 7px 14px)}
+.bp-plane{position:absolute;right:-4px;top:50%;width:30px;height:30px;margin-top:-15px;fill:var(--pa)}
+.bp-grid{display:grid;grid-template-columns:repeat(5,auto);justify-content:space-between;gap:12px 20px;margin:0;padding-top:16px;border-top:1px solid #0d0d0c1a}
+.bp-grid dd,.bp-val{margin:4px 0 0;font:700 clamp(15px,1.3vw,19px)/1.2 var(--display);letter-spacing:-.01em;text-transform:uppercase;color:var(--pi)}
+.bp-val{font-size:clamp(14px,1.15vw,17px)}
+.bp-hl{color:var(--pa)!important}
+.bp-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bp-code{display:block;width:100%;height:clamp(54px,5vw,74px);margin-top:4px}
+.bp-code path{fill:var(--pi)}
+.bp-stamp{position:absolute;right:clamp(16px,2.4vw,34px);top:clamp(70px,7vw,96px);width:clamp(96px,9vw,128px);aspect-ratio:1;border:3px solid #ff4d1f99;border-radius:50%;display:grid;place-items:center;text-align:center;color:#ff4d1fbf;font:700 11px/1.35 var(--mono);letter-spacing:.1em;text-transform:uppercase;transform:rotate(-14deg)}
+.bp-stamp b{display:block;font:800 clamp(18px,1.8vw,24px)/1.1 var(--display);letter-spacing:-.03em;text-transform:none}
+/* arrival: the plane flies the route, then the stamp lands */
+.bp-ready .bp-plane{right:calc(100% - 26px);transition:right 1.6s cubic-bezier(.45,0,.2,1) .2s}
+.bp-ready .bp-stamp{opacity:0;transform:rotate(-14deg) scale(1.5);transition:opacity .25s 1.75s,transform .45s cubic-bezier(.2,1.6,.4,1) 1.75s}
+.bp-in .bp-plane{right:-4px}
+.bp-in .bp-stamp{opacity:1;transform:rotate(-14deg) scale(1)}
+@media (max-width:760px){
+  .bp{grid-template-columns:minmax(0,1fr)}
+  .bp-main{border-radius:20px 20px 0 0}
+  .bp-stub{border-radius:0 0 20px 20px}
+  .bp-stub::before{left:22px;right:22px;top:-1px;bottom:auto;border-left:0;border-top:2px dashed #0d0d0c2e}
+  .bp-main,.bp-stub{-webkit-mask:radial-gradient(circle 16px at var(--n1),#0000 98%,#000) 0 0/51% 100% no-repeat,radial-gradient(circle 16px at var(--n2),#0000 98%,#000) 100% 0/51% 100% no-repeat;mask:radial-gradient(circle 16px at var(--n1),#0000 98%,#000) 0 0/51% 100% no-repeat,radial-gradient(circle 16px at var(--n2),#0000 98%,#000) 100% 0/51% 100% no-repeat}
+  .bp-main{--n1:0 100%;--n2:100% 100%}.bp-stub{--n1:0 0;--n2:100% 0}
+  .bp-stub .bp-band{display:none}
+  .bp-grid{grid-template-columns:repeat(2,auto);justify-content:start;column-gap:40px}
+  .bp-stamp{top:clamp(118px,30vw,140px);right:14px;width:84px;font-size:9px}
+  .bp-stamp b{font-size:17px}
+  .bp-code{height:52px}
+  .bp-route{grid-template-columns:auto minmax(24px,1fr) auto}
+}
 
 /* ───────── White mode ─────────
    The dark surfaces turn light and the text turns dark. Sections that already have their own palette

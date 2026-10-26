@@ -23,14 +23,15 @@ export const home = {
     hero: {
       sr: 'Rohit Suryaa Saravanan. I turn raw data into forecasts, AI agents, APIs, pipelines and decisions people trust.',
       before: 'I turn raw data', mid: 'into', after: 'people trust.',
-      words: ['forecasts', 'AI agents', 'APIs', 'pipelines', 'decisions'],
+      // shown on a split flap board, so in capitals like a station display
+      words: ['FORECASTS', 'AI AGENTS', 'APIs', 'PIPELINES', 'DECISIONS'], punct: '',
       sub: 'Software developer & data scientist · Fulda, Germany',
       open: 'Open to opportunities',
       ctaWork: 'See the work', ctaContact: 'Get in touch',
       scroll: 'Scroll ↓', found: 'Signal found.',
     },
     about: {
-      label: 'Who am I?', aside: 'Engineer by training. Researcher by habit.',
+      hi: 'I’m', aside: 'Engineer by training. Researcher by habit.',
       manifesto: 'Data science meets software engineering. I build the model and the system it lives in.',
       cursor: 'Hallo!', caption: 'Chennai 13.08° N → Fulda 50.55° N',
       lead: 'I like the moment a hard problem starts to make sense.',
@@ -104,14 +105,14 @@ export const home = {
     hero: {
       sr: 'Rohit Suryaa Saravanan. Ich mache aus Rohdaten Prognosen, Agenten, APIs, Pipelines und Entscheidungen, denen man vertraut.',
       before: 'Ich mache Rohdaten', mid: 'zu', after: 'denen man vertraut.',
-      words: ['Prognosen,', 'Agenten,', 'APIs,', 'Pipelines,', 'Entscheidungen,'],
+      words: ['PROGNOSEN', 'AGENTEN', 'APIs', 'PIPELINES', 'ENTSCHEIDUNGEN'], punct: ',',
       sub: 'Softwareentwickler & Data Scientist · Fulda',
       open: 'Offen für neue Aufgaben',
       ctaWork: 'Projekte ansehen', ctaContact: 'Kontakt aufnehmen',
       scroll: 'Scrollen ↓', found: 'Signal gefunden.',
     },
     about: {
-      label: 'Wer bin ich?', aside: 'Informatiker von Haus aus. Forscher aus Gewohnheit.',
+      hi: 'Ich bin', aside: 'Informatiker von Haus aus. Forscher aus Gewohnheit.',
       manifesto: 'Data Science trifft Softwareentwicklung. Ich baue das Modell und das System drumherum.',
       cursor: 'Hallo!', caption: 'Chennai 13,08° N → Fulda 50,55° N',
       lead: 'Ich mag den Moment, in dem ein schweres Problem plötzlich Sinn ergibt.',

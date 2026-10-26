@@ -1,5 +1,6 @@
 ---
 import Layout from './Layout.astro';
+import BoardingPass from './BoardingPass.astro';
 import { person, website, profilePage, origin } from '../data/seo';
 import Exhibit from './Exhibit.astro';
 import Network from './Network.astro';
@@ -10,6 +11,8 @@ import { home, site, localePath, type Lang } from '../i18n/content';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = home[lang];
+// the departure board has one tile per letter of the longest word
+const cells = Math.max(...t.hero.words.map((w) => w.length));
 const other: Lang = lang === 'en' ? 'de' : 'en';
 const list = projects.map((p) => localize(p, lang));
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -49,7 +52,7 @@ const glyphs = [0, 1, 2];
     <div class="hero-main">
       <h1 class="hero-title">
         <span class="sr-only">{t.hero.sr}</span>
-        <span aria-hidden="true">{t.hero.before}<br/> {t.hero.mid} <span class="rotator">{t.hero.words.map((w) => <span class="rot-word">{w}</span>)}</span><br/> {t.hero.after}</span>
+        <span aria-hidden="true">{t.hero.before}<br/> {t.hero.mid} <span class="board-line"><span class="board" style={`--n:${cells}`} data-words={JSON.stringify(t.hero.words)}>{Array.from({ length: cells }, (_, i) => <span class="flap"><b>{t.hero.words[0][i] ?? ''}</b></span>)}</span>{t.hero.punct}</span><br/> {t.hero.after}</span>
       </h1>
       <div class="hero-sub">
         <p class="mono">{t.hero.sub} · <span class="open"><i class="pulse"></i>{t.hero.open}</span></p>
@@ -61,13 +64,13 @@ const glyphs = [0, 1, 2];
     </div>
     <div class="hero-bottom">
       <p class="hero-legend mono" aria-hidden="true"><b class="legend-noise">{t.hero.scroll}</b><b class="legend-signal">{t.hero.found}</b></p>
-      <p class="hero-name" aria-hidden="true">Rohit Suryaa</p>
     </div>
   </section>
 
   <!-- 02 ABOUT -->
   <section class="manifesto light" id="about" aria-labelledby="about-title">
-    <div class="section-label mono"><span id="about-title">{t.about.label}</span><span>{t.about.aside}</span></div>
+    <!-- the introduction: the name the hero used to carry, on a boarding pass from Chennai to Fulda -->
+    <BoardingPass lang={lang} />
     <p class="manifesto-text" data-fill>{t.about.manifesto}</p>
     <div class="about-grid">
       <figure class="about-portrait" data-cursor={t.about.cursor}>

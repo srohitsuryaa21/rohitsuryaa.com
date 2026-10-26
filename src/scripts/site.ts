@@ -2,7 +2,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import Lenis from 'lenis';
-import { createField, fitName } from './field';
+import { createField } from './field';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -327,8 +327,6 @@ setupNumberNotes();
 setupStory();
 setupZigzag();
 setupWorkRow();
-const heroName = $('.hero-name');
-if (heroName) fitName(heroName);
 
 if (reduced) {
   root.classList.add('reduced', 'loader-done');
@@ -380,13 +378,12 @@ function initMotion() {
     }
   });
 
-  const heroChars = new SplitText('.hero-name', { type: 'chars', charsClass: 'char' }).chars;
   const field = createField($<HTMLCanvasElement>('.hero-field')!, { animate: true });
 
   runLoader(() => {
     root.classList.add('loader-done');
     lenis.start();
-  }, heroChars);
+  });
 
   const start = () => {
     // Each section is isolated: a failure in one must never leave the page half-built.
@@ -412,7 +409,7 @@ function initMotion() {
   addEventListener('load', () => ScrollTrigger.refresh());
 }
 
-function runLoader(done: () => void, heroChars: Element[]) {
+function runLoader(done: () => void, heroChars: Element[] = []) {
   const loader = $('.loader');
   gsap.set(heroChars, { yPercent: 105 });
   const reveal = () => gsap.to(heroChars, { yPercent: 0, duration: 1.2, ease: 'expo.out', stagger: 0.035 });
@@ -447,121 +444,60 @@ function buildHero(field: { setProgress: (p: number) => void }) {
   gsap.from('.hero-sub, .hero-legend', { y: 30, opacity: 0, duration: 1, ease: 'expo.out', stagger: 0.08, delay: 0.4 });
   buildRotator();
 
-  const name = $('.hero-name')!;
-  const chars = $$('.char', name);
-  const logo = $('.site-header .logo')!;
-  const logoRs = $('.logo-rs', logo) ?? logo;
-  // "ROHIT SURYAA" split into chars: keep the R (0) and the S (5), fold the rest away mid flight
-  const folding = chars.filter((_, i) => i !== 0 && i !== 5);
+  // Scroll: the noisy dots settle into the curve as the hero leaves the screen.
+  // On desktop the text links in the header wait until then, so the top of the page stays quiet.
   const hero = $('.hero')!;
-
-  // Scroll, desktop: the curve settles first, then the big name shrinks and flies into the header logo.
-  const mm = gsap.matchMedia();
-  mm.add('(min-width: 900px) and (min-height: 600px)', () => {
-    // geometry of the untransformed name inside the (pinned) hero, and of the logo it lands on
-    const geo = () => {
-      // offsetLeft/Top are layout values (unaffected by the running transform), relative to offsetParent
-      const op = (name.offsetParent as HTMLElement).getBoundingClientRect();
-      const hr = hero.getBoundingClientRect();
-      const left = op.left - hr.left + name.offsetLeft;
-      const top = op.top - hr.top + name.offsetTop;
-      const height = name.offsetHeight;
-      const lr = logoRs.getBoundingClientRect();
-      // match the letter size of the mark, then centre on it vertically
-      const scale = (parseFloat(getComputedStyle(logoRs).fontSize) * 1.05) / parseFloat(getComputedStyle(name).fontSize);
-      return { x: lr.left - left, y: lr.top + lr.height / 2 - (top + (height * scale) / 2), scale };
-    };
-    gsap.set(logo, { autoAlpha: 0 });
-    // the menu waits too: it comes in with the logo, once the name has landed
-    root.classList.add('hero-flight');
-    gsap.timeline({
-      defaults: { ease: 'none' },
-      scrollTrigger: {
-        trigger: hero, start: 'top top', end: '+=110%', pin: true, scrub: 0.6, invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          field.setProgress(self.progress / 0.5);
-          root.classList.toggle('signal-found', self.progress > 0.38);
-          root.classList.toggle('hero-landed', self.progress > 0.9);
-        },
-      },
-    })
-      .to({}, { duration: 0.5 }, 0)
-      .to('.hero-legend', { autoAlpha: 0, duration: 0.1 }, 0.45)
-      // clear the headline out of the flight path
-      .to('.hero-main', { autoAlpha: 0, y: -50, duration: 0.18, ease: 'power2.in' }, 0.5)
-      .to(chars, { scaleY: 0.45, transformOrigin: '50% 100%', stagger: { each: 0.012, from: 'center' }, duration: 0.18, ease: 'power2.in' }, 0.48)
-      .to(name, {
-        x: () => geo().x, y: () => geo().y, scale: () => geo().scale,
-        transformOrigin: '0% 0%', duration: 0.42, ease: 'power3.inOut',
-      }, 0.52)
-      .to(chars, { scaleY: 1, stagger: { each: 0.01, from: 'edges' }, duration: 0.22, ease: 'back.out(2)' }, 0.66)
-      // max-width (not width) so letters keep their natural size until they fold, even while the hover changes their weight
-      .fromTo(name, { wordSpacing: '0em' }, { wordSpacing: '-0.3em', duration: 0.2, ease: 'power2.inOut', immediateRender: false }, 0.62)
-      .fromTo(folding, { maxWidth: '1.2em', opacity: 1 }, { maxWidth: '0em', opacity: 0, stagger: { each: 0.012, from: 'end' }, duration: 0.2, ease: 'power2.inOut', immediateRender: false }, 0.6)
-      .to(name, { autoAlpha: 0, duration: 0.06 }, 0.94)
-      .to(logo, { autoAlpha: 1, duration: 0.06 }, 0.94);
-    return () => root.classList.remove('hero-flight', 'hero-landed');
+  const desktop = matchMedia('(min-width: 900px)').matches;
+  if (desktop) root.classList.add('hero-flight');
+  ScrollTrigger.create({
+    trigger: hero, start: 'top top', end: 'bottom top',
+    onUpdate: (self) => {
+      field.setProgress(self.progress * 2.2);
+      root.classList.toggle('signal-found', self.progress > 0.35);
+      root.classList.toggle('hero-landed', self.progress > 0.4);
+    },
   });
-
-  // Scroll, phones and short screens: no pin, so the letters squash flat one by one as the hero leaves.
-  mm.add('(max-width: 899px), (max-height: 599px)', () => {
-    ScrollTrigger.create({
-      trigger: hero, start: 'top top', end: 'bottom top',
-      onUpdate: (self) => {
-        field.setProgress(self.progress * 2.2);
-        root.classList.toggle('signal-found', self.progress > 0.35);
-      },
-    });
-    gsap.to(chars, {
-      scaleY: 0.15, transformOrigin: '50% 100%', ease: 'none',
-      stagger: { each: 0.05, from: 'edges' },
-      scrollTrigger: { trigger: name, start: 'top 85%', end: 'bottom top', scrub: true },
-    });
-  });
-
-  // Hover, fine pointers: letters near the cursor thin out, the rest stay heavy.
-  if (finePointer) {
-    let px = -9999, py = -9999, raf = 0;
-    const update = () => {
-      raf = 0;
-      for (const c of chars) {
-        const r = c.getBoundingClientRect();
-        const dx = r.left + r.width / 2 - px, dy = r.top + r.height / 2 - py;
-        const k = Math.exp(-(dx * dx + dy * dy) / (2 * 250 * 250));
-        gsap.to(c, { '--w': 800 - 600 * k, duration: 0.5, ease: 'power3.out', overwrite: 'auto' });
-      }
-    };
-    hero.addEventListener('pointermove', (e) => { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(update); });
-    hero.addEventListener('pointerleave', () => { px = py = -9999; if (!raf) raf = requestAnimationFrame(update); });
-  }
 }
 
-// Cycles the accent word in the headline; the box width follows each word.
+// Split flap board: every 2.6 s the next word clacks in. Each tile steps through the letters
+// between the old and the new one, like a station display, starting a little after its left neighbour.
 function buildRotator() {
-  const rot = $('.rotator');
-  if (!rot) return;
-  const words = $$('.rot-word', rot);
-  let i = 0;
-  gsap.set(words, { yPercent: 0, opacity: 0 });
-  gsap.set(words[0], { opacity: 1 });
-  const fit = () => gsap.set(rot, { width: words[i].offsetWidth });
-  fit();
-  document.fonts?.ready.then(fit);
-  const next = () => {
-    const cur = words[i];
-    i = (i + 1) % words.length;
-    const nxt = words[i];
-    gsap.timeline()
-      .to(cur, { yPercent: -100, opacity: 0, duration: 0.45, ease: 'power3.in' }, 0)
-      .fromTo(nxt, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.6, ease: 'expo.out' }, 0.35)
-      .to(rot, { width: nxt.offsetWidth, duration: 0.7, ease: 'expo.inOut' }, 0.15);
+  const board = $('.board');
+  if (!board) return;
+  const words = JSON.parse(board.dataset.words ?? '[]') as string[];
+  const tiles = $$('.flap', board).map((el) => ({ el, b: $('b', el)!, ch: $('b', el)!.textContent ?? '' }));
+  const ABC = ' ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜabcdefghijklmnopqrstuvwxyz';
+  let w = 0;
+  const flipTo = (tile: (typeof tiles)[number], target: string, delay: number) => {
+    let from = ABC.indexOf(tile.ch), to = ABC.indexOf(target);
+    if (from < 0) from = 0;
+    if (to < 0) { setTimeout(() => set(tile, target), delay); return; }
+    // walk forward through the alphabet, but never more than eight flaps
+    const path: string[] = [];
+    for (let k = from; k !== to; k = (k + 1) % ABC.length) path.push(ABC[(k + 1) % ABC.length]);
+    path.splice(0, Math.max(0, path.length - 8));
+    path.forEach((c, n) => setTimeout(() => set(tile, c), delay + n * 70));
   };
-  let timer = setInterval(next, 2200);
+  const set = (tile: (typeof tiles)[number], c: string) => {
+    tile.ch = c;
+    tile.b.textContent = c.trim();
+    tile.el.classList.remove('tick');
+    void tile.el.offsetWidth;
+    tile.el.classList.add('tick');
+  };
+  const show = () => {
+    w = (w + 1) % words.length;
+    const word = words[w];
+    tiles.forEach((tile, i) => {
+      const target = word[i] ?? ' ';
+      if (target !== (tile.ch || ' ')) flipTo(tile, target, i * 45);
+    });
+  };
+  let timer = setInterval(show, 2600);
   document.addEventListener('visibilitychange', () => {
     clearInterval(timer);
-    if (!document.hidden) timer = setInterval(next, 2200);
+    if (!document.hidden) timer = setInterval(show, 2600);
   });
-  addEventListener('resize', fit);
 }
 
 function buildReveals() {

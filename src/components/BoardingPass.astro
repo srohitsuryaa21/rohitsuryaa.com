@@ -1,0 +1,74 @@
+---
+// The introduction as a boarding pass: Chennai to Fulda, already arrived, now studying.
+// It stays the same printed object in both themes. The plane flies the route and the
+// arrival stamp lands when the pass scrolls into view.
+import type { Lang } from '../i18n/content';
+interface Props { lang: Lang }
+const de = Astro.props.lang === 'de';
+const n = (en: string, d: string) => (de ? d : en);
+
+// a dense 2D barcode like the ones printed on real passes, drawn as one path (seeded, so it never changes)
+let seed = 7;
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const cols = 68, rows = 18;
+let bars = '';
+for (let r = 0; r < rows; r++) {
+  let run = 0;
+  for (let c = 0; c <= cols; c++) {
+    const on = c < cols && rnd() > 0.5;
+    if (on) run++;
+    else if (run) { bars += `M${c - run} ${r}h${run}v1h-${run}z`; run = 0; }
+  }
+}
+---
+<div class="bp" data-bp>
+  <div class="bp-main">
+    <div class="bp-band"><span class="bp-logo" aria-hidden="true">rs<sup>©</sup></span><span class="bp-kind mono">{n('Boarding pass', 'Bordkarte')}<small>{n('Bordkarte', 'Boarding pass')}</small></span></div>
+    <div class="bp-body">
+      <div>
+        <p class="bp-lab mono">{n('Passenger', 'Fluggast')} <i>/ {n('Fluggast', 'Passenger')}</i></p>
+        <h2 class="bp-name" id="about-title"><em>{n('I’m', 'Ich bin')}</em> Rohit Suryaa.</h2>
+      </div>
+      <div class="bp-route">
+        <div><p class="bp-lab mono">{n('From', 'Von')} <i>/ {n('Von', 'From')}</i></p><p class="bp-city">Chennai</p><p class="bp-lab mono">13.08° N</p></div>
+        <div class="bp-line" aria-hidden="true"><svg class="bp-plane" viewBox="0 0 24 24"><path d="M21.5 15.5v-2l-8-5V3.2c0-.9-.7-1.7-1.5-1.7s-1.5.8-1.5 1.7v5.3l-8 5v2l8-2.5v5.2l-2 1.5v1.5l3.5-1 3.5 1v-1.5l-2-1.5V13z" transform="rotate(90 12 12)" /></svg></div>
+        <div class="bp-to"><p class="bp-lab mono">{n('To', 'Nach')} <i>/ {n('Nach', 'To')}</i></p><p class="bp-city">Fulda</p><p class="bp-lab mono">50.55° N</p></div>
+      </div>
+      <dl class="bp-grid">
+        <div><dt class="bp-lab mono">{n('Since', 'Seit')}</dt><dd>2025</dd></div>
+        <div><dt class="bp-lab mono">{n('Class', 'Klasse')}</dt><dd>MSc Data Science</dd></div>
+        <div><dt class="bp-lab mono">{n('Trained as', 'Von Haus aus')}</dt><dd>{n('Engineer', 'Informatiker')}</dd></div>
+        <div><dt class="bp-lab mono">{n('By habit', 'Aus Gewohnheit')}</dt><dd>{n('Researcher', 'Forscher')}</dd></div>
+        <div><dt class="bp-lab mono">Status</dt><dd class="bp-hl">{n('Arrived', 'Angekommen')}</dd></div>
+      </dl>
+    </div>
+    <div class="bp-stamp" aria-hidden="true"><span>{n('Arrived', 'Angekommen')}<b>Fulda</b>2025 · DE</span></div>
+  </div>
+  <div class="bp-stub">
+    <div class="bp-band"><span class="bp-logo" aria-hidden="true">rs<sup>©</sup></span><span class="bp-kind mono">{n('Passenger', 'Fluggast')}<small>{n('Receipt', 'Abschnitt')}</small></span></div>
+    <div class="bp-body">
+      <div><p class="bp-lab mono">Name</p><p class="bp-val">Saravanan / Rohit Suryaa</p></div>
+      <div class="bp-two">
+        <div><p class="bp-lab mono">{n('Now', 'Jetzt')}</p><p class="bp-val">{n('Studying', 'Im Studium')}</p></div>
+        <div><p class="bp-lab mono">{n('Next', 'Danach')}</p><p class="bp-val">{n('Your team', 'Ihr Team')}</p></div>
+      </div>
+      <div class="bp-two">
+        <div><p class="bp-lab mono">Gate</p><p class="bp-val bp-hl">{n('Open', 'Offen')}</p></div>
+        <div><p class="bp-lab mono">{n('Where', 'Wo')}</p><p class="bp-val">Fulda, DE</p></div>
+      </div>
+      <svg class="bp-code" viewBox={`0 0 ${cols} ${rows}`} preserveAspectRatio="none" aria-hidden="true"><path d={bars} /></svg>
+    </div>
+  </div>
+</div>
+
+<script>
+  // fly and stamp once, when the pass comes into view
+  const pass = document.querySelector<HTMLElement>('[data-bp]');
+  if (pass && 'IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    pass.classList.add('bp-ready');
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { pass.classList.add('bp-in'); io.disconnect(); }
+    }, { threshold: 0.45 });
+    io.observe(pass);
+  }
+</script>
