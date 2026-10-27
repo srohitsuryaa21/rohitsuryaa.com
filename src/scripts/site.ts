@@ -318,6 +318,100 @@ function setupStory() {
   show(steps[0]);
 }
 
+/* Card stories: the card in front plays its story tile by tile, like a phone story.
+   Cover, question, problem, what I built, result, then the call to watch the whole thing.
+   Tap the left or right edge to step, press and hold to pause; the middle opens the case study. */
+const TILE_MS = 3200;
+function setupCardStories() {
+  const cards = $$('.work-track .panel');
+  if (!cards.length || reduced) return;
+  type Play = { k: number; timer: number; start: number; left: number };
+  const seen = new Set<HTMLElement>();
+  const playing = new Map<HTMLElement, Play>();
+  const total = (card: HTMLElement) => $$('.panel-tiles .tile', card).length + 1;
+  const run = (card: HTMLElement, st: Play, ms: number) => {
+    clearTimeout(st.timer);
+    st.start = performance.now();
+    st.left = ms;
+    st.timer = window.setTimeout(() => show(card, st.k + 1), ms);
+  };
+  const show = (card: HTMLElement, idx: number) => {
+    const n = total(card);
+    const k = ((idx % n) + n) % n;
+    const st = playing.get(card) ?? { k, timer: 0, start: 0, left: TILE_MS };
+    st.k = k;
+    playing.set(card, st);
+    card.dataset.tile = String(k);
+    card.classList.remove('is-held');
+    $$('.panel-tiles .tile', card).forEach((t, i) => t.classList.toggle('is-on', i === k - 1));
+    $$('.panel-reel i', card).forEach((g, i) => {
+      g.className = '';
+      // restart the running segment so it fills from empty
+      if (i === k) { void g.offsetWidth; g.className = 'now'; } else if (i < k) g.className = 'done';
+    });
+    run(card, st, TILE_MS);
+  };
+  const stop = (card: HTMLElement) => {
+    clearTimeout(playing.get(card)?.timer);
+    playing.delete(card);
+    delete card.dataset.tile;
+    card.classList.remove('is-held');
+    $$('.panel-tiles .tile', card).forEach((t) => t.classList.remove('is-on'));
+    $$('.panel-reel i', card).forEach((g) => (g.className = ''));
+  };
+  // a card plays while it is on screen and in front; side cards in the 3D row wait their turn
+  const sync = () => cards.forEach((card) => {
+    const on = seen.has(card) && !card.classList.contains('is-side') && card.style.visibility !== 'hidden' && !document.hidden;
+    if (on && !playing.has(card)) show(card, 0);
+    else if (!on && playing.has(card)) stop(card);
+  });
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => (e.isIntersecting ? seen.add(e.target as HTMLElement) : seen.delete(e.target as HTMLElement)));
+    sync();
+  }, { threshold: 0.6 });
+  cards.forEach((c) => io.observe(c));
+  const mo = new MutationObserver(sync);
+  cards.forEach((c) => mo.observe(c, { attributes: true, attributeFilter: ['class', 'style'] }));
+  document.addEventListener('visibilitychange', sync);
+
+  cards.forEach((card) => {
+    const media = $('.panel-media', card);
+    if (!media) return;
+    let hold = 0, held = false, x0 = 0, y0 = 0;
+    const release = () => {
+      clearTimeout(hold);
+      const st = playing.get(card);
+      if (!card.classList.contains('is-held') || !st) return;
+      card.classList.remove('is-held');
+      run(card, st, st.left);
+    };
+    media.addEventListener('pointerdown', (e) => {
+      const st = playing.get(card);
+      if (!st || e.button > 0) return;
+      held = false; x0 = e.clientX; y0 = e.clientY;
+      hold = window.setTimeout(() => {
+        held = true;
+        clearTimeout(st.timer);
+        st.left = Math.max(0, st.left - (performance.now() - st.start));
+        card.classList.add('is-held');
+      }, 240);
+    });
+    // a swipe through the row is not a hold
+    media.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - x0, e.clientY - y0) > 10) { clearTimeout(hold); release(); } });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((t) => media.addEventListener(t, release));
+    media.addEventListener('contextmenu', (e) => { if (held) e.preventDefault(); });
+    media.addEventListener('click', (e) => {
+      const st = playing.get(card);
+      if (!st) return;
+      if (held) { e.preventDefault(); held = false; return; }
+      const zone = (e.target as Element).closest<HTMLElement>('[data-step]');
+      if (!zone) return;
+      e.preventDefault();
+      show(card, st.k + Number(zone.dataset.step));
+    });
+  });
+}
+
 setupCopy();
 setupTheme();
 setupHeader();
@@ -327,6 +421,7 @@ setupNumberNotes();
 setupStory();
 setupZigzag();
 setupWorkRow();
+setupCardStories();
 
 if (reduced) {
   root.classList.add('reduced', 'loader-done');

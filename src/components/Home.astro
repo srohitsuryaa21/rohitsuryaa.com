@@ -16,6 +16,8 @@ const cells = Math.max(...t.hero.words.map((w) => w.length));
 const other: Lang = lang === 'en' ? 'de' : 'en';
 const list = projects.map((p) => localize(p, lang));
 const pad = (n: number) => String(n).padStart(2, '0');
+// a story tile shows the first sentence of each part of the case study
+const lead = (text: string) => text.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? text;
 const work = (slug: string) => localePath(lang, `/work/${slug}/`);
 const dois = ['10.1109/ICEMCE57940.2023.10433983', '10.1109/ICSCSS60660.2024.10625462'];
 const glyphs = [0, 1, 2];
@@ -135,7 +137,16 @@ const glyphs = [0, 1, 2];
             <article class="panel" style={`--c:${p.color}`} data-index={i}>
               <a class="panel-media" href={work(p.slug)} data-cursor={t.work.cursor} aria-label={`${p.short}, ${t.work.caseStudy}`}>
                 <div class="panel-art"><Exhibit kind={p.art} /></div>
-                <span class="panel-reel" style={`--n:${p.scenes}`} aria-hidden="true"><i></i></span>
+                <span class="panel-reel" aria-hidden="true">{[0, 1, 2, 3, 4, 5].map(() => <i></i>)}</span>
+                <span class="panel-tiles" aria-hidden="true">
+                  <span class="tile"><small class="mono">{t.work.tiles[0]}</small><q>{p.hook}</q></span>
+                  <span class="tile"><small class="mono">{t.work.tiles[1]}</small><span>{lead(p.challenge)}</span></span>
+                  <span class="tile"><small class="mono">{t.work.tiles[2]}</small><span>{lead(p.approach)}</span></span>
+                  <span class="tile tile-result"><small class="mono">{t.work.tiles[3]}</small><b>{p.metric}</b><span>{lead(p.result)}</span></span>
+                  <span class="tile tile-end"><i>▶</i><span>{t.work.tiles[4]}</span><small class="mono">{p.scenes} {t.work.scenes}</small></span>
+                </span>
+                <span class="tile-zone" data-step="-1" data-cursor={t.work.tilePrev}></span>
+                <span class="tile-zone" data-step="1" data-cursor={t.work.tileNext}></span>
                 <span class="panel-index mono">{pad(i + 1)} / {pad(list.length)}</span>
                 <span class="panel-cat mono">{p.category}</span>
                 <span class="panel-metric"><b>{p.metric}</b><small class="mono">{p.metricLabel}</small></span>

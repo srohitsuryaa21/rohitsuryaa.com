@@ -726,16 +726,53 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 /* ───────── Stories, not case studies ─────────
    Each card carries a story reel (one segment per scene) that plays on the card in front,
    asks the question the story answers, and the case page shows the reel filling as you scroll. */
-.panel-reel{position:absolute;top:12px;left:16px;right:16px;height:3px;z-index:3;--seg:calc(100% / var(--n));
-  -webkit-mask:repeating-linear-gradient(90deg,#000 0 calc(var(--seg) - 4px),transparent calc(var(--seg) - 4px) var(--seg));
-  mask:repeating-linear-gradient(90deg,#000 0 calc(var(--seg) - 4px),transparent calc(var(--seg) - 4px) var(--seg));
-  -webkit-mask-size:calc(100% + 4px) 100%;mask-size:calc(100% + 4px) 100%;background:#ffffff40}
-.panel-reel i{display:block;height:100%;background:#fff;transform-origin:left;transform:scaleX(0)}
+.panel-reel{position:absolute;top:12px;left:16px;right:16px;z-index:4;display:flex;gap:4px}
+.panel-reel i{flex:1;height:3px;border-radius:2px;background:#ffffff40;overflow:hidden;position:relative}
+.panel-reel i::after{content:'';position:absolute;inset:0;background:#fff;transform:scaleX(0);transform-origin:left}
+.panel-reel i.done::after{transform:none}
+.panel-reel i.now::after{animation:reel 3.2s linear forwards}
 .panel-index,.panel-cat{top:26px}
-.panel:hover .panel-reel i,.motion-h .panel:not(.is-side) .panel-reel i{animation:reel calc(var(--n) * .9s) linear infinite}
-@media (hover:none){.panel-reel i{animation:reel calc(var(--n) * .9s) linear infinite}}
-.motion-h .panel.is-side .panel-reel i{animation:none}
+.panel-index{z-index:4}
 @keyframes reel{to{transform:scaleX(1)}}
+/* the tiles sit over the art; the cover (tile 0) is the card as it always was */
+.panel-tiles{position:absolute;inset:0;z-index:3;pointer-events:none}
+.panel-tiles::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0d0d0cb8 0%,#0d0d0ce0 55%,#0d0d0cf5 100%);opacity:0;transition:opacity .5s var(--ease)}
+.panel[data-tile]:not([data-tile="0"]) .panel-tiles::before{opacity:1}
+.panel-index,.panel-cat,.panel-metric{transition:opacity .4s var(--ease)}
+.panel[data-tile]:not([data-tile="0"]) .panel-metric,.panel[data-tile]:not([data-tile="0"]) .panel-cat{opacity:0}
+.tile{position:absolute;inset:58px clamp(20px,3vw,32px) clamp(20px,3vw,30px);display:flex;flex-direction:column;justify-content:flex-end;gap:14px;color:#fff;
+  opacity:0;transform:translateY(14px);transition:opacity .45s var(--ease),transform .6s var(--ease)}
+.tile.is-on{opacity:1;transform:none;transition-delay:.12s}
+.tile small{color:var(--c);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.tile>span{font:500 clamp(17px,1.7vw,24px)/1.3 var(--display);letter-spacing:-.015em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden}
+.tile q{font:400 clamp(28px,3.2vw,46px)/1.08 var(--serif);font-style:italic;letter-spacing:-.02em;quotes:'“' '”'}
+:lang(de) .tile q{quotes:'„' '“'}
+.tile-result b{font:700 clamp(46px,6vw,96px)/.85 var(--display);letter-spacing:-.06em;color:var(--c)}
+.tile-result>span{font-size:clamp(15px,1.4vw,19px);color:#ffffffc8}
+.tile-end{justify-content:center;align-items:center;text-align:center}
+.tile-end i{display:grid;place-items:center;width:clamp(56px,6vw,76px);aspect-ratio:1;border-radius:50%;background:var(--c);color:#0d0d0c;font-style:normal;font-size:18px;padding-left:4px;box-sizing:border-box}
+.tile-end.is-on i{animation:play-ring-pop 1.6s var(--ease) infinite}
+@keyframes play-ring-pop{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.tile-end>span{font:600 clamp(20px,2vw,28px)/1.15 var(--display);letter-spacing:-.02em;-webkit-line-clamp:2}
+.tile-end small{color:#ffffffa0}
+/* tap zones: the outer thirds step back and forward while a card plays; press and hold pauses */
+.tile-zone{position:absolute;top:0;bottom:0;width:30%;z-index:5;display:none}
+.tile-zone[data-step="-1"]{left:0}
+.tile-zone[data-step="1"]{right:0}
+.panel[data-tile] .tile-zone{display:block}
+.panel[data-tile] .panel-media{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.panel.is-held .panel-reel i.now::after{animation-play-state:paused}
+@media (max-width:520px){
+  .tile{inset:42px 16px 14px;gap:8px}
+  .tile small{font-size:10px}
+  .tile>span{font-size:13.5px;line-height:1.28;-webkit-line-clamp:9}
+  .tile q{font-size:23px}
+  .tile-result b{font-size:38px}
+  .tile-result>span{font-size:13px}
+  .tile-end>span{font-size:19px}
+}
+.motion-h .tile q{font-size:clamp(24px,min(2.8vw,4.6vh),42px)}
+.motion-h .tile>span{font-size:clamp(15px,min(1.5vw,2.6vh),22px)}
 .panel-hook{font:400 clamp(19px,1.6vw,24px)/1.25 var(--serif);font-style:italic;letter-spacing:-.01em;color:var(--paper)}
 .motion-h .panel-hook{font-size:clamp(17px,min(1.5vw,2.6vh),23px);line-height:1.2}
 .panel-play b{display:inline-grid;place-items:center;width:22px;height:22px;margin-right:4px;border-radius:50%;background:var(--cd,var(--c));color:#0d0d0c;font-size:8px;vertical-align:1px;transition:transform .35s var(--ease)}
@@ -759,7 +796,7 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .story-reel-n b{color:var(--hl);font-weight:600}
 .next-hook{display:block;margin-top:14px;font-size:clamp(20px,2vw,30px);color:var(--fg-dim)}
 @media (max-width:899px){.story-reel{top:8px}.story-reel-n{display:none}}
-@media (prefers-reduced-motion:reduce){.panel-reel i{animation:none!important;transform:scaleX(calc(1 / var(--n)))}.case-play-btn::after{display:none}}
+@media (prefers-reduced-motion:reduce){.panel-reel{display:none}.case-play-btn::after{display:none}}
 
 /* ───────── Boarding pass (the introduction) ─────────
    A printed object, so its colours stay fixed in both themes. Main part and stub sit side by side,

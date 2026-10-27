@@ -52,7 +52,7 @@ export const home = {
     work: {
       label: 'What I built', title: 'Nine projects.', titleEm: 'Real questions.',
       intro: 'One from a real factory line. Eight with all the code on GitHub.',
-      index: 'Project index', cursor: 'Play ▶', play: 'Play the story', scenes: 'scenes', caseStudy: 'Case study', story: 'Interactive story', source: 'Source', more: 'More on GitHub',
+      index: 'Project index', cursor: 'Play ▶', play: 'Play the story', tiles: ['The question', 'The problem', 'What I built', 'What came out of it', 'Now watch the whole story'], tilePrev: '← Back', tileNext: 'Next →', scenes: 'scenes', caseStudy: 'Case study', story: 'Interactive story', source: 'Source', more: 'More on GitHub',
       prev: 'Previous project', next: 'Next project',
     },
     principles: {
@@ -133,7 +133,7 @@ export const home = {
     work: {
       label: 'Was ich gebaut habe', title: 'Neun Projekte.', titleEm: 'Echte Fragen.',
       intro: 'Eins aus einer echten Fertigungslinie. Acht mit dem ganzen Code auf GitHub.',
-      index: 'Projektübersicht', cursor: 'Abspielen ▶', play: 'Story abspielen', scenes: 'Szenen', caseStudy: 'Fallstudie', story: 'Interaktive Story', source: 'Code', more: 'Mehr auf GitHub',
+      index: 'Projektübersicht', cursor: 'Abspielen ▶', play: 'Story abspielen', tiles: ['Die Frage', 'Das Problem', 'Was ich gebaut habe', 'Was dabei herauskam', 'Jetzt die ganze Story ansehen'], tilePrev: '← Zurück', tileNext: 'Weiter →', scenes: 'Szenen', caseStudy: 'Fallstudie', story: 'Interaktive Story', source: 'Code', more: 'Mehr auf GitHub',
       prev: 'Vorheriges Projekt', next: 'Nächstes Projekt',
     },
     principles: {
