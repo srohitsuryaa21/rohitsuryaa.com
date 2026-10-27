@@ -1,0 +1,78 @@
+---
+// One chart tile on a project card. Drawn in HTML so the labels stay readable at phone size;
+// the bars grow in when the tile comes on (see .tile.is-on in site.css).
+import type { Chart } from '../data/cardCharts';
+interface Props { chart: Chart }
+const { chart: c } = Astro.props;
+const pct = (v: number, max: number, min = 0) => `${Math.max(2, ((v - min) / (max - min)) * 100).toFixed(1)}%`;
+// waffle: everyone as a dot, the leavers spread through the grid with a fixed seed
+let seed = 11;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+let waffle = { all: '', hit: '', w: 0, h: 0 };
+if (c.kind === 'waffle') {
+  const hit = new Set(Array.from({ length: c.n }, (_, i) => [rnd(), i] as const).sort((a, b) => a[0] - b[0]).slice(0, c.k).map(([, i]) => i));
+  const rows = Math.ceil(c.n / c.cols);
+  for (let i = 0; i < c.n; i++) {
+    const d = `M${(i % c.cols) * 3 + .5} ${Math.floor(i / c.cols) * 3 + .5}h2v2h-2z`;
+    if (hit.has(i)) waffle.hit += d; else waffle.all += d;
+  }
+  waffle = { ...waffle, w: c.cols * 3, h: rows * 3 };
+}
+---
+<span class={`cc cc--${c.kind}`}>
+  {c.kind === 'bars' && (
+    <span class="cc-bars">
+      {c.rows.map((r, i) => (
+        <span class={`cc-row ${r.tone ?? ''}`} style={`--i:${i};--w:${pct(r.v, c.max, c.min)}`}>
+          <span class="cc-l">{r.l}</span><span class="cc-track"><i></i></span><b>{r.d}</b>
+        </span>
+      ))}
+    </span>
+  )}
+  {c.kind === 'cols' && (
+    <span class="cc-cols">
+      {c.rows.map((r, i) => (
+        <span class={`cc-col ${r.tone ?? ''}`} style={`--i:${i};--h:${pct(r.v, c.max)}`}>
+          <b>{r.d}</b><span class="cc-shaft"><i></i></span><span class="cc-l">{r.l}</span>
+        </span>
+      ))}
+    </span>
+  )}
+  {c.kind === 'range' && (
+    <span class="cc-range" style={`--at:${(c.at * 100).toFixed(1)}%`}>
+      <span class="cc-line"><i></i><em></em></span>
+      <span class="cc-ends"><b>{c.lo}</b><b class="hl">{c.mid}</b><b>{c.hi}</b></span>
+    </span>
+  )}
+  {c.kind === 'stack' && (
+    <span class="cc-stack">
+      <span class="cc-bar">
+        {c.parts.map((p, i) => <i style={`--i:${i};width:${p.v}%`}><b>{p.d}</b><small>{p.l}</small></i>)}
+        {c.marks.map((m) => <span class={`cc-mark ${m.tone ?? ''}`} style={`left:${m.v}%`}><small>{m.d}<span class="cc-w"> · {m.l}</span></small></span>)}
+      </span>
+      <span class="cc-total">= {c.parts.reduce((a, p) => a + p.v, 0)}</span>
+    </span>
+  )}
+  {c.kind === 'stats' && (
+    <span class="cc-stats">{c.rows.map((r, i) => <span style={`--i:${i}`}><b>{r.v}</b><small>{r.l}</small></span>)}</span>
+  )}
+  {c.kind === 'groups' && (
+    <span class="cc-groups">
+      {c.groups.map((g, i) => (
+        <span class={`cc-group ${g.tone ?? ''}`} style={`--i:${i}`}><small>{g.l}</small>{g.items.map((t) => <span>{t}</span>)}</span>
+      ))}
+    </span>
+  )}
+  {c.kind === 'waffle' && (
+    <svg class="cc-waffle" viewBox={`0 0 ${waffle.w} ${waffle.h}`}><path d={waffle.all} /><path class="hit" d={waffle.hit} /></svg>
+  )}
+  {c.kind === 'scatter' && (
+    <span class="cc-scatter">
+      <span class="cc-plot">
+        <span class="cc-zero" style={`bottom:${c.zero * 100}%`}></span>
+        {c.pts.map(([x, y], i) => <i style={`left:${(x * 100).toFixed(1)}%;bottom:${(y * 100).toFixed(1)}%;--i:${i % 12}`}></i>)}
+      </span>
+      <small class="cc-x">{c.x} →</small><small class="cc-y">↑ {c.y}</small>
+    </span>
+  )}
+</span>

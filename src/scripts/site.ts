@@ -319,7 +319,7 @@ function setupStory() {
 }
 
 /* Card stories: the card in front plays its story tile by tile, like a phone story.
-   Cover, question, problem, what I built, result, then the call to watch the whole thing.
+   Cover, question, problem, its numbers, what I built, the result as a chart, then the call to watch the whole thing.
    Tap the left or right edge to step, press and hold to pause; the middle opens the case study. */
 const TILE_MS = 3200;
 function setupCardStories() {
@@ -344,12 +344,15 @@ function setupCardStories() {
     card.dataset.tile = String(k);
     card.classList.remove('is-held');
     $$('.panel-tiles .tile', card).forEach((t, i) => t.classList.toggle('is-on', i === k - 1));
+    // chart tiles stay up longer than the text tiles
+    const ms = Number($$('.panel-tiles .tile', card)[k - 1]?.dataset.ms ?? TILE_MS);
+    card.style.setProperty('--tile-ms', `${ms}ms`);
     $$('.panel-reel i', card).forEach((g, i) => {
       g.className = '';
       // restart the running segment so it fills from empty
       if (i === k) { void g.offsetWidth; g.className = 'now'; } else if (i < k) g.className = 'done';
     });
-    run(card, st, TILE_MS);
+    run(card, st, ms);
   };
   const stop = (card: HTMLElement) => {
     clearTimeout(playing.get(card)?.timer);
