@@ -47,7 +47,8 @@ em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.0
 .loader{display:none}
 .js .loader{position:fixed;inset:0;z-index:900;background:var(--accent);color:var(--ink);display:flex;flex-direction:column;padding:22px var(--gutter);animation:loader-failsafe 0s 5s forwards}
 @keyframes loader-failsafe{to{visibility:hidden}}
-.loader-top{display:flex;justify-content:space-between;gap:20px;padding-bottom:14px;border-bottom:1px solid #0d0d0c33}
+.loader-top{display:flex;justify-content:space-between;align-items:center;gap:20px;padding-bottom:14px;border-bottom:1px solid #0d0d0c33}
+.loader-logo{font-family:var(--display);text-transform:none}
 .loader-words{position:relative;margin-top:auto;height:1.15em;overflow:hidden;font:700 clamp(40px,6vw,96px)/1.15 var(--display);letter-spacing:-.05em}
 .loader-words span{position:absolute;left:0;top:0;white-space:nowrap;opacity:0}
 .loader-count{font:700 clamp(96px,20vw,320px)/.8 var(--display);letter-spacing:-.07em;align-self:flex-end;font-variant-numeric:tabular-nums;margin-top:10px}

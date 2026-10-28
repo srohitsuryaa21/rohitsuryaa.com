@@ -29,7 +29,7 @@ const glyphs = [0, 1, 2];
   schema={[person(lang), website(lang), profilePage(`${origin}${localePath(lang, '/')}`, t.htmlTitle, t.description, lang)]}>
 
 <div class="loader" aria-hidden="true">
-  <div class="loader-top mono"><span>rs©</span><span>{t.role}</span></div>
+  <div class="loader-top mono"><span class="logo loader-logo"><span class="logo-rs">rs</span><sup>©</sup></span><span>{t.role}</span></div>
   <div class="loader-words">{t.loaderWords.map((w) => <span>{w}</span>)}</div>
   <div class="loader-count"><span class="loader-num">0</span><sup>%</sup></div>
   <div class="loader-bar"><i></i></div>
